@@ -1,0 +1,65 @@
+# =========================================================================
+# Android & Kotlin Standard .gitignore Template
+# =========================================================================
+
+# Gradle files and directories
+.gradle/
+/build/
+/*/build/
+*~
+*.lck
+
+# Kotlin
+.kotlin/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Android Studio & IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Local configuration files (contains local SDK paths, user-specific config)
+local.properties
+.navigation/
+
+# Secrets & Signing files (CRITICAL: Do not commit keys to GitHub!)
+*.jks
+*.keystore
+*.pepk
+*.p12
+*.properties.local
+secrets.properties
+signing.properties
+
+# Output artifacts
+*.apk
+*.ap_
+*.aab
+*.dex
+
+# Log files & Captures
+*.log
+/captures/
+
+# NDK & C++ build outputs
+.externalNativeBuild/
+.cxx/
+cmake-build-*/
+/obj/
+/lib/
+
+# OS/System generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
