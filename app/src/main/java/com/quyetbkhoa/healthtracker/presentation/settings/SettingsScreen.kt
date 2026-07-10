@@ -22,6 +22,7 @@ import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPri
 fun SettingsScreen(
     themeType: AppThemeType,
     onThemeChanged: (AppThemeType) -> Unit,
+    onNavigateToProfile: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     Column(
@@ -62,6 +63,12 @@ fun SettingsScreen(
         }
 
         Spacer(modifier = Modifier.height(Dimens.spaceExtraLarge))
+
+        HealthPrimaryButton(onClick = onNavigateToProfile) {
+            Text(text = stringResource(id = R.string.profile_settings_open))
+        }
+
+        Spacer(modifier = Modifier.height(Dimens.spaceMedium))
 
         HealthPrimaryButton(onClick = onNavigateBack) {
             Text(text = stringResource(id = R.string.settings_back))
