@@ -63,3 +63,13 @@ cmake-build-*/
 ehthumbs.db
 Thumbs.db
 Desktop.ini
+
+# Project structure script outputs
+project_structure.txt
+codebase_summary.txt
+android_mvvm_guidelines.txt
+generate_tree.bat
+generate_tree.ps1
+
+# Agent customizations
+.agents/
