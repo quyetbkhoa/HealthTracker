@@ -6,6 +6,49 @@
 
     <!-- Test / Temp Screens -->
     <string name="screen_home">Màn hình chính</string>
+    <string name="dashboard_today_health">SỨC KHỎE HÔM NAY</string>
+    <string name="dashboard_date">%1$s</string>
+    <string name="dashboard_food_emoji">🥗</string>
+    <string name="dashboard_meal_emoji">🍽️</string>
+    <string name="dashboard_activity_emoji">🏃</string>
+    <string name="dashboard_settings">Cài đặt</string>
+    <string name="dashboard_progress_percent">%1$d%%</string>
+    <string name="dashboard_goal">MỤC TIÊU</string>
+    <string name="dashboard_tdee">TDEE / MỤC TIÊU</string>
+    <string name="dashboard_consumed">ĐÃ NẠP</string>
+    <string name="dashboard_burned">ĐÃ TIÊU</string>
+    <string name="dashboard_remaining">CÒN LẠI</string>
+    <string name="dashboard_kcal_value">%1$s kcal</string>
+    <string name="dashboard_advice">LỜI KHUYÊN</string>
+    <string name="dashboard_advice_message">Bạn còn thiếu %1$s kcal — hãy ăn thêm một bữa nhẹ!</string>
+    <string name="dashboard_advice_exceeded">Bạn đã vượt mục tiêu %1$s kcal — hãy cân đối lại hôm nay.</string>
+    <string name="dashboard_quick_access">TRUY CẬP NHANH</string>
+    <string name="dashboard_add_meal">Thêm bữa ăn</string>
+    <string name="dashboard_add_meal_hint">Ghi nhận calories</string>
+    <string name="dashboard_add_activity">Thêm hoạt động</string>
+    <string name="dashboard_add_activity_hint">Ghi nhận vận động</string>
+    <string name="dashboard_today_details">CHI TIẾT HÔM NAY</string>
+    <string name="dashboard_water">Uống nước</string>
+    <string name="dashboard_calorie_progress">%1$s / %2$s kcal</string>
+    <string name="dashboard_water_progress">%1$s / %2$s L</string>
+    <string name="tdee_result_title">Kết quả năng lượng của bạn</string>
+    <string name="tdee_result_subtitle">Dựa trên hồ sơ và mức độ vận động hằng ngày</string>
+    <string name="tdee_bmr">BMR</string>
+    <string name="tdee_bmr_description">Năng lượng cơ thể cần khi nghỉ ngơi</string>
+    <string name="tdee_value">TDEE</string>
+    <string name="tdee_description">Tổng năng lượng tiêu hao mỗi ngày</string>
+    <string name="tdee_target">Mục tiêu calo mỗi ngày</string>
+    <string name="tdee_target_hint">Chạm vào con số để điều chỉnh</string>
+    <string name="tdee_kcal_value">%1$d kcal</string>
+    <string name="tdee_save">Xác nhận và vào Dashboard</string>
+    <string name="tdee_invalid_target">Mức calo mục tiêu phải từ 500 đến 10.000 kcal</string>
+    <string name="unit_kcal">kcal</string>
+    <string name="dashboard_loading">Đang tải dữ liệu sức khỏe…</string>
+    <string name="dashboard_no_profile">Chưa tìm thấy hồ sơ người dùng</string>
+    <string name="dashboard_exceeded">VƯỢT QUÁ</string>
+    <string name="dashboard_remaining_burn">CẦN ĐỐT CÒN LẠI</string>
+    <string name="dashboard_ring_remaining">%1$d kcal\ncòn lại</string>
+    <string name="dashboard_ring_exceeded">-%1$d kcal\nvượt quá</string>
     <string name="screen_settings">Cài đặt</string>
     <string name="settings_select_theme">Chọn theme</string>
     <string name="settings_back">Quay lại</string>
@@ -43,6 +86,7 @@
     <string name="onboarding_activity_light">Vận động nhẹ</string>
     <string name="onboarding_activity_moderate">Vận động vừa</string>
     <string name="onboarding_activity_active">Vận động nhiều</string>
+    <string name="onboarding_activity_extra_active">Vận động rất nhiều</string>
     <string name="onboarding_goal">Mục tiêu</string>
     <string name="onboarding_goal_lose">Giảm cân</string>
     <string name="onboarding_goal_maintain">Duy trì</string>
@@ -56,4 +100,17 @@
     <string name="error_invalid_weight">Cân nặng phải từ 1 đến 300 kg</string>
     <string name="error_invalid_height">Chiều cao phải từ 1 đến 300 cm</string>
     <string name="error_terms_not_accepted">Bạn cần đồng ý với Điều khoản</string>
+
+    <!-- Profile settings -->
+    <string name="profile_settings_title">Hồ sơ cá nhân</string>
+    <string name="profile_settings_open">Chỉnh sửa hồ sơ</string>
+    <string name="profile_settings_subtitle">Cập nhật thông tin để TDEE luôn chính xác</string>
+    <string name="profile_settings_bmi">BMI hiện tại</string>
+    <string name="profile_settings_save">Lưu thay đổi</string>
+    <string name="profile_settings_saved">Đã cập nhật hồ sơ và TDEE</string>
+    <string name="profile_bmi_value">%1$.1f</string>
+    <string name="profile_bmi_underweight">Thiếu cân</string>
+    <string name="profile_bmi_normal">Bình thường</string>
+    <string name="profile_bmi_overweight">Thừa cân</string>
+    <string name="profile_bmi_obese">Béo phì</string>
 </resources>

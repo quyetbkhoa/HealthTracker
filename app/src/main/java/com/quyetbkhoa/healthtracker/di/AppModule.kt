@@ -11,6 +11,9 @@ import com.quyetbkhoa.healthtracker.domain.repository.SettingsRepository
 import com.quyetbkhoa.healthtracker.data.datastore.ProfileDataStore
 import com.quyetbkhoa.healthtracker.data.repository.ProfileRepositoryImpl
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
+import com.quyetbkhoa.healthtracker.data.datastore.DailyCalorieDataStore
+import com.quyetbkhoa.healthtracker.data.repository.DailyCalorieRepositoryImpl
+import com.quyetbkhoa.healthtracker.domain.repository.DailyCalorieRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -53,4 +56,14 @@ object AppModule {
     fun provideProfileRepository(profileDataStore: ProfileDataStore): ProfileRepository {
         return ProfileRepositoryImpl(profileDataStore)
     }
+
+    @Provides
+    @Singleton
+    fun provideDailyCalorieDataStore(dataStore: DataStore<Preferences>): DailyCalorieDataStore =
+        DailyCalorieDataStore(dataStore)
+
+    @Provides
+    @Singleton
+    fun provideDailyCalorieRepository(dataStore: DailyCalorieDataStore): DailyCalorieRepository =
+        DailyCalorieRepositoryImpl(dataStore)
 }

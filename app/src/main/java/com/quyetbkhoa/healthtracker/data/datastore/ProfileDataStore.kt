@@ -21,6 +21,9 @@ class ProfileDataStore @Inject constructor(
         val HEIGHT_KEY = floatPreferencesKey("profile_height")
         val ACTIVITY_LEVEL_KEY = stringPreferencesKey("profile_activity_level")
         val GOAL_KEY = stringPreferencesKey("profile_goal")
+        val BMR_KEY = intPreferencesKey("profile_bmr")
+        val TDEE_KEY = intPreferencesKey("profile_tdee")
+        val CALORIE_TARGET_KEY = intPreferencesKey("profile_calorie_target")
     }
 
     val userProfileFlow: Flow<UserProfile?> = dataStore.data.map { preferences ->
@@ -46,7 +49,10 @@ class ProfileDataStore @Inject constructor(
             weightKg = weight,
             heightCm = height,
             activityLevel = activityLevel,
-            goal = goal
+            goal = goal,
+            bmrCalories = preferences[BMR_KEY] ?: 0,
+            tdeeCalories = preferences[TDEE_KEY] ?: 0,
+            dailyCalorieTarget = preferences[CALORIE_TARGET_KEY] ?: 0
         )
     }
 
@@ -59,6 +65,9 @@ class ProfileDataStore @Inject constructor(
             preferences[HEIGHT_KEY] = profile.heightCm
             preferences[ACTIVITY_LEVEL_KEY] = profile.activityLevel.name
             preferences[GOAL_KEY] = profile.goal.name
+            preferences[BMR_KEY] = profile.bmrCalories
+            preferences[TDEE_KEY] = profile.tdeeCalories
+            preferences[CALORIE_TARGET_KEY] = profile.dailyCalorieTarget
         }
     }
 }

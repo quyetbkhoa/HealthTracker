@@ -7,7 +7,10 @@ data class UserProfile(
     val weightKg: Float = 0f,
     val heightCm: Float = 0f,
     val activityLevel: ActivityLevel = ActivityLevel.SEDENTARY,
-    val goal: Goal = Goal.MAINTAIN
+    val goal: Goal = Goal.MAINTAIN,
+    val bmrCalories: Int = 0,
+    val tdeeCalories: Int = 0,
+    val dailyCalorieTarget: Int = 0
 )
 
 enum class Gender {
@@ -18,7 +21,8 @@ enum class ActivityLevel {
     SEDENTARY,
     LIGHT,
     MODERATE,
-    VERY_ACTIVE
+    VERY_ACTIVE,
+    EXTRA_ACTIVE
 }
 
 enum class Goal {
