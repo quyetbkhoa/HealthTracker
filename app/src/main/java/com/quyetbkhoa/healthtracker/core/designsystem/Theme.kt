@@ -37,7 +37,14 @@ private val LightColorScheme = lightColorScheme(
     surface = White,
     onSurface = TextPrimary,
     onSurfaceVariant = TextSecondary,
-    outline = LightOutline
+    outline = LightOutline,
+    primaryContainer = HealthyGreenContainer,
+    onPrimaryContainer = White,
+    secondaryContainer = HealthyGreenSoft,
+    tertiaryContainer = HealthyYellow,
+    surfaceContainer = HealthyMint,
+    surfaceContainerHigh = HealthyPeach,
+    inversePrimary = HealthyBlue
 )
 
 private val PinkColorScheme = lightColorScheme(

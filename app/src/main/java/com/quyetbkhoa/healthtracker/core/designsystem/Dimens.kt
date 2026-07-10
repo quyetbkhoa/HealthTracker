@@ -26,4 +26,16 @@ object Dimens {
     val progressBarWidth: Dp = 32.dp
     val genderBoxHeight: Dp = 48.dp
     val topBarSpacing: Dp = 48.dp
+    val dashboardHorizontalPadding: Dp = 20.dp
+    val dashboardHeroPadding: Dp = 24.dp
+    val dashboardHeroCorner: Dp = 32.dp
+    val dashboardCardCorner: Dp = 24.dp
+    val dashboardCardElevation: Dp = 3.dp
+    val dashboardRingSize: Dp = 210.dp
+    val dashboardRingStroke: Dp = 20.dp
+    val dashboardInnerRingStroke: Dp = 16.dp
+    val dashboardIconContainer: Dp = 56.dp
+    val dashboardQuickCardHeight: Dp = 142.dp
+    val dashboardProgressHeight: Dp = 10.dp
+    val dashboardHeaderIconSize: Dp = 52.dp
 }

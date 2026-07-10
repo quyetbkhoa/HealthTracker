@@ -1,6 +1,8 @@
 package com.quyetbkhoa.healthtracker.core.navigation
 
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -12,11 +14,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
 import com.quyetbkhoa.healthtracker.presentation.onboarding.*
-import com.quyetbkhoa.healthtracker.presentation.test.TestHomeScreen
+import com.quyetbkhoa.healthtracker.presentation.dashboard.DashboardScreen
 import com.quyetbkhoa.healthtracker.presentation.settings.SettingsScreen
+import com.quyetbkhoa.healthtracker.presentation.tdee.TdeeResultScreen
+import com.quyetbkhoa.healthtracker.presentation.profile.ProfileSettingsScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
     themeType: AppThemeType,
@@ -93,11 +99,7 @@ fun AppNavigation(
                 LaunchedEffect(Unit) {
                     viewModel.uiEvent.collect { event ->
                         when (event) {
-                            is ProfileSetupUiEvent.NavigateToHome -> {
-                                navController.navigate("home") {
-                                    popUpTo("welcome") { inclusive = true }
-                                }
-                            }
+                            is ProfileSetupUiEvent.NavigateToTdeeResult -> navController.navigate("tdee_result")
                             is ProfileSetupUiEvent.ShowToast -> Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                             else -> Unit
                         }
@@ -112,8 +114,18 @@ fun AppNavigation(
             }
         }
 
+        composable("tdee_result") {
+            TdeeResultScreen(
+                onNavigateToDashboard = {
+                    navController.navigate("home") {
+                        popUpTo("welcome") { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable("home") {
-            TestHomeScreen(
+            DashboardScreen(
                 onNavigateToSettings = { navController.navigate("settings") }
             )
         }
@@ -122,7 +134,20 @@ fun AppNavigation(
             SettingsScreen(
                 themeType = themeType,
                 onThemeChanged = onThemeChanged,
+                onNavigateToProfile = { navController.navigate("profile_settings") },
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("profile_settings") {
+            ProfileSettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSaved = {
+                    Toast.makeText(context, context.getString(R.string.profile_settings_saved), Toast.LENGTH_SHORT).show()
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                }
             )
         }
     }

@@ -19,6 +19,13 @@ val LightGreenBg = Color(0xFFE8F5E9)
 val TextPrimary = Color(0xFF1E1E1E)
 val TextSecondary = Color(0xFF757575)
 val LightOutline = Color(0xFFBDBDBD)
+val HealthyGreenContainer = Color(0xFF45AD58)
+val HealthyGreenSoft = Color(0xFFC7F2D5)
+val HealthyGreenTrack = Color(0x559DE6AA)
+val HealthyYellow = Color(0xFFFFCF67)
+val HealthyBlue = Color(0xFF77CFF2)
+val HealthyPeach = Color(0xFFFFF0E9)
+val HealthyMint = Color(0xFFECFAF1)
 
 // Dark theme
 val DarkBackground = Color(0xFF121212)
