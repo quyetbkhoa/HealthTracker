@@ -50,7 +50,7 @@ sealed interface ProfileSetupAction {
 sealed interface ProfileSetupUiEvent {
     object NavigateToStep2 : ProfileSetupUiEvent
     object NavigateToStep3 : ProfileSetupUiEvent
-    object NavigateToHome : ProfileSetupUiEvent
+    object NavigateToTdeeResult : ProfileSetupUiEvent
     data class ShowToast(val message: String) : ProfileSetupUiEvent
 }
 
@@ -160,7 +160,7 @@ class ProfileSetupViewModel @Inject constructor(
 
         viewModelScope.launch {
             profileRepository.saveProfile(profile)
-            _uiEvent.send(ProfileSetupUiEvent.NavigateToHome)
+            _uiEvent.send(ProfileSetupUiEvent.NavigateToTdeeResult)
         }
     }
 }

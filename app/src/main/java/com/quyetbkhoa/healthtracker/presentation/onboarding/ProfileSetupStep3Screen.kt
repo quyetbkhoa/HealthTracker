@@ -82,6 +82,7 @@ fun ProfileSetupStep3Screen(
                     ActivityLevel.LIGHT -> R.string.onboarding_activity_light
                     ActivityLevel.MODERATE -> R.string.onboarding_activity_moderate
                     ActivityLevel.VERY_ACTIVE -> R.string.onboarding_activity_active
+                    ActivityLevel.EXTRA_ACTIVE -> R.string.onboarding_activity_extra_active
                 }
                 SelectableCard(
                     text = stringResource(id = textRes),
