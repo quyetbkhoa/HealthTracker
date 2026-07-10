@@ -4,49 +4,68 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+
+enum class AppThemeType {
+    LIGHT,
+    DARK,
+    PINK,
+    SYSTEM
+}
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
+    primary = PrimaryGreen,
+    onPrimary = White,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    tertiary = Pink80,
+    background = DarkBackground,
+    onBackground = DarkOnBackground,
+    surface = DarkSurface,
+    onSurface = DarkOnSurface,
+    onSurfaceVariant = DarkOnSurfaceVariant,
+    outline = DarkOutline
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
+    primary = PrimaryGreen,
+    onPrimary = White,
     secondary = PurpleGrey40,
-    tertiary = Pink40
+    tertiary = Pink40,
+    background = LightGreenBg,
+    onBackground = TextPrimary,
+    surface = White,
+    onSurface = TextPrimary,
+    onSurfaceVariant = TextSecondary,
+    outline = LightOutline
+)
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val PinkColorScheme = lightColorScheme(
+    primary = Pink_Primary,
+    onPrimary = White,
+    secondary = Pink_Primary,
+    onSecondary = White,
+    tertiary = Pink_Primary,
+    onTertiary = White,
+    background = Pink_LightGreenBg,
+    onBackground = Pink_TextPrimary,
+    surface = Pink_Surface,
+    onSurface = Pink_TextPrimary,
+    onSurfaceVariant = Pink_TextSecondary,
+    outline = Pink_Outline
 )
 
 @Composable
 fun HealthTrackerTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    themeType: AppThemeType = AppThemeType.SYSTEM,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val isSystemDark = isSystemInDarkTheme()
+    val colorScheme = when (themeType) {
+        AppThemeType.LIGHT -> LightColorScheme
+        AppThemeType.DARK -> DarkColorScheme
+        AppThemeType.PINK -> PinkColorScheme
+        AppThemeType.SYSTEM -> if (isSystemDark) DarkColorScheme else LightColorScheme
     }
 
     MaterialTheme(

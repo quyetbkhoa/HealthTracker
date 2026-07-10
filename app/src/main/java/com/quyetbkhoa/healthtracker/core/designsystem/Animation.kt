@@ -1,4 +1,6 @@
 package com.quyetbkhoa.healthtracker.core.designsystem
 
-class Animation {
+object Animation {
+    const val Short = 150
+    const val Medium = 300
 }
