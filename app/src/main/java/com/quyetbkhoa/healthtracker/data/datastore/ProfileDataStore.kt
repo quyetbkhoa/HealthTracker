@@ -70,4 +70,19 @@ class ProfileDataStore @Inject constructor(
             preferences[CALORIE_TARGET_KEY] = profile.dailyCalorieTarget
         }
     }
+
+    suspend fun clearProfile() {
+        dataStore.edit { preferences ->
+            preferences.remove(FULL_NAME_KEY)
+            preferences.remove(DOB_KEY)
+            preferences.remove(GENDER_KEY)
+            preferences.remove(WEIGHT_KEY)
+            preferences.remove(HEIGHT_KEY)
+            preferences.remove(ACTIVITY_LEVEL_KEY)
+            preferences.remove(GOAL_KEY)
+            preferences.remove(BMR_KEY)
+            preferences.remove(TDEE_KEY)
+            preferences.remove(CALORIE_TARGET_KEY)
+        }
+    }
 }

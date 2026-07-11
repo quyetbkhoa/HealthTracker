@@ -100,6 +100,12 @@
     <string name="screen_settings">Cài đặt</string>
     <string name="settings_select_theme">Chọn theme</string>
     <string name="settings_back">Quay lại</string>
+    <string name="settings_reset_data">Đặt lại toàn bộ dữ liệu</string>
+    <string name="settings_reset_title">Đặt lại dữ liệu?</string>
+    <string name="settings_reset_message">Hồ sơ, nhật ký calories và tất cả bữa ăn sẽ bị xóa. Thao tác này không thể hoàn tác.</string>
+    <string name="settings_reset_confirm">Xóa dữ liệu</string>
+    <string name="settings_reset_cancel">Hủy</string>
+    <string name="settings_reset_failed">Không thể đặt lại dữ liệu. Vui lòng thử lại.</string>
     <string name="theme_light">Sáng</string>
     <string name="theme_dark">Tối</string>
     <string name="theme_pink">Hồng</string>
@@ -197,4 +203,24 @@
     <string name="profile_bmi_normal">Bình thường</string>
     <string name="profile_bmi_overweight">Thừa cân</string>
     <string name="profile_bmi_obese">Béo phì</string>
+
+    <!-- Add meal -->
+    <string name="add_meal_title">Thêm bữa ăn</string>
+    <string name="add_meal_subtitle">Ghi lại năng lượng bạn đã nạp</string>
+    <string name="add_meal_choose_type">Chọn bữa ăn</string>
+    <string name="add_meal_name">Tên món ăn</string>
+    <string name="add_meal_name_hint">Ví dụ: Cơm gà</string>
+    <string name="add_meal_calories">Năng lượng</string>
+    <string name="add_meal_kcal">kcal</string>
+    <string name="add_meal_breakfast">Sáng</string>
+    <string name="add_meal_lunch">Trưa</string>
+    <string name="add_meal_dinner">Tối</string>
+    <string name="add_meal_snack">Phụ</string>
+    <string name="add_meal_save">Lưu bữa ăn</string>
+    <string name="add_meal_saved">Đã thêm bữa ăn</string>
+    <string name="add_meal_save_failed">Không thể lưu bữa ăn. Vui lòng thử lại.</string>
+    <string name="add_meal_error_empty_name">Vui lòng nhập tên món ăn</string>
+    <string name="add_meal_error_invalid_calories">Calories phải lớn hơn 0</string>
+    <string name="add_meal_error_calories_too_high">Calories không được vượt quá 10.000 kcal</string>
+    <string name="navigate_back">Quay lại</string>
 </resources>

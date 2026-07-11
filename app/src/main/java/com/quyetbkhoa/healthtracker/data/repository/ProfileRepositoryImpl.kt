@@ -16,4 +16,8 @@ class ProfileRepositoryImpl @Inject constructor(
     override suspend fun saveProfile(profile: UserProfile) {
         profileDataStore.saveProfile(profile)
     }
+
+    override suspend fun clearProfile() {
+        profileDataStore.clearProfile()
+    }
 }

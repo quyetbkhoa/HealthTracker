@@ -39,6 +39,14 @@ class DailyCalorieDataStore @Inject constructor(
         updateDay(epochDay) { it[EXERCISE] = calories.coerceAtLeast(0) }
     }
 
+    suspend fun clear() {
+        dataStore.edit { preferences ->
+            preferences.remove(EPOCH_DAY)
+            preferences.remove(CONSUMED)
+            preferences.remove(EXERCISE)
+        }
+    }
+
     private suspend fun updateDay(epochDay: Long, update: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
         dataStore.edit { preferences ->
             if (preferences[EPOCH_DAY] != epochDay) {

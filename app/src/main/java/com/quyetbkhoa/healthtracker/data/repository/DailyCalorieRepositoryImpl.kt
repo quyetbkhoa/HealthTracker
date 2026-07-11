@@ -12,4 +12,5 @@ class DailyCalorieRepositoryImpl @Inject constructor(
     override fun observeSummary(epochDay: Long): Flow<DailyCalorieSummary> = dataStore.observeSummary(epochDay)
     override suspend fun updateConsumedCalories(epochDay: Long, calories: Int) = dataStore.updateConsumedCalories(epochDay, calories)
     override suspend fun updateExerciseCalories(epochDay: Long, calories: Int) = dataStore.updateExerciseCalories(epochDay, calories)
+    override suspend fun clear() = dataStore.clear()
 }

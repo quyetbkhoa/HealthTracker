@@ -1,6 +1,7 @@
 package com.quyetbkhoa.healthtracker.di
 
 import android.content.Context
+import androidx.room.Room
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
@@ -14,6 +15,10 @@ import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
 import com.quyetbkhoa.healthtracker.data.datastore.DailyCalorieDataStore
 import com.quyetbkhoa.healthtracker.data.repository.DailyCalorieRepositoryImpl
 import com.quyetbkhoa.healthtracker.domain.repository.DailyCalorieRepository
+import com.quyetbkhoa.healthtracker.data.local.HealthTrackerDatabase
+import com.quyetbkhoa.healthtracker.data.local.meal.MealDao
+import com.quyetbkhoa.healthtracker.data.repository.MealRepositoryImpl
+import com.quyetbkhoa.healthtracker.domain.repository.MealRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,6 +29,24 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideHealthTrackerDatabase(
+        @ApplicationContext context: Context
+    ): HealthTrackerDatabase =
+        Room.databaseBuilder(
+            context,
+            HealthTrackerDatabase::class.java,
+            "health_tracker.db"
+        ).build()
+
+    @Provides
+    fun provideMealDao(database: HealthTrackerDatabase): MealDao = database.mealDao()
+
+    @Provides
+    @Singleton
+    fun provideMealRepository(mealDao: MealDao): MealRepository = MealRepositoryImpl(mealDao)
 
     @Provides
     @Singleton
