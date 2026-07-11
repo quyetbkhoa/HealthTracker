@@ -7,21 +7,27 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,19 +36,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.abs
 
 @Composable
 fun DashboardScreen(
@@ -64,290 +72,357 @@ fun DashboardContent(
     onNavigateToSettings: () -> Unit
 ) {
     if (uiState.isLoading || !uiState.hasProfile) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(
-                text = stringResource(
-                    if (uiState.isLoading) R.string.dashboard_loading else R.string.dashboard_no_profile
-                ),
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
+        DashboardLoadingState(isLoading = uiState.isLoading)
         return
     }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
-    ) {
-        DashboardHero(uiState, onNavigateToSettings)
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = { DashboardBottomBar(onNavigateToSettings = onNavigateToSettings) }
+    ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(Dimens.dashboardHorizontalPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = Dimens.spaceMedium),
             verticalArrangement = Arrangement.spacedBy(Dimens.spaceLarge)
         ) {
-            AdviceCard(uiState.remainingCalories)
-            QuickAccess(onAction)
-            TodayDetails(uiState)
-            Spacer(modifier = Modifier.height(Dimens.spaceLarge))
+            DashboardHeader(userName = uiState.userName, onNavigateToSettings = onNavigateToSettings)
+            CalorieOverviewCard(uiState = uiState)
+            AchievementCard(progressPercent = uiState.progressPercent)
+            DashboardQuickActions(onAction = onAction)
+            TodayMealsSection()
+            DailyTipCard()
+            Spacer(modifier = Modifier.height(Dimens.spaceExtraSmall))
         }
     }
 }
 
 @Composable
-private fun DashboardHero(uiState: DashboardUiState, onNavigateToSettings: () -> Unit) {
-    val numberFormat = NumberFormat.getIntegerInstance(Locale.forLanguageTag("vi-VN"))
-    val date = LocalDate.now().format(
-        DateTimeFormatter.ofPattern("EEEE, d 'tháng' M yyyy", Locale.forLanguageTag("vi-VN"))
-    ).replaceFirstChar { it.titlecase(Locale.forLanguageTag("vi-VN")) }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(bottomStart = Dimens.dashboardHeroCorner, bottomEnd = Dimens.dashboardHeroCorner))
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .statusBarsPadding()
-            .padding(Dimens.dashboardHeroPadding)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.dashboard_today_health),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f)
-                )
-                Text(
-                    text = stringResource(R.string.dashboard_date, date),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(Dimens.dashboardHeaderIconSize)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.16f))
-                    .clickable(onClick = onNavigateToSettings),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.dashboard_food_emoji),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(Dimens.spaceLarge))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)
-        ) {
-            CalorieRing(
-                progress = uiState.progress,
-                remainingCalories = uiState.remainingCalories,
-                isExceeded = uiState.isExceeded,
-                modifier = Modifier.weight(1.2f).aspectRatio(1f)
-            )
-            Column(
-                modifier = Modifier.weight(0.9f),
-                verticalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)
-            ) {
-                HeroMetric(R.string.dashboard_tdee, numberFormat.format(uiState.targetCalories), MaterialTheme.colorScheme.onPrimaryContainer)
-                HeroMetric(R.string.dashboard_consumed, numberFormat.format(uiState.consumedCalories), MaterialTheme.colorScheme.secondaryContainer)
-                HeroMetric(R.string.dashboard_burned, numberFormat.format(uiState.exerciseCalories), MaterialTheme.colorScheme.tertiaryContainer)
-                HeroMetric(
-                    if (uiState.isExceeded) R.string.dashboard_exceeded else R.string.dashboard_remaining_burn,
-                    numberFormat.format(kotlin.math.abs(uiState.remainingCalories)),
-                    if (uiState.isExceeded) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondaryContainer
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun CalorieRing(progress: Float, remainingCalories: Int, isExceeded: Boolean, modifier: Modifier = Modifier) {
-    val trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.18f)
-    val progressColor = if (isExceeded) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondaryContainer
-    val outerStroke = Dimens.dashboardRingStroke
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val outer = outerStroke.toPx()
-            drawCircle(trackColor, style = Stroke(outer))
-            drawArc(
-                color = progressColor,
-                startAngle = -90f,
-                sweepAngle = 360f * progress.coerceIn(0f, 1f),
-                useCenter = false,
-                topLeft = Offset(outer / 2, outer / 2),
-                size = Size(size.width - outer, size.height - outer),
-                style = Stroke(outer, cap = StrokeCap.Round)
-            )
-        }
+private fun DashboardLoadingState(isLoading: Boolean) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
-            text = stringResource(
-                if (isExceeded) R.string.dashboard_ring_exceeded else R.string.dashboard_ring_remaining,
-                kotlin.math.abs(remainingCalories)
-            ),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = if (isExceeded) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onPrimaryContainer
+            text = stringResource(if (isLoading) R.string.dashboard_loading else R.string.dashboard_no_profile),
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
 
 @Composable
-private fun HeroMetric(labelRes: Int, value: String, dotColor: Color) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-        Box(modifier = Modifier.size(Dimens.iconSizeSmall).clip(CircleShape).background(dotColor))
-        Column {
+private fun DashboardHeader(userName: String, onNavigateToSettings: () -> Unit) {
+    val locale = Locale.forLanguageTag("vi-VN")
+    val formattedDate = LocalDate.now()
+        .format(DateTimeFormatter.ofPattern(stringResource(R.string.dashboard_date_pattern), locale))
+        .replaceFirstChar { it.titlecase(locale) }
+    val displayName = userName.substringBeforeLast(' ').ifBlank { stringResource(R.string.dashboard_guest_name) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(top = Dimens.spaceMedium),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
             Text(
-                text = stringResource(labelRes),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                text = stringResource(R.string.dashboard_greeting, displayName),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = stringResource(R.string.dashboard_kcal_value, value),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                text = stringResource(R.string.dashboard_date_with_icon, formattedDate),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        NotificationButton(onClick = onNavigateToSettings)
+    }
+}
+
+@Composable
+private fun NotificationButton(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(Dimens.buttonHeightMedium)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = stringResource(R.string.dashboard_icon_notification), style = MaterialTheme.typography.headlineSmall)
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(Dimens.iconSizeLarge)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.dashboard_notification_count),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
 }
 
 @Composable
-private fun AdviceCard(remainingCalories: Int) {
-    val formatted = NumberFormat.getIntegerInstance(Locale.forLanguageTag("vi-VN")).format(kotlin.math.abs(remainingCalories))
-    DashboardCard {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)) {
-            EmojiBox(R.string.dashboard_meal_emoji, MaterialTheme.colorScheme.surfaceContainerHigh)
-            Column {
-                Text(
-                    text = stringResource(R.string.dashboard_advice),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = stringResource(
-                        if (remainingCalories < 0) R.string.dashboard_advice_exceeded else R.string.dashboard_advice_message,
-                        formatted
-                    ),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+private fun CalorieOverviewCard(uiState: DashboardUiState) {
+    DashboardCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(DashboardDimens.overviewHeight)
+                .padding(Dimens.spaceMedium),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            GoalRing(
+                targetCalories = uiState.targetCalories,
+                progress = uiState.progress,
+                modifier = Modifier.weight(1f).aspectRatio(1f)
+            )
+            Spacer(modifier = Modifier.width(Dimens.spaceSmall))
+            Column(modifier = Modifier.weight(1.55f)) {
+                Row {
+                    OverviewMetric(R.string.dashboard_icon_eaten, R.string.dashboard_consumed, uiState.consumedCalories, Modifier.weight(1f))
+                    OverviewMetric(R.string.dashboard_icon_burned, R.string.dashboard_burned, uiState.exerciseCalories, Modifier.weight(1f))
+                    OverviewMetric(R.string.dashboard_icon_remaining, R.string.dashboard_remaining, abs(uiState.remainingCalories), Modifier.weight(1f), uiState.isExceeded)
+                }
+                Spacer(modifier = Modifier.height(Dimens.spaceLarge))
+                ProgressLine(progress = uiState.progress, progressPercent = uiState.progressPercent)
             }
         }
     }
 }
 
 @Composable
-private fun QuickAccess(onAction: (DashboardAction) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)) {
-        SectionTitle(R.string.dashboard_quick_access)
-        Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)) {
-            QuickCard(
-                emojiRes = R.string.dashboard_food_emoji,
-                titleRes = R.string.dashboard_add_meal,
-                hintRes = R.string.dashboard_add_meal_hint,
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                onClick = { onAction(DashboardAction.AddMeal) },
-                modifier = Modifier.weight(1f)
+private fun GoalRing(targetCalories: Int, progress: Float, modifier: Modifier = Modifier) {
+    val scheme = MaterialTheme.colorScheme
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val stroke = DashboardDimens.progressStroke.toPx()
+            drawCircle(color = scheme.surfaceContainerHigh, style = Stroke(stroke))
+            drawArc(
+                color = scheme.primary,
+                startAngle = -90f,
+                sweepAngle = progress.coerceIn(0f, 1f) * 360f,
+                useCenter = false,
+                topLeft = Offset(stroke / 2, stroke / 2),
+                size = Size(size.width - stroke, size.height - stroke),
+                style = Stroke(width = stroke, cap = StrokeCap.Round)
             )
-            QuickCard(
-                emojiRes = R.string.dashboard_activity_emoji,
-                titleRes = R.string.dashboard_add_activity,
-                hintRes = R.string.dashboard_add_activity_hint,
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                onClick = { onAction(DashboardAction.AddActivity) },
-                modifier = Modifier.weight(1f)
-            )
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = stringResource(R.string.dashboard_goal), style = MaterialTheme.typography.labelLarge, color = scheme.onSurfaceVariant)
+            Text(text = formatNumber(targetCalories), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = scheme.onSurface)
+            Text(text = stringResource(R.string.dashboard_goal_daily), style = MaterialTheme.typography.bodyMedium, color = scheme.onSurfaceVariant)
         }
     }
 }
 
 @Composable
-private fun QuickCard(emojiRes: Int, titleRes: Int, hintRes: Int, containerColor: Color, onClick: () -> Unit, modifier: Modifier) {
-    Card(
-        modifier = modifier.height(Dimens.dashboardQuickCardHeight).clickable(onClick = onClick),
-        shape = RoundedCornerShape(Dimens.dashboardCardCorner),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(Dimens.dashboardCardElevation)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(Dimens.spaceMedium),
-            verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+private fun OverviewMetric(iconRes: Int, labelRes: Int, value: Int, modifier: Modifier, isExceeded: Boolean = false) {
+    val valueColor = if (isExceeded) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .size(Dimens.buttonHeightMedium)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondaryContainer),
+            contentAlignment = Alignment.Center
         ) {
-            EmojiBox(emojiRes, containerColor)
-            Text(text = stringResource(titleRes), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(text = stringResource(hintRes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
         }
+        Spacer(modifier = Modifier.height(Dimens.spaceSmall))
+        Text(text = stringResource(labelRes), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = formatNumber(value), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = valueColor)
     }
 }
 
 @Composable
-private fun TodayDetails(uiState: DashboardUiState) {
-    DashboardCard {
-        Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)) {
-            SectionTitle(R.string.dashboard_today_details)
-            ProgressMetric(
-                R.string.dashboard_consumed,
-                stringResource(R.string.dashboard_calorie_progress, uiState.consumedCalories.toString(), uiState.allowedCalories.toString()),
-                uiState.progress,
-                if (uiState.isExceeded) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-            )
-            ProgressMetric(
-                R.string.dashboard_burned,
-                stringResource(R.string.dashboard_kcal_value, uiState.exerciseCalories.toString()),
-                if (uiState.targetCalories > 0) uiState.exerciseCalories.toFloat() / uiState.targetCalories else 0f,
-                MaterialTheme.colorScheme.tertiaryContainer
-            )
-            ProgressMetric(R.string.dashboard_water, stringResource(R.string.dashboard_water_progress, "0", "2.5"), uiState.waterProgress, MaterialTheme.colorScheme.inversePrimary)
-        }
-    }
-}
-
-@Composable
-private fun ProgressMetric(labelRes: Int, value: String, progress: Float, color: Color) {
+private fun ProgressLine(progress: Float, progressPercent: Int) {
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = stringResource(labelRes), style = MaterialTheme.typography.bodyLarge)
-            Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(Dimens.progressBarHeight)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(progress.coerceIn(0f, 1f))
+                    .height(Dimens.progressBarHeight)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
         }
-        Box(modifier = Modifier.fillMaxWidth().height(Dimens.dashboardProgressHeight).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)) {
-            Box(modifier = Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).height(Dimens.dashboardProgressHeight).clip(CircleShape).background(color))
+        Text(
+            text = stringResource(R.string.dashboard_percent_goal, progressPercent),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+@Composable
+private fun AchievementCard(progressPercent: Int) {
+    DashboardCard(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.padding(Dimens.spaceMedium), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(Dimens.buttonHeightLarge)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.tertiaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = stringResource(R.string.dashboard_icon_star), style = MaterialTheme.typography.displaySmall)
+            }
+            Spacer(modifier = Modifier.width(Dimens.spaceSmall))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
+                Text(text = stringResource(R.string.dashboard_awesome), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(text = stringResource(R.string.dashboard_awesome_message, progressPercent), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
     }
 }
 
 @Composable
-private fun DashboardCard(content: @Composable () -> Unit) {
+private fun DashboardQuickActions(onAction: (DashboardAction) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
+        QuickActionCard(
+            iconRes = R.string.dashboard_icon_meal,
+            titleRes = R.string.dashboard_add_meal,
+            isPrimary = true,
+            onClick = { onAction(DashboardAction.AddMeal) },
+            modifier = Modifier.weight(1f)
+        )
+        QuickActionCard(
+            iconRes = R.string.dashboard_icon_activity,
+            titleRes = R.string.dashboard_add_activity,
+            isPrimary = false,
+            onClick = { onAction(DashboardAction.AddActivity) },
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun QuickActionCard(iconRes: Int, titleRes: Int, isPrimary: Boolean, onClick: () -> Unit, modifier: Modifier) {
+    val containerColor = if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+    val contentColor = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(Dimens.dashboardCardCorner),
+        modifier = modifier.height(Dimens.buttonHeightLarge).clickable(onClick = onClick),
+        shape = Shape.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)
+    ) {
+        Row(modifier = Modifier.fillMaxSize().padding(Dimens.spaceMedium), verticalAlignment = Alignment.CenterVertically) {
+            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surface, modifier = Modifier.size(Dimens.buttonHeightMedium), shadowElevation = Dimens.spaceExtraSmall) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) { Text(text = stringResource(iconRes), style = MaterialTheme.typography.headlineSmall) }
+            }
+            Spacer(modifier = Modifier.width(Dimens.spaceSmall))
+            Text(text = stringResource(titleRes), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = contentColor)
+        }
+    }
+}
+
+@Composable
+private fun TodayMealsSection() {
+    Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(text = stringResource(R.string.dashboard_meals_today), modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+            Text(text = stringResource(R.string.dashboard_view_all), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+            Text(text = stringResource(R.string.dashboard_icon_arrow), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
+            MealCard(R.string.dashboard_icon_breakfast, R.string.dashboard_breakfast, R.string.dashboard_breakfast_time, R.string.dashboard_breakfast_calories, Modifier.weight(1f))
+            MealCard(R.string.dashboard_icon_lunch, R.string.dashboard_lunch, R.string.dashboard_lunch_time, R.string.dashboard_lunch_calories, Modifier.weight(1f))
+            MealCard(R.string.dashboard_icon_dinner, R.string.dashboard_dinner, R.string.dashboard_dinner_time, R.string.dashboard_dinner_calories, Modifier.weight(1f))
+            MealCard(R.string.dashboard_icon_snack, R.string.dashboard_snack, R.string.dashboard_snack_time, R.string.dashboard_snack_calories, Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun MealCard(iconRes: Int, titleRes: Int, timeRes: Int, caloriesRes: Int, modifier: Modifier) {
+    Card(modifier = modifier.height(DashboardDimens.mealCardHeight), shape = Shape.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)) {
+        Column(modifier = Modifier.padding(Dimens.spaceSmall), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
+            Box(modifier = Modifier.size(Dimens.buttonHeightMedium).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
+                Text(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
+            }
+            Text(text = stringResource(titleRes), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = stringResource(timeRes), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = stringResource(caloriesRes), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+        }
+    }
+}
+
+@Composable
+private fun DailyTipCard() {
+    DashboardCard(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.padding(Dimens.spaceMedium), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(Dimens.buttonHeightLarge).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
+                Text(text = stringResource(R.string.dashboard_icon_tip), style = MaterialTheme.typography.headlineMedium)
+            }
+            Spacer(modifier = Modifier.width(Dimens.spaceSmall))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.spaceExtraSmall)) {
+                Text(text = stringResource(R.string.dashboard_tip_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(text = stringResource(R.string.dashboard_tip_message), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Text(text = stringResource(R.string.dashboard_icon_arrow), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
+        }
+    }
+}
+
+@Composable
+private fun DashboardBottomBar(onNavigateToSettings: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = Dimens.spaceLarge, topEnd = Dimens.spaceLarge),
+        shadowElevation = Dimens.spaceSmall
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(vertical = Dimens.spaceSmall),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            NavigationItem(R.string.dashboard_icon_home, R.string.dashboard_home, true, {})
+            NavigationItem(R.string.dashboard_icon_meals_nav, R.string.dashboard_meals, false, {})
+            NavigationItem(R.string.dashboard_icon_activity_nav, R.string.dashboard_activity, false, {})
+            NavigationItem(R.string.dashboard_icon_statistics, R.string.dashboard_statistics, false, {})
+            NavigationItem(R.string.dashboard_icon_settings, R.string.dashboard_settings, false, onNavigateToSettings)
+        }
+    }
+}
+
+@Composable
+private fun RowScope.NavigationItem(iconRes: Int, labelRes: Int, selected: Boolean, onClick: () -> Unit) {
+    val contentColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+    Column(
+        modifier = Modifier.weight(1f).clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Dimens.spaceExtraSmall)
+    ) {
+        Text(text = stringResource(iconRes), style = MaterialTheme.typography.headlineSmall, color = contentColor)
+        Text(text = stringResource(labelRes), style = MaterialTheme.typography.labelMedium, color = contentColor, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, textAlign = TextAlign.Center)
+        if (selected) {
+            Box(modifier = Modifier.width(Dimens.progressBarWidth).height(Dimens.progressBarHeight).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
+        }
+    }
+}
+
+@Composable
+private fun DashboardCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    Card(
+        modifier = modifier,
+        shape = Shape.extraLarge,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(Dimens.dashboardCardElevation)
-    ) {
-        Box(modifier = Modifier.padding(Dimens.spaceLarge)) { content() }
-    }
-}
-
-@Composable
-private fun EmojiBox(emojiRes: Int, containerColor: Color) {
-    Box(
-        modifier = Modifier.size(Dimens.dashboardIconContainer).clip(RoundedCornerShape(Dimens.spaceMedium)).background(containerColor),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = stringResource(emojiRes), style = MaterialTheme.typography.headlineSmall)
-    }
-}
-
-@Composable
-private fun SectionTitle(titleRes: Int) {
-    Text(
-        text = stringResource(titleRes),
-        style = MaterialTheme.typography.titleLarge,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium),
+        content = { content() }
     )
 }
+
+private fun formatNumber(value: Int): String = NumberFormat.getIntegerInstance(Locale.forLanguageTag("vi-VN")).format(value)

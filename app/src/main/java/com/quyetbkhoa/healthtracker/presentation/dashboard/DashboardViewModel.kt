@@ -20,7 +20,8 @@ data class DashboardUiState(
     val tdeeCalories: Int = 0,
     val targetCalories: Int = 0,
     val consumedCalories: Int = 0,
-    val exerciseCalories: Int = 0
+    val exerciseCalories: Int = 0,
+    val userName: String = ""
 ) {
     val allowedCalories: Int get() = targetCalories + exerciseCalories
     val remainingCalories: Int get() = allowedCalories - consumedCalories
@@ -54,7 +55,8 @@ class DashboardViewModel @Inject constructor(
             tdeeCalories = profile?.tdeeCalories ?: 0,
             targetCalories = profile?.dailyCalorieTarget ?: 0,
             consumedCalories = daily.consumedCalories,
-            exerciseCalories = daily.exerciseCalories
+            exerciseCalories = daily.exerciseCalories,
+            userName = profile?.fullName.orEmpty()
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
 
