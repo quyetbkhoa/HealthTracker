@@ -75,30 +75,6 @@ fun AppNavigation(
                 LaunchedEffect(Unit) {
                     viewModel.uiEvent.collect { event ->
                         when (event) {
-                            is ProfileSetupUiEvent.NavigateToStep3 -> navController.navigate("profile_step3")
-                            is ProfileSetupUiEvent.ShowToast -> Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
-                            else -> Unit
-                        }
-                    }
-                }
-
-                ProfileSetupStep2Screen(
-                    uiState = uiState,
-                    onAction = viewModel::onAction,
-                    onBack = { navController.popBackStack() }
-                )
-            }
-
-            composable("profile_step3") { backStackEntry ->
-                val parentEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry("onboarding_graph")
-                }
-                val viewModel: ProfileSetupViewModel = hiltViewModel(parentEntry)
-                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-                LaunchedEffect(Unit) {
-                    viewModel.uiEvent.collect { event ->
-                        when (event) {
                             is ProfileSetupUiEvent.NavigateToTdeeResult -> navController.navigate("tdee_result")
                             is ProfileSetupUiEvent.ShowToast -> Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                             else -> Unit
@@ -106,7 +82,7 @@ fun AppNavigation(
                     }
                 }
 
-                ProfileSetupStep3Screen(
+                ProfileSetupStep2Screen(
                     uiState = uiState,
                     onAction = viewModel::onAction,
                     onBack = { navController.popBackStack() }

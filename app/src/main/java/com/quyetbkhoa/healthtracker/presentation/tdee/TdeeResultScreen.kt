@@ -30,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 
 @Composable
@@ -85,7 +86,7 @@ fun TdeeResultContent(state: TdeeResultUiState, onAction: (TdeeResultAction) -> 
                 value = stringResource(R.string.tdee_kcal_value, state.tdeeCalories)
             )
             Card(
-                shape = RoundedCornerShape(Dimens.dashboardCardCorner),
+                shape = Shape.extraLarge,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Column(
@@ -131,9 +132,9 @@ fun TdeeResultContent(state: TdeeResultUiState, onAction: (TdeeResultAction) -> 
 private fun ResultMetricCard(label: String, description: String, value: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(Dimens.dashboardCardCorner),
+        shape = Shape.extraLarge,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(Dimens.dashboardCardElevation)
+        elevation = CardDefaults.cardElevation(Dimens.cardElevationMedium)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(Dimens.spaceLarge),

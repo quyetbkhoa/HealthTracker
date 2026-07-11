@@ -2,11 +2,13 @@ package com.quyetbkhoa.healthtracker.presentation.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.compose.runtime.Immutable
 import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
 import com.quyetbkhoa.healthtracker.domain.model.Gender
 import com.quyetbkhoa.healthtracker.domain.model.Goal
 import com.quyetbkhoa.healthtracker.domain.model.UserProfile
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
+import com.quyetbkhoa.healthtracker.domain.usecase.CalculateTdeeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Immutable
 data class ProfileSetupUiState(
     val fullName: String = "",
     val dateOfBirth: Long? = null,
@@ -29,7 +32,10 @@ data class ProfileSetupUiState(
     val dobError: Int? = null,
     val weightError: Int? = null,
     val heightError: Int? = null,
-    val termsError: Int? = null
+    val termsError: Int? = null,
+    val estimatedBmr: Int = 0,
+    val estimatedTdee: Int = 0,
+    val estimatedTarget: Int = 0
 )
 
 sealed interface ProfileSetupAction {
@@ -42,21 +48,20 @@ sealed interface ProfileSetupAction {
     data class UpdateGoal(val goal: Goal) : ProfileSetupAction
     data class UpdateAcceptedTerms(val accepted: Boolean) : ProfileSetupAction
     
-    object SubmitStep1 : ProfileSetupAction
-    object SubmitStep2 : ProfileSetupAction
-    object SubmitStep3 : ProfileSetupAction
+    data object SubmitInformation : ProfileSetupAction
+    data object SubmitProfile : ProfileSetupAction
 }
 
 sealed interface ProfileSetupUiEvent {
     object NavigateToStep2 : ProfileSetupUiEvent
-    object NavigateToStep3 : ProfileSetupUiEvent
     object NavigateToTdeeResult : ProfileSetupUiEvent
     data class ShowToast(val message: String) : ProfileSetupUiEvent
 }
 
 @HiltViewModel
 class ProfileSetupViewModel @Inject constructor(
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val calculateTdee: CalculateTdeeUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileSetupUiState())
@@ -83,21 +88,20 @@ class ProfileSetupViewModel @Inject constructor(
                 _uiState.update { it.copy(heightStr = action.height, heightError = null) }
             }
             is ProfileSetupAction.UpdateActivityLevel -> {
-                _uiState.update { it.copy(activityLevel = action.level) }
+                _uiState.update { state -> state.copy(activityLevel = action.level).withEstimate() }
             }
             is ProfileSetupAction.UpdateGoal -> {
-                _uiState.update { it.copy(goal = action.goal) }
+                _uiState.update { state -> state.copy(goal = action.goal).withEstimate() }
             }
             is ProfileSetupAction.UpdateAcceptedTerms -> {
                 _uiState.update { it.copy(acceptedTerms = action.accepted, termsError = null) }
             }
-            ProfileSetupAction.SubmitStep1 -> validateStep1()
-            ProfileSetupAction.SubmitStep2 -> validateStep2()
-            ProfileSetupAction.SubmitStep3 -> submitProfile()
+            ProfileSetupAction.SubmitInformation -> validateInformation()
+            ProfileSetupAction.SubmitProfile -> submitProfile()
         }
     }
 
-    private fun validateStep1() {
+    private fun validateInformation() {
         val state = _uiState.value
         var hasError = false
 
@@ -111,23 +115,11 @@ class ProfileSetupViewModel @Inject constructor(
             hasError = true
         }
 
-        if (!hasError) {
-            viewModelScope.launch {
-                _uiEvent.send(ProfileSetupUiEvent.NavigateToStep2)
-            }
-        }
-    }
-
-    private fun validateStep2() {
-        val state = _uiState.value
-        var hasError = false
-
         val weight = state.weightStr.toFloatOrNull()
         if (weight == null || weight < 1f || weight > 300f) {
             _uiState.update { it.copy(weightError = com.quyetbkhoa.healthtracker.R.string.error_invalid_weight) }
             hasError = true
         }
-
         val height = state.heightStr.toFloatOrNull()
         if (height == null || height < 1f || height > 300f) {
             _uiState.update { it.copy(heightError = com.quyetbkhoa.healthtracker.R.string.error_invalid_height) }
@@ -135,19 +127,15 @@ class ProfileSetupViewModel @Inject constructor(
         }
 
         if (!hasError) {
+            _uiState.update { it.withEstimate() }
             viewModelScope.launch {
-                _uiEvent.send(ProfileSetupUiEvent.NavigateToStep3)
+                _uiEvent.send(ProfileSetupUiEvent.NavigateToStep2)
             }
         }
     }
 
     private fun submitProfile() {
         val state = _uiState.value
-        if (!state.acceptedTerms) {
-            _uiState.update { it.copy(termsError = com.quyetbkhoa.healthtracker.R.string.error_terms_not_accepted) }
-            return
-        }
-
         val profile = UserProfile(
             fullName = state.fullName,
             dateOfBirth = state.dateOfBirth ?: 0L,
@@ -162,5 +150,22 @@ class ProfileSetupViewModel @Inject constructor(
             profileRepository.saveProfile(profile)
             _uiEvent.send(ProfileSetupUiEvent.NavigateToTdeeResult)
         }
+    }
+
+    private fun ProfileSetupUiState.withEstimate(): ProfileSetupUiState {
+        val birthDate = dateOfBirth ?: return this
+        val weight = weightStr.toFloatOrNull() ?: return this
+        val height = heightStr.toFloatOrNull() ?: return this
+        val result = calculateTdee(
+            UserProfile(
+                dateOfBirth = birthDate,
+                gender = gender,
+                weightKg = weight,
+                heightCm = height,
+                activityLevel = activityLevel,
+                goal = goal
+            )
+        )
+        return copy(estimatedBmr = result.bmrCalories, estimatedTdee = result.tdeeCalories, estimatedTarget = result.targetCalories)
     }
 }
