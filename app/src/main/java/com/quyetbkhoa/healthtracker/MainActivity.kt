@@ -46,6 +46,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             AppNavigation(
                                 themeType = state.themeType,
+                                hasProfile = state.hasProfile,
                                 onThemeChanged = viewModel::setTheme
                             )
                         }
