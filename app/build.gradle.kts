@@ -69,4 +69,9 @@ dependencies {
 
     // Alternatively - without an Android dependency.
     implementation("androidx.datastore:datastore-preferences-core:1.2.1")
+
+    // Room
+    implementation("androidx.room:room-runtime:2.8.3")
+    implementation("androidx.room:room-ktx:2.8.3")
+    ksp("androidx.room:room-compiler:2.8.3")
 }
