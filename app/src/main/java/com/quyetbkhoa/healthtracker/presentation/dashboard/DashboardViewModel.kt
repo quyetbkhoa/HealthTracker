@@ -5,11 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quyetbkhoa.healthtracker.domain.repository.DailyCalorieRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
+import com.quyetbkhoa.healthtracker.domain.repository.MealRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -38,23 +42,32 @@ sealed interface DashboardAction {
     data object AddActivity : DashboardAction
 }
 
+sealed interface DashboardUiEvent {
+    data object NavigateToAddMeal : DashboardUiEvent
+}
+
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     profileRepository: ProfileRepository,
-    dailyCalorieRepository: DailyCalorieRepository
+    dailyCalorieRepository: DailyCalorieRepository,
+    mealRepository: MealRepository
 ) : ViewModel() {
     private val todayEpochDay = LocalDate.now().toEpochDay()
 
+    private val _uiEvent = Channel<DashboardUiEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
+
     val uiState: StateFlow<DashboardUiState> = combine(
         profileRepository.userProfile,
-        dailyCalorieRepository.observeSummary(todayEpochDay)
-    ) { profile, daily ->
+        dailyCalorieRepository.observeSummary(todayEpochDay),
+        mealRepository.observeMealsByDay(todayEpochDay)
+    ) { profile, daily, meals ->
         DashboardUiState(
             isLoading = false,
             hasProfile = profile != null,
             tdeeCalories = profile?.tdeeCalories ?: 0,
             targetCalories = profile?.dailyCalorieTarget ?: 0,
-            consumedCalories = daily.consumedCalories,
+            consumedCalories = meals.sumOf { it.calories },
             exerciseCalories = daily.exerciseCalories,
             userName = profile?.fullName.orEmpty()
         )
@@ -62,7 +75,9 @@ class DashboardViewModel @Inject constructor(
 
     fun onAction(action: DashboardAction) {
         when (action) {
-            DashboardAction.AddMeal -> Unit
+            DashboardAction.AddMeal -> viewModelScope.launch {
+                _uiEvent.send(DashboardUiEvent.NavigateToAddMeal)
+            }
             DashboardAction.AddActivity -> Unit
         }
     }

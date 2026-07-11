@@ -21,11 +21,13 @@ import com.quyetbkhoa.healthtracker.presentation.dashboard.DashboardScreen
 import com.quyetbkhoa.healthtracker.presentation.settings.SettingsScreen
 import com.quyetbkhoa.healthtracker.presentation.tdee.TdeeResultScreen
 import com.quyetbkhoa.healthtracker.presentation.profile.ProfileSettingsScreen
+import com.quyetbkhoa.healthtracker.presentation.meal.AddMealScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
     themeType: AppThemeType,
+    hasProfile: Boolean,
     onThemeChanged: (AppThemeType) -> Unit
 ) {
     val navController = rememberNavController()
@@ -33,7 +35,7 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = "welcome"
+        startDestination = if (hasProfile) "home" else "welcome"
     ) {
         composable("welcome") {
             WelcomeScreen(
@@ -102,7 +104,22 @@ fun AppNavigation(
 
         composable("home") {
             DashboardScreen(
-                onNavigateToSettings = { navController.navigate("settings") }
+                onNavigateToSettings = { navController.navigate("settings") },
+                onNavigateToAddMeal = { navController.navigate("add_meal") }
+            )
+        }
+
+        composable("add_meal") {
+            AddMealScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSaved = {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.add_meal_saved),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    navController.popBackStack()
+                }
             )
         }
 
@@ -111,7 +128,13 @@ fun AppNavigation(
                 themeType = themeType,
                 onThemeChanged = onThemeChanged,
                 onNavigateToProfile = { navController.navigate("profile_settings") },
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onResetCompleted = {
+                    navController.navigate("welcome") {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 
