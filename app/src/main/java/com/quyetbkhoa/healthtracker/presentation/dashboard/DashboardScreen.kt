@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
@@ -57,6 +58,7 @@ import kotlin.math.abs
 fun DashboardScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToAddMeal: () -> Unit,
+    onNavigateToAddActivity: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -64,6 +66,7 @@ fun DashboardScreen(
         viewModel.uiEvent.collect { event ->
             when (event) {
                 DashboardUiEvent.NavigateToAddMeal -> onNavigateToAddMeal()
+                DashboardUiEvent.NavigateToAddActivity -> onNavigateToAddActivity()
             }
         }
     }
@@ -435,3 +438,4 @@ private fun DashboardCard(modifier: Modifier = Modifier, content: @Composable ()
 }
 
 private fun formatNumber(value: Int): String = NumberFormat.getIntegerInstance(Locale.forLanguageTag("vi-VN")).format(value)
+

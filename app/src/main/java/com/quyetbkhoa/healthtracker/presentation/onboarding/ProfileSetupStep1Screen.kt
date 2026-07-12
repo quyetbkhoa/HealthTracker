@@ -52,6 +52,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.tooling.preview.Preview
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
@@ -300,3 +301,4 @@ private fun onboardingFieldColors() = OutlinedTextFieldDefaults.colors(
     focusedContainerColor = MaterialTheme.colorScheme.surface,
     unfocusedContainerColor = MaterialTheme.colorScheme.surface
 )
+

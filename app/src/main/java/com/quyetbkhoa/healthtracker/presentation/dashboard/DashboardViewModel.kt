@@ -3,7 +3,7 @@ package com.quyetbkhoa.healthtracker.presentation.dashboard
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.quyetbkhoa.healthtracker.domain.repository.DailyCalorieRepository
+import com.quyetbkhoa.healthtracker.domain.repository.ActivityRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
 import com.quyetbkhoa.healthtracker.domain.repository.MealRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,13 +44,14 @@ sealed interface DashboardAction {
 
 sealed interface DashboardUiEvent {
     data object NavigateToAddMeal : DashboardUiEvent
+    data object NavigateToAddActivity : DashboardUiEvent
 }
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     profileRepository: ProfileRepository,
-    dailyCalorieRepository: DailyCalorieRepository,
-    mealRepository: MealRepository
+    mealRepository: MealRepository,
+    activityRepository: ActivityRepository
 ) : ViewModel() {
     private val todayEpochDay = LocalDate.now().toEpochDay()
 
@@ -59,16 +60,16 @@ class DashboardViewModel @Inject constructor(
 
     val uiState: StateFlow<DashboardUiState> = combine(
         profileRepository.userProfile,
-        dailyCalorieRepository.observeSummary(todayEpochDay),
-        mealRepository.observeMealsByDay(todayEpochDay)
-    ) { profile, daily, meals ->
+        mealRepository.observeMealsByDay(todayEpochDay),
+        activityRepository.observeTotalCaloriesByDay(todayEpochDay)
+    ) { profile, meals, activityCalories ->
         DashboardUiState(
             isLoading = false,
             hasProfile = profile != null,
             tdeeCalories = profile?.tdeeCalories ?: 0,
             targetCalories = profile?.dailyCalorieTarget ?: 0,
             consumedCalories = meals.sumOf { it.calories },
-            exerciseCalories = daily.exerciseCalories,
+            exerciseCalories = activityCalories.toInt(),
             userName = profile?.fullName.orEmpty()
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
@@ -78,7 +79,9 @@ class DashboardViewModel @Inject constructor(
             DashboardAction.AddMeal -> viewModelScope.launch {
                 _uiEvent.send(DashboardUiEvent.NavigateToAddMeal)
             }
-            DashboardAction.AddActivity -> Unit
+            DashboardAction.AddActivity -> viewModelScope.launch {
+                _uiEvent.send(DashboardUiEvent.NavigateToAddActivity)
+            }
         }
     }
 }

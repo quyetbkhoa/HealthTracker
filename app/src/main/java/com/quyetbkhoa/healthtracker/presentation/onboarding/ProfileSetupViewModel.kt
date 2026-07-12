@@ -23,7 +23,7 @@ data class ProfileSetupUiState(
     val fullName: String = "",
     val dateOfBirth: Long? = null,
     val gender: Gender = Gender.MALE,
-    val weightStr: String = "", // using String for text fields to handle empty/decimals
+    val weightStr: String = "",
     val heightStr: String = "",
     val activityLevel: ActivityLevel = ActivityLevel.SEDENTARY,
     val goal: Goal = Goal.MAINTAIN,

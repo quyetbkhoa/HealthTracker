@@ -134,7 +134,6 @@ fun ProfileSettingsContent(
                     val label = when (gender) {
                         Gender.MALE -> R.string.onboarding_gender_male
                         Gender.FEMALE -> R.string.onboarding_gender_female
-                        Gender.OTHER -> R.string.onboarding_gender_other
                     }
                     SelectableCardCompact(
                         text = stringResource(label),
