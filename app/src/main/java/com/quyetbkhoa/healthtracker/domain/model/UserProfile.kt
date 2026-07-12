@@ -3,7 +3,7 @@ package com.quyetbkhoa.healthtracker.domain.model
 data class UserProfile(
     val fullName: String = "",
     val dateOfBirth: Long = 0L, // Epoch milliseconds
-    val gender: Gender = Gender.OTHER,
+    val gender: Gender = Gender.MALE,
     val weightKg: Float = 0f,
     val heightCm: Float = 0f,
     val activityLevel: ActivityLevel = ActivityLevel.SEDENTARY,
@@ -14,7 +14,7 @@ data class UserProfile(
 )
 
 enum class Gender {
-    MALE, FEMALE, OTHER
+    MALE, FEMALE
 }
 
 enum class ActivityLevel {
