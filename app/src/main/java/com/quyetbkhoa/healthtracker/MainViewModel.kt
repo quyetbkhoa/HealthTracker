@@ -21,12 +21,10 @@ class MainViewModel @Inject constructor(
 
     val uiState: StateFlow<MainActivityUiState> = combine(
         settingsRepository.themeType,
-        settingsRepository.language,
         profileRepository.userProfile
-    ) { themeType, language, profile ->
+    ) { themeType, profile ->
         MainActivityUiState.Success(
             themeType = themeType,
-            language = language,
             hasProfile = profile != null
         )
     }.stateIn(
@@ -46,7 +44,6 @@ sealed interface MainActivityUiState {
     data object Loading : MainActivityUiState
     data class Success(
         val themeType: AppThemeType,
-        val language: String,
         val hasProfile: Boolean
     ) : MainActivityUiState
 }

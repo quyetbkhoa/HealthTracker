@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quyetbkhoa.healthtracker.domain.usecase.ResetUserDataUseCase
+import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,12 +22,14 @@ data class SettingsUiState(
 )
 
 sealed interface SettingsAction {
+    data class SelectLanguage(val language: AppLanguage) : SettingsAction
     data object RequestReset : SettingsAction
     data object CancelReset : SettingsAction
     data object ConfirmReset : SettingsAction
 }
 
 sealed interface SettingsUiEvent {
+    data class LanguageSelected(val language: AppLanguage) : SettingsUiEvent
     data object ResetCompleted : SettingsUiEvent
     data object ResetFailed : SettingsUiEvent
 }
@@ -43,6 +46,7 @@ class SettingsViewModel @Inject constructor(
 
     fun onAction(action: SettingsAction) {
         when (action) {
+            is SettingsAction.SelectLanguage -> selectLanguage(action.language)
             SettingsAction.RequestReset -> _uiState.update {
                 it.copy(showResetConfirmation = true)
             }
@@ -50,6 +54,12 @@ class SettingsViewModel @Inject constructor(
                 it.copy(showResetConfirmation = false)
             }
             SettingsAction.ConfirmReset -> resetData()
+        }
+    }
+
+    private fun selectLanguage(language: AppLanguage) {
+        viewModelScope.launch {
+            _uiEvent.send(SettingsUiEvent.LanguageSelected(language))
         }
     }
 

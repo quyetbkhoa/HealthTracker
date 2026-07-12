@@ -10,12 +10,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
+import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
 import com.quyetbkhoa.healthtracker.presentation.onboarding.*
 import com.quyetbkhoa.healthtracker.presentation.dashboard.DashboardScreen
 import com.quyetbkhoa.healthtracker.presentation.settings.SettingsScreen
@@ -29,7 +31,8 @@ import com.quyetbkhoa.healthtracker.presentation.activity.AddActivityScreen
 fun AppNavigation(
     themeType: AppThemeType,
     hasProfile: Boolean,
-    onThemeChanged: (AppThemeType) -> Unit
+    onThemeChanged: (AppThemeType) -> Unit,
+    onLanguageChanged: (AppLanguage) -> Unit
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -143,6 +146,10 @@ fun AppNavigation(
             SettingsScreen(
                 themeType = themeType,
                 onThemeChanged = onThemeChanged,
+                selectedLanguage = AppLanguage.fromLanguageTag(
+                    AppCompatDelegate.getApplicationLocales().toLanguageTags()
+                ),
+                onLanguageChanged = onLanguageChanged,
                 onNavigateToProfile = { navController.navigate("profile_settings") },
                 onNavigateBack = { navController.popBackStack() },
                 onResetCompleted = {

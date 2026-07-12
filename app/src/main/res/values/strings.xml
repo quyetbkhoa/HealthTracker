@@ -99,6 +99,9 @@
     <string name="dashboard_ring_exceeded">-%1$d kcal\nvượt quá</string>
     <string name="screen_settings">Cài đặt</string>
     <string name="settings_select_theme">Chọn theme</string>
+    <string name="settings_select_language">Ngôn ngữ</string>
+    <string name="language_vietnamese">Tiếng Việt</string>
+    <string name="language_english">English</string>
     <string name="settings_back">Quay lại</string>
     <string name="settings_reset_data">Đặt lại toàn bộ dữ liệu</string>
     <string name="settings_reset_title">Đặt lại dữ liệu?</string>

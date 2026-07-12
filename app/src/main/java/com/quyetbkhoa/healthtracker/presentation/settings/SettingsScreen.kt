@@ -27,6 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
+import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 
@@ -34,6 +35,8 @@ import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPri
 fun SettingsScreen(
     themeType: AppThemeType,
     onThemeChanged: (AppThemeType) -> Unit,
+    selectedLanguage: AppLanguage,
+    onLanguageChanged: (AppLanguage) -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateBack: () -> Unit,
     onResetCompleted: () -> Unit,
@@ -46,6 +49,7 @@ fun SettingsScreen(
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { event ->
             when (event) {
+                is SettingsUiEvent.LanguageSelected -> onLanguageChanged(event.language)
                 SettingsUiEvent.ResetCompleted -> onResetCompleted()
                 SettingsUiEvent.ResetFailed -> Toast.makeText(
                     context,
@@ -93,6 +97,32 @@ fun SettingsScreen(
                 RadioButton(
                     selected = themeType == type,
                     onClick = { onThemeChanged(type) }
+                )
+                Text(
+                    text = stringResource(id = labelRes),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(Dimens.spaceExtraLarge))
+
+        Text(
+            text = stringResource(id = R.string.settings_select_language),
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        AppLanguage.entries.forEach { language ->
+            val labelRes = when (language) {
+                AppLanguage.VIETNAMESE -> R.string.language_vietnamese
+                AppLanguage.ENGLISH -> R.string.language_english
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = selectedLanguage == language,
+                    onClick = {
+                        viewModel.onAction(SettingsAction.SelectLanguage(language))
+                    }
                 )
                 Text(
                     text = stringResource(id = labelRes),
