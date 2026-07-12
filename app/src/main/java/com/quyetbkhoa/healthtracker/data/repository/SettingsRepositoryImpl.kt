@@ -13,14 +13,8 @@ class SettingsRepositoryImpl @Inject constructor(
     override val themeType: Flow<AppThemeType>
         get() = settingsDataStore.themeTypeFlow
 
-    override val language: Flow<String>
-        get() = settingsDataStore.languageFlow
-
     override suspend fun setThemeType(themeType: AppThemeType) {
         settingsDataStore.saveThemeType(themeType)
     }
 
-    override suspend fun setLanguage(language: String) {
-        settingsDataStore.saveLanguage(language)
-    }
 }

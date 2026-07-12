@@ -15,7 +15,6 @@ class SettingsDataStore @Inject constructor(
 
     companion object {
         val THEME_TYPE_KEY = stringPreferencesKey("theme_type")
-        val LANGUAGE_KEY = stringPreferencesKey("language")
     }
 
     val themeTypeFlow: Flow<AppThemeType> = dataStore.data
@@ -24,20 +23,10 @@ class SettingsDataStore @Inject constructor(
             runCatching { AppThemeType.valueOf(themeString) }.getOrDefault(AppThemeType.SYSTEM)
         }
 
-    val languageFlow: Flow<String> = dataStore.data
-        .map { preferences ->
-            preferences[LANGUAGE_KEY] ?: "en" // Default is English
-        }
-
     suspend fun saveThemeType(themeType: AppThemeType) {
         dataStore.edit { preferences ->
             preferences[THEME_TYPE_KEY] = themeType.name
         }
     }
 
-    suspend fun saveLanguage(language: String) {
-        dataStore.edit { preferences ->
-            preferences[LANGUAGE_KEY] = language
-        }
-    }
 }
