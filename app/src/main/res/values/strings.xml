@@ -186,7 +186,7 @@
 
     <!-- Errors -->
     <string name="error_empty_name">Vui lòng nhập họ tên</string>
-    <string name="error_invalid_dob">Vui lòng chọn ngày sinh hợp lệ (trước hôm nay)</string>
+    <string name="error_invalid_dob">Vui lòng chọn ngày sinh hợp lệ</string>
     <string name="error_invalid_weight">Cân nặng phải từ 1 đến 300 kg</string>
     <string name="error_invalid_height">Chiều cao phải từ 1 đến 300 cm</string>
     <string name="error_terms_not_accepted">Bạn cần đồng ý với Điều khoản</string>
@@ -223,4 +223,30 @@
     <string name="add_meal_error_invalid_calories">Calories phải lớn hơn 0</string>
     <string name="add_meal_error_calories_too_high">Calories không được vượt quá 10.000 kcal</string>
     <string name="navigate_back">Quay lại</string>
+
+    <!-- Add physical activity -->
+    <string name="add_activity_title">Thêm hoạt động</string>
+    <string name="add_activity_subtitle">Ghi lại vận động trong ngày</string>
+    <string name="add_activity_choose">Chọn hoạt động</string>
+    <string name="add_activity_reselect">Chọn lại</string>
+    <string name="add_activity_info">Xem hướng dẫn chọn hoạt động</string>
+    <string name="add_activity_info_title">Hoạt động yêu thích</string>
+    <string name="add_activity_info_message">Hãy nhấn giữ để yêu thích hoạt động.</string>
+    <string name="add_activity_info_confirm">Đã hiểu</string>
+    <string name="add_activity_duration">Thời gian thực hiện</string>
+    <string name="add_activity_minutes">%1$d phút</string>
+    <string name="add_activity_met">MET %1$.1f</string>
+    <string name="add_activity_estimate">Ước tính đã tiêu thụ</string>
+    <string name="add_activity_kcal">%1$d kcal</string>
+    <string name="add_activity_save">Lưu hoạt động</string>
+    <string name="add_activity_saved">Đã thêm hoạt động</string>
+    <string name="add_activity_favorite">Hoạt động yêu thích</string>
+    <string name="add_activity_not_favorite">Chưa yêu thích; nhấn giữ để thêm</string>
+    <string name="add_activity_increase">Tăng thời gian</string>
+    <string name="add_activity_decrease">Giảm thời gian</string>
+    <string name="add_activity_minus_symbol">−</string>
+    <string name="add_activity_error_weight">Hồ sơ chưa có cân nặng hợp lệ</string>
+    <string name="add_activity_error_duration">Thời gian phải từ 1 đến 600 phút</string>
+    <string name="add_activity_error_activity">Vui lòng chọn hoạt động hợp lệ</string>
+    <string name="add_activity_error_save">Không thể lưu hoạt động. Vui lòng thử lại.</string>
 </resources>

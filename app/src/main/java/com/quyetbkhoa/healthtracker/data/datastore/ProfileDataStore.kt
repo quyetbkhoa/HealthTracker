@@ -32,13 +32,13 @@ class ProfileDataStore @Inject constructor(
         if (fullName == null) return@map null
         
         val dob = preferences[DOB_KEY] ?: 0L
-        val genderStr = preferences[GENDER_KEY] ?: Gender.OTHER.name
+        val genderStr = preferences[GENDER_KEY] ?: Gender.MALE.name
         val weight = preferences[WEIGHT_KEY] ?: 0f
         val height = preferences[HEIGHT_KEY] ?: 0f
         val activityStr = preferences[ACTIVITY_LEVEL_KEY] ?: ActivityLevel.SEDENTARY.name
         val goalStr = preferences[GOAL_KEY] ?: Goal.MAINTAIN.name
 
-        val gender = runCatching { Gender.valueOf(genderStr) }.getOrDefault(Gender.OTHER)
+        val gender = runCatching { Gender.valueOf(genderStr) }.getOrDefault(Gender.MALE)
         val activityLevel = runCatching { ActivityLevel.valueOf(activityStr) }.getOrDefault(ActivityLevel.SEDENTARY)
         val goal = runCatching { Goal.valueOf(goalStr) }.getOrDefault(Goal.MAINTAIN)
 
