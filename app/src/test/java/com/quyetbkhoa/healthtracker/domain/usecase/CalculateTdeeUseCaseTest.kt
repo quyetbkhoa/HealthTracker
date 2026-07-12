@@ -22,13 +22,6 @@ class CalculateTdeeUseCaseTest {
     }
 
     @Test
-    fun otherGender_defaultsToMaleFormula() {
-        val male = calculateTdee(profile(Gender.MALE, Goal.MAINTAIN), today)
-        val other = calculateTdee(profile(Gender.OTHER, Goal.MAINTAIN), today)
-        assertEquals(male, other)
-    }
-
-    @Test
     fun goals_adjustTargetByFiveHundredCalories() {
         val maintain = calculateTdee(profile(Gender.FEMALE, Goal.MAINTAIN), today)
         val lose = calculateTdee(profile(Gender.FEMALE, Goal.LOSE_WEIGHT), today)

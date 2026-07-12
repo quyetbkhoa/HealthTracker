@@ -22,6 +22,7 @@ import com.quyetbkhoa.healthtracker.presentation.settings.SettingsScreen
 import com.quyetbkhoa.healthtracker.presentation.tdee.TdeeResultScreen
 import com.quyetbkhoa.healthtracker.presentation.profile.ProfileSettingsScreen
 import com.quyetbkhoa.healthtracker.presentation.meal.AddMealScreen
+import com.quyetbkhoa.healthtracker.presentation.activity.AddActivityScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -105,7 +106,8 @@ fun AppNavigation(
         composable("home") {
             DashboardScreen(
                 onNavigateToSettings = { navController.navigate("settings") },
-                onNavigateToAddMeal = { navController.navigate("add_meal") }
+                onNavigateToAddMeal = { navController.navigate("add_meal") },
+                onNavigateToAddActivity = { navController.navigate("add_activity") }
             )
         }
 
@@ -116,6 +118,20 @@ fun AppNavigation(
                     Toast.makeText(
                         context,
                         context.getString(R.string.add_meal_saved),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable("add_activity") {
+            AddActivityScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSaved = {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.add_activity_saved),
                         Toast.LENGTH_SHORT
                     ).show()
                     navController.popBackStack()
