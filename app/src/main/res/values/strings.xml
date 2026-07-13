@@ -113,6 +113,29 @@
     <string name="theme_dark">Tối</string>
     <string name="theme_pink">Hồng</string>
     <string name="theme_system">Theo hệ thống</string>
+    <string name="settings_subtitle">Cá nhân hóa trải nghiệm HealthTracker</string>
+    <string name="settings_hero_title">Không gian của bạn</string>
+    <string name="settings_hero_description">Điều chỉnh hồ sơ, giao diện và dữ liệu theo cách bạn muốn.</string>
+    <string name="settings_account_section">Tài khoản</string>
+    <string name="settings_appearance_section">Giao diện</string>
+    <string name="settings_language_section">Ngôn ngữ</string>
+    <string name="settings_data_section">Dữ liệu</string>
+    <string name="settings_profile_description">Cập nhật thông tin và mục tiêu sức khỏe</string>
+    <string name="settings_reset_description">Xóa hồ sơ và toàn bộ nhật ký đã lưu</string>
+    <string name="settings_selected">Đang dùng</string>
+    <string name="settings_vietnamese_native">Tiếng Việt</string>
+    <string name="settings_english_native">English</string>
+    <string name="settings_icon_settings">⚙</string>
+    <string name="settings_icon_profile">👤</string>
+    <string name="settings_icon_appearance">🎨</string>
+    <string name="settings_icon_language">🌐</string>
+    <string name="settings_icon_data">🗂</string>
+    <string name="settings_icon_reset">↻</string>
+    <string name="settings_icon_chevron">›</string>
+    <string name="settings_icon_light">☀</string>
+    <string name="settings_icon_dark">☾</string>
+    <string name="settings_icon_pink">✿</string>
+    <string name="settings_icon_system">◐</string>
 
     <!-- Onboarding -->
     <string name="onboarding_step_format">Bước %1$d/3</string>
