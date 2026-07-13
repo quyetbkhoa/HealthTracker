@@ -1,11 +1,8 @@
 package com.quyetbkhoa.healthtracker.data.local.food
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-@Entity(tableName = "foods")
-data class FoodEntity(
-    @PrimaryKey val id: Long,
+data class LocalizedFoodRow(
+    val id: Long,
+    val name: String,
     val caloriesPer100Grams: Double,
     val defaultServingGrams: Double,
     val displayOrder: Int

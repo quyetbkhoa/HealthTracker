@@ -1,12 +1,64 @@
 package com.quyetbkhoa.healthtracker.data.local.food
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FoodDao {
-    fun searchFoods(query: String): Flow<List<FoodEntity>>
-    fun observeFoods(): Flow<List<FoodEntity>>
-    suspend fun getById(id: Long): FoodEntity?
-    suspend fun insertIgnore(foods: List<FoodEntity>)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertFoods(foods: List<FoodEntity>): List<Long>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertTranslations(
+        translations: List<FoodTranslationEntity>
+    ): List<Long>
+
+    @Query(
+        """
+        SELECT
+            foods.id AS id,
+            food_translations.name AS name,
+            foods.caloriesPer100Grams AS caloriesPer100Grams,
+            foods.defaultServingGrams AS defaultServingGrams,
+            foods.displayOrder AS displayOrder
+        FROM foods
+        INNER JOIN food_translations
+            ON foods.id = food_translations.foodId
+        WHERE food_translations.languageTag = :languageTag
+          AND (
+              :normalizedQuery = ''
+              OR food_translations.normalizedName
+                  LIKE '%' || :normalizedQuery || '%'
+          )
+        ORDER BY foods.displayOrder ASC, food_translations.name ASC
+        """
+    )
+    fun observeLocalizedFoods(
+        languageTag: String,
+        normalizedQuery: String
+    ): Flow<List<LocalizedFoodRow>>
+
+    @Query(
+        """
+        SELECT
+            foods.id AS id,
+            food_translations.name AS name,
+            foods.caloriesPer100Grams AS caloriesPer100Grams,
+            foods.defaultServingGrams AS defaultServingGrams,
+            foods.displayOrder AS displayOrder
+        FROM foods
+        INNER JOIN food_translations
+            ON foods.id = food_translations.foodId
+        WHERE foods.id = :foodId
+          AND food_translations.languageTag = :languageTag
+        LIMIT 1
+        """
+    )
+    suspend fun getLocalizedFoodById(
+        foodId: Long,
+        languageTag: String
+    ): LocalizedFoodRow?
 }

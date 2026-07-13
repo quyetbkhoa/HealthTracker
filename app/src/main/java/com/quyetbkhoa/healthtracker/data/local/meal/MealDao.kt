@@ -26,10 +26,27 @@ interface MealDao {
 
     @Query(
         """
-        SELECT * FROM meals
+        SELECT
+            meals.id AS id,
+            meals.foodId AS foodId,
+            COALESCE(food_translations.name, meals.nameSnapshot) AS displayName,
+            meals.nameSnapshot AS nameSnapshot,
+            meals.calories AS calories,
+            meals.mealType AS mealType,
+            meals.consumedGrams AS consumedGrams,
+            meals.caloriesPer100GramsSnapshot AS caloriesPer100GramsSnapshot,
+            meals.eatenAt AS eatenAt
+        FROM meals
+        LEFT JOIN food_translations
+            ON meals.foodId = food_translations.foodId
+            AND food_translations.languageTag = :languageTag
         WHERE eatenAt >= :startMillis AND eatenAt < :endMillis
         ORDER BY eatenAt ASC
         """
     )
-    fun observeMealsBetween(startMillis: Long, endMillis: Long): Flow<List<MealEntity>>
+    fun observeMealsBetween(
+        startMillis: Long,
+        endMillis: Long,
+        languageTag: String
+    ): Flow<List<LocalizedMealRow>>
 }
