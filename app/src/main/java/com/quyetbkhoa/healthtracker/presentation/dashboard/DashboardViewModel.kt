@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.quyetbkhoa.healthtracker.domain.repository.ActivityRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
 import com.quyetbkhoa.healthtracker.domain.repository.MealRepository
+import com.quyetbkhoa.healthtracker.domain.model.MealEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.util.Locale
 import javax.inject.Inject
 
 @Immutable
@@ -25,7 +27,8 @@ data class DashboardUiState(
     val targetCalories: Int = 0,
     val consumedCalories: Int = 0,
     val exerciseCalories: Int = 0,
-    val userName: String = ""
+    val userName: String = "",
+    val meals: List<MealEntry> = emptyList()
 ) {
     val allowedCalories: Int get() = targetCalories + exerciseCalories
     val remainingCalories: Int get() = allowedCalories - consumedCalories
@@ -40,11 +43,13 @@ data class DashboardUiState(
 sealed interface DashboardAction {
     data object AddMeal : DashboardAction
     data object AddActivity : DashboardAction
+    data object ViewMeals : DashboardAction
 }
 
 sealed interface DashboardUiEvent {
     data object NavigateToAddMeal : DashboardUiEvent
     data object NavigateToAddActivity : DashboardUiEvent
+    data object NavigateToMealJournal : DashboardUiEvent
 }
 
 @HiltViewModel
@@ -54,13 +59,14 @@ class DashboardViewModel @Inject constructor(
     activityRepository: ActivityRepository
 ) : ViewModel() {
     private val todayEpochDay = LocalDate.now().toEpochDay()
+    private val languageTag = Locale.getDefault().language.takeIf { it == "en" } ?: "vi"
 
     private val _uiEvent = Channel<DashboardUiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
     val uiState: StateFlow<DashboardUiState> = combine(
         profileRepository.userProfile,
-        mealRepository.observeMealsByDay(todayEpochDay),
+        mealRepository.observeMealsByDay(todayEpochDay, languageTag),
         activityRepository.observeTotalCaloriesByDay(todayEpochDay)
     ) { profile, meals, activityCalories ->
         DashboardUiState(
@@ -70,7 +76,8 @@ class DashboardViewModel @Inject constructor(
             targetCalories = profile?.dailyCalorieTarget ?: 0,
             consumedCalories = meals.sumOf { it.calories },
             exerciseCalories = activityCalories.toInt(),
-            userName = profile?.fullName.orEmpty()
+            userName = profile?.fullName.orEmpty(),
+            meals = meals
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
 
@@ -81,6 +88,9 @@ class DashboardViewModel @Inject constructor(
             }
             DashboardAction.AddActivity -> viewModelScope.launch {
                 _uiEvent.send(DashboardUiEvent.NavigateToAddActivity)
+            }
+            DashboardAction.ViewMeals -> viewModelScope.launch {
+                _uiEvent.send(DashboardUiEvent.NavigateToMealJournal)
             }
         }
     }

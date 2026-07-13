@@ -48,6 +48,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
+import com.quyetbkhoa.healthtracker.domain.model.MealType
+import com.quyetbkhoa.healthtracker.domain.model.MealEntry
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -59,6 +61,7 @@ fun DashboardScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToAddMeal: () -> Unit,
     onNavigateToAddActivity: () -> Unit,
+    onNavigateToMealJournal: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -67,6 +70,7 @@ fun DashboardScreen(
             when (event) {
                 DashboardUiEvent.NavigateToAddMeal -> onNavigateToAddMeal()
                 DashboardUiEvent.NavigateToAddActivity -> onNavigateToAddActivity()
+                DashboardUiEvent.NavigateToMealJournal -> onNavigateToMealJournal()
             }
         }
     }
@@ -90,7 +94,12 @@ fun DashboardContent(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = { DashboardBottomBar(onNavigateToSettings = onNavigateToSettings) }
+        bottomBar = {
+            DashboardBottomBar(
+                onNavigateToSettings = onNavigateToSettings,
+                onNavigateToMeals = { onAction(DashboardAction.ViewMeals) }
+            )
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -104,7 +113,7 @@ fun DashboardContent(
             CalorieOverviewCard(uiState = uiState)
             AchievementCard(progressPercent = uiState.progressPercent)
             DashboardQuickActions(onAction = onAction)
-            TodayMealsSection()
+            TodayMealsSection(uiState = uiState, onAction = onAction)
             DailyTipCard()
             Spacer(modifier = Modifier.height(Dimens.spaceExtraSmall))
         }
@@ -343,32 +352,38 @@ private fun QuickActionCard(iconRes: Int, titleRes: Int, isPrimary: Boolean, onC
 }
 
 @Composable
-private fun TodayMealsSection() {
+private fun TodayMealsSection(uiState: DashboardUiState, onAction: (DashboardAction) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(text = stringResource(R.string.dashboard_meals_today), modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-            Text(text = stringResource(R.string.dashboard_view_all), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
+            Text(
+                text = stringResource(R.string.dashboard_view_all),
+                modifier = Modifier.clickable { onAction(DashboardAction.ViewMeals) },
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
             Text(text = stringResource(R.string.dashboard_icon_arrow), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-            MealCard(R.string.dashboard_icon_breakfast, R.string.dashboard_breakfast, R.string.dashboard_breakfast_time, R.string.dashboard_breakfast_calories, Modifier.weight(1f))
-            MealCard(R.string.dashboard_icon_lunch, R.string.dashboard_lunch, R.string.dashboard_lunch_time, R.string.dashboard_lunch_calories, Modifier.weight(1f))
-            MealCard(R.string.dashboard_icon_dinner, R.string.dashboard_dinner, R.string.dashboard_dinner_time, R.string.dashboard_dinner_calories, Modifier.weight(1f))
-            MealCard(R.string.dashboard_icon_snack, R.string.dashboard_snack, R.string.dashboard_snack_time, R.string.dashboard_snack_calories, Modifier.weight(1f))
+            MealCard(R.string.dashboard_icon_breakfast, R.string.dashboard_breakfast, uiState.meals.filter { it.mealType == MealType.BREAKFAST }, Modifier.weight(1f))
+            MealCard(R.string.dashboard_icon_lunch, R.string.dashboard_lunch, uiState.meals.filter { it.mealType == MealType.LUNCH }, Modifier.weight(1f))
+            MealCard(R.string.dashboard_icon_dinner, R.string.dashboard_dinner, uiState.meals.filter { it.mealType == MealType.DINNER }, Modifier.weight(1f))
+            MealCard(R.string.dashboard_icon_snack, R.string.dashboard_snack, uiState.meals.filter { it.mealType == MealType.SNACK }, Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-private fun MealCard(iconRes: Int, titleRes: Int, timeRes: Int, caloriesRes: Int, modifier: Modifier) {
+private fun MealCard(iconRes: Int, titleRes: Int, meals: List<MealEntry>, modifier: Modifier) {
+    val calories = meals.sumOf(MealEntry::calories)
     Card(modifier = modifier.height(DashboardDimens.mealCardHeight), shape = Shape.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)) {
         Column(modifier = Modifier.padding(Dimens.spaceSmall), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
             Box(modifier = Modifier.size(Dimens.buttonHeightMedium).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
                 Text(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
             }
             Text(text = stringResource(titleRes), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-            Text(text = stringResource(timeRes), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(text = stringResource(caloriesRes), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = stringResource(R.string.dashboard_meal_records, meals.size), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = stringResource(R.string.dashboard_meal_kcal, calories), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
@@ -391,7 +406,10 @@ private fun DailyTipCard() {
 }
 
 @Composable
-private fun DashboardBottomBar(onNavigateToSettings: () -> Unit) {
+private fun DashboardBottomBar(
+    onNavigateToSettings: () -> Unit,
+    onNavigateToMeals: () -> Unit
+) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(topStart = Dimens.spaceLarge, topEnd = Dimens.spaceLarge),
@@ -402,7 +420,7 @@ private fun DashboardBottomBar(onNavigateToSettings: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             NavigationItem(R.string.dashboard_icon_home, R.string.dashboard_home, true, {})
-            NavigationItem(R.string.dashboard_icon_meals_nav, R.string.dashboard_meals, false, {})
+            NavigationItem(R.string.dashboard_icon_meals_nav, R.string.dashboard_meals, false, onNavigateToMeals)
             NavigationItem(R.string.dashboard_icon_activity_nav, R.string.dashboard_activity, false, {})
             NavigationItem(R.string.dashboard_icon_statistics, R.string.dashboard_statistics, false, {})
             NavigationItem(R.string.dashboard_icon_settings, R.string.dashboard_settings, false, onNavigateToSettings)
@@ -438,4 +456,3 @@ private fun DashboardCard(modifier: Modifier = Modifier, content: @Composable ()
 }
 
 private fun formatNumber(value: Int): String = NumberFormat.getIntegerInstance(Locale.forLanguageTag("vi-VN")).format(value)
-
