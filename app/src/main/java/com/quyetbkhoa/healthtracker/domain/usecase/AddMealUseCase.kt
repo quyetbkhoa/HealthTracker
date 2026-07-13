@@ -6,7 +6,8 @@ import javax.inject.Inject
 
 enum class AddMealValidationError {
     EMPTY_NAME,
-    INVALID_CALORIES,
+    INVALID_GRAMS,
+    INVALID_CALORIES_PER_100_GRAMS,
     CALORIES_TOO_HIGH
 }
 
@@ -16,20 +17,37 @@ sealed interface AddMealResult {
 }
 
 class AddMealUseCase @Inject constructor(
-    private val mealRepository: MealRepository
+    private val mealRepository: MealRepository,
+    private val calculateMealCalories: CalculateMealCaloriesUseCase
 ) {
     suspend operator fun invoke(meal: MealEntry): AddMealResult {
-        if (meal.name.isBlank()) {
+        if (meal.nameSnapshot.isBlank()) {
             return AddMealResult.Invalid(AddMealValidationError.EMPTY_NAME)
         }
-        if (meal.calories <= 0) {
-            return AddMealResult.Invalid(AddMealValidationError.INVALID_CALORIES)
+        if (!meal.consumedGrams.isFinite() || meal.consumedGrams <= 0.0) {
+            return AddMealResult.Invalid(AddMealValidationError.INVALID_GRAMS)
         }
-        if (meal.calories > MAX_CALORIES_PER_MEAL) {
+        if (!meal.caloriesPer100GramsSnapshot.isFinite() ||
+            meal.caloriesPer100GramsSnapshot <= 0.0
+        ) {
+            return AddMealResult.Invalid(AddMealValidationError.INVALID_CALORIES_PER_100_GRAMS)
+        }
+        val calories = calculateMealCalories(
+            caloriesPer100Grams = meal.caloriesPer100GramsSnapshot,
+            consumedGrams = meal.consumedGrams
+        ) ?: return AddMealResult.Invalid(AddMealValidationError.INVALID_CALORIES_PER_100_GRAMS)
+        if (calories > MAX_CALORIES_PER_MEAL) {
             return AddMealResult.Invalid(AddMealValidationError.CALORIES_TOO_HIGH)
         }
 
-        mealRepository.addMeal(meal.copy(name = meal.name.trim()))
+        val trimmedName = meal.nameSnapshot.trim()
+        mealRepository.addMeal(
+            meal.copy(
+                name = trimmedName,
+                nameSnapshot = trimmedName,
+                calories = calories
+            )
+        )
         return AddMealResult.Success
     }
 
