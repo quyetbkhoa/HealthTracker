@@ -15,6 +15,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
@@ -25,6 +27,9 @@ import com.quyetbkhoa.healthtracker.presentation.tdee.TdeeResultScreen
 import com.quyetbkhoa.healthtracker.presentation.profile.ProfileSettingsScreen
 import com.quyetbkhoa.healthtracker.presentation.meal.AddMealScreen
 import com.quyetbkhoa.healthtracker.presentation.activity.AddActivityScreen
+import com.quyetbkhoa.healthtracker.presentation.mealjournal.MealJournalScreen
+import com.quyetbkhoa.healthtracker.domain.model.MealType
+import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -109,12 +114,27 @@ fun AppNavigation(
         composable("home") {
             DashboardScreen(
                 onNavigateToSettings = { navController.navigate("settings") },
-                onNavigateToAddMeal = { navController.navigate("add_meal") },
-                onNavigateToAddActivity = { navController.navigate("add_activity") }
+                onNavigateToAddMeal = {
+                    navController.navigate(addMealRoute(LocalDate.now().toEpochDay(), MealType.BREAKFAST))
+                },
+                onNavigateToAddActivity = { navController.navigate("add_activity") },
+                onNavigateToMealJournal = { navController.navigate("meal_journal") }
             )
         }
 
-        composable("add_meal") {
+        composable(
+            route = "add_meal?epochDay={epochDay}&mealType={mealType}",
+            arguments = listOf(
+                navArgument("epochDay") {
+                    type = NavType.LongType
+                    defaultValue = LocalDate.now().toEpochDay()
+                },
+                navArgument("mealType") {
+                    type = NavType.StringType
+                    defaultValue = MealType.BREAKFAST.name
+                }
+            )
+        ) {
             AddMealScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onSaved = {
@@ -124,6 +144,15 @@ fun AppNavigation(
                         Toast.LENGTH_SHORT
                     ).show()
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable("meal_journal") {
+            MealJournalScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onAddMeal = { epochDay, mealType ->
+                    navController.navigate(addMealRoute(epochDay, mealType))
                 }
             )
         }
@@ -174,3 +203,6 @@ fun AppNavigation(
         }
     }
 }
+
+private fun addMealRoute(epochDay: Long, mealType: MealType): String =
+    "add_meal?epochDay=$epochDay&mealType=${mealType.name}"

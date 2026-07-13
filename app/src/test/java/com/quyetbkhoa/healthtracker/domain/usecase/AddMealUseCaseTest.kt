@@ -12,7 +12,7 @@ import org.junit.Test
 
 class AddMealUseCaseTest {
     private val repository = FakeMealRepository()
-    private val useCase = AddMealUseCase(repository)
+    private val useCase = AddMealUseCase(repository, CalculateMealCaloriesUseCase())
 
     @Test
     fun `blank name returns validation error`() = runBlocking {
@@ -26,11 +26,11 @@ class AddMealUseCaseTest {
     }
 
     @Test
-    fun `invalid calories returns validation error`() = runBlocking {
-        val result = useCase(meal(name = "Cơm gà", calories = 0))
+    fun `invalid grams returns validation error`() = runBlocking {
+        val result = useCase(meal(name = "Cơm gà", calories = 0, grams = 0.0))
 
         assertEquals(
-            AddMealResult.Invalid(AddMealValidationError.INVALID_CALORIES),
+            AddMealResult.Invalid(AddMealValidationError.INVALID_GRAMS),
             result
         )
         assertNull(repository.addedMeal)
@@ -45,10 +45,12 @@ class AddMealUseCaseTest {
         assertEquals(500, repository.addedMeal?.calories)
     }
 
-    private fun meal(name: String, calories: Int) = MealEntry(
+    private fun meal(name: String, calories: Int, grams: Double = 100.0) = MealEntry(
         name = name,
         calories = calories,
         mealType = MealType.LUNCH,
+        consumedGrams = grams,
+        caloriesPer100GramsSnapshot = calories.toDouble(),
         eatenAt = 0L
     )
 }
@@ -56,7 +58,10 @@ class AddMealUseCaseTest {
 private class FakeMealRepository : MealRepository {
     var addedMeal: MealEntry? = null
 
-    override fun observeMealsByDay(epochDay: Long): Flow<List<MealEntry>> = emptyFlow()
+    override fun observeMealsByDay(
+        epochDay: Long,
+        languageTag: String
+    ): Flow<List<MealEntry>> = emptyFlow()
 
     override suspend fun addMeal(meal: MealEntry) {
         addedMeal = meal
