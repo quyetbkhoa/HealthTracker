@@ -2,6 +2,7 @@ package com.quyetbkhoa.healthtracker.data.repository
 
 import com.quyetbkhoa.healthtracker.data.local.meal.MealDao
 import com.quyetbkhoa.healthtracker.data.local.meal.MealEntity
+import com.quyetbkhoa.healthtracker.data.local.meal.LocalizedMealRow
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
 import com.quyetbkhoa.healthtracker.domain.model.MealType
 import com.quyetbkhoa.healthtracker.domain.repository.MealRepository
@@ -14,14 +15,14 @@ import javax.inject.Inject
 class MealRepositoryImpl @Inject constructor(
     private val mealDao: MealDao
 ) : MealRepository {
-    override fun observeMealsByDay(epochDay: Long): Flow<List<MealEntry>> {
+    override fun observeMealsByDay(epochDay: Long, languageTag: String): Flow<List<MealEntry>> {
         val zoneId = ZoneId.systemDefault()
         val date = LocalDate.ofEpochDay(epochDay)
         val startMillis = date.atStartOfDay(zoneId).toInstant().toEpochMilli()
         val endMillis = date.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
 
-        return mealDao.observeMealsBetween(startMillis, endMillis).map { entities ->
-            entities.map(MealEntity::toDomain)
+        return mealDao.observeMealsBetween(startMillis, endMillis, languageTag).map { rows ->
+            rows.map(LocalizedMealRow::toDomain)
         }
     }
 
@@ -42,18 +43,25 @@ class MealRepositoryImpl @Inject constructor(
     }
 }
 
-private fun MealEntity.toDomain(): MealEntry = MealEntry(
+private fun LocalizedMealRow.toDomain(): MealEntry = MealEntry(
     id = id,
-    name = name,
+    foodId = foodId,
+    name = displayName,
+    nameSnapshot = nameSnapshot,
     calories = calories,
     mealType = MealType.valueOf(mealType),
+    consumedGrams = consumedGrams,
+    caloriesPer100GramsSnapshot = caloriesPer100GramsSnapshot,
     eatenAt = eatenAt
 )
 
 private fun MealEntry.toEntity(): MealEntity = MealEntity(
     id = id,
-    name = name,
+    foodId = foodId,
+    nameSnapshot = nameSnapshot,
     calories = calories,
     mealType = mealType.name,
+    consumedGrams = consumedGrams,
+    caloriesPer100GramsSnapshot = caloriesPer100GramsSnapshot,
     eatenAt = eatenAt
 )
