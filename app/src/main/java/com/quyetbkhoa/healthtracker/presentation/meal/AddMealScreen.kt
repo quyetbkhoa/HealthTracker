@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,23 +29,26 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.domain.model.Food
 import com.quyetbkhoa.healthtracker.domain.model.MealType
 import com.quyetbkhoa.healthtracker.domain.usecase.AddMealValidationError
+import java.text.NumberFormat
 
 @Composable
 fun AddMealScreen(
@@ -50,30 +56,23 @@ fun AddMealScreen(
     onSaved: () -> Unit,
     viewModel: AddMealViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val saveFailedMessage = stringResource(R.string.add_meal_save_failed)
-
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbar = remember { SnackbarHostState() }
+    val failedMessage = stringResource(R.string.add_meal_save_failed)
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { event ->
             when (event) {
                 AddMealUiEvent.Saved -> onSaved()
-                AddMealUiEvent.SaveFailed -> snackbarHostState.showSnackbar(saveFailedMessage)
+                AddMealUiEvent.SaveFailed -> snackbar.showSnackbar(failedMessage)
             }
         }
     }
-
-    AddMealContent(
-        uiState = uiState,
-        snackbarHostState = snackbarHostState,
-        onAction = viewModel::onAction,
-        onNavigateBack = onNavigateBack
-    )
+    AddMealContent(state, snackbar, viewModel::onAction, onNavigateBack)
 }
 
 @Composable
 private fun AddMealContent(
-    uiState: AddMealUiState,
+    state: AddMealUiState,
     snackbarHostState: SnackbarHostState,
     onAction: (AddMealAction) -> Unit,
     onNavigateBack: () -> Unit
@@ -81,80 +80,73 @@ private fun AddMealContent(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { innerPadding ->
-        Column(
+    ) { padding ->
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .statusBarsPadding()
+                .padding(padding)
                 .imePadding()
                 .padding(horizontal = Dimens.spaceMedium),
-            verticalArrangement = Arrangement.spacedBy(Dimens.spaceLarge)
+            verticalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)
         ) {
-            AddMealHeader(onNavigateBack)
-            Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-                Text(
-                    text = stringResource(R.string.add_meal_choose_type),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                MealTypeSelector(uiState.mealType) {
-                    onAction(AddMealAction.SelectMealType(it))
-                }
-            }
-            OutlinedTextField(
-                value = uiState.name,
-                onValueChange = { onAction(AddMealAction.UpdateName(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.add_meal_name)) },
-                placeholder = { Text(stringResource(R.string.add_meal_name_hint)) },
-                singleLine = true,
-                isError = uiState.nameError != null,
-                supportingText = uiState.nameError?.let { error ->
-                    { Text(addMealErrorText(error)) }
-                },
-                shape = Shape.medium
-            )
-            OutlinedTextField(
-                value = uiState.calories,
-                onValueChange = { onAction(AddMealAction.UpdateCalories(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.add_meal_calories)) },
-                suffix = { Text(stringResource(R.string.add_meal_kcal)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                isError = uiState.caloriesError != null,
-                supportingText = uiState.caloriesError?.let { error ->
-                    { Text(addMealErrorText(error)) }
-                },
-                shape = Shape.medium
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            HealthPrimaryButton(
-                onClick = { onAction(AddMealAction.Save) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(Dimens.buttonHeightMedium),
-                enabled = !uiState.isSaving
-            ) {
-                if (uiState.isSaving) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(Dimens.iconSizeMedium),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = Dimens.borderWidthThick
+            item { ScreenHeader(onNavigateBack) }
+            item { MealTypeSelector(state.mealType, onAction) }
+            item { ModeSelector(state.isCustom, onAction) }
+
+            if (!state.isCustom && state.selectedFood == null) {
+                item {
+                    OutlinedTextField(
+                        value = state.query,
+                        onValueChange = { onAction(AddMealAction.UpdateQuery(it)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text(stringResource(R.string.food_search_hint)) },
+                        leadingIcon = { Icon(Icons.Default.Search, null) },
+                        singleLine = true,
+                        shape = Shape.large
                     )
+                }
+                if (state.foods.isEmpty()) {
+                    item { EmptyFoodCard { onAction(AddMealAction.SetCustomMode(true)) } }
                 } else {
-                    Text(stringResource(R.string.add_meal_save))
+                    items(state.foods, key = Food::id) { food ->
+                        FoodRow(food) { onAction(AddMealAction.SelectFood(food)) }
+                    }
+                }
+            } else {
+                item { MealDetailsForm(state, onAction) }
+                item {
+                    HealthPrimaryButton(
+                        onClick = { onAction(AddMealAction.Save) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(Dimens.buttonHeightMedium),
+                        enabled = !state.isSaving && state.estimatedCalories != null
+                    ) {
+                        if (state.isSaving) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(Dimens.iconSizeMedium),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Text(stringResource(R.string.add_meal_save))
+                        }
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(Dimens.spaceMedium))
+            item {
+                Text(
+                    text = stringResource(R.string.food_nutrition_disclaimer),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            item { Spacer(Modifier.height(Dimens.spaceLarge)) }
         }
     }
 }
 
 @Composable
-private fun AddMealHeader(onNavigateBack: () -> Unit) {
+private fun ScreenHeader(onNavigateBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -167,27 +159,24 @@ private fun AddMealHeader(onNavigateBack: () -> Unit) {
                 .size(Dimens.buttonHeightMedium)
                 .clickable(onClick = onNavigateBack),
             shape = CircleShape,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.navigate_back),
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.navigate_back))
             }
         }
         Column {
             Text(
-                text = stringResource(R.string.add_meal_title),
+                stringResource(R.string.add_meal_title),
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                fontWeight = FontWeight.Bold
             )
             Text(
-                text = stringResource(R.string.add_meal_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
+                stringResource(R.string.add_meal_catalog_subtitle),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -195,44 +184,189 @@ private fun AddMealHeader(onNavigateBack: () -> Unit) {
 }
 
 @Composable
-private fun MealTypeSelector(selected: MealType, onSelected: (MealType) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+private fun ModeSelector(isCustom: Boolean, onAction: (AddMealAction) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
+        ModeCard(
+            label = stringResource(R.string.food_catalog_tab),
+            selected = !isCustom,
+            modifier = Modifier.weight(1f)
+        ) { onAction(AddMealAction.SetCustomMode(false)) }
+        ModeCard(
+            label = stringResource(R.string.food_custom_tab),
+            selected = isCustom,
+            modifier = Modifier.weight(1f)
+        ) { onAction(AddMealAction.SetCustomMode(true)) }
+    }
+}
+
+@Composable
+private fun ModeCard(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    Card(
+        modifier = modifier.clickable(onClick = onClick),
+        shape = Shape.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surface
+        )
     ) {
-        MealType.entries.forEach { type ->
-            val isSelected = selected == type
-            Card(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { onSelected(type) },
-                shape = Shape.large,
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    }
-                ),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = if (isSelected) Dimens.cardElevationLarge else Dimens.cardElevationMedium
+        Text(
+            text = label,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(Dimens.spaceMedium),
+            color = if (selected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+        )
+    }
+}
+
+@Composable
+private fun FoodRow(food: Food, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = Shape.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(Dimens.cardElevationMedium)
+    ) {
+        Row(
+            modifier = Modifier.padding(Dimens.spaceMedium),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(food.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.food_default_grams, formatDecimal(food.defaultServingGrams)),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+            Text(
+                stringResource(
+                    R.string.food_kcal_per_100g_value,
+                    formatDecimal(food.caloriesPer100Grams)
+                ),
+                fontWeight = FontWeight.Bold
+            )
+            Icon(
+                Icons.Default.Add,
+                stringResource(R.string.food_select),
+                modifier = Modifier.padding(start = Dimens.spaceSmall),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyFoodCard(onCustom: () -> Unit) {
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dimens.spaceLarge),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(stringResource(R.string.food_empty_search))
+            TextButton(onClick = onCustom) { Text(stringResource(R.string.food_enter_custom)) }
+        }
+    }
+}
+
+@Composable
+private fun MealDetailsForm(state: AddMealUiState, onAction: (AddMealAction) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)) {
+        state.selectedFood?.let { food ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
-                Column(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = Dimens.spaceMedium),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+                        .padding(Dimens.spaceMedium),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = mealTypeIcon(type), style = MaterialTheme.typography.headlineSmall)
-                    Text(
-                        text = mealTypeLabel(type),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(food.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text(
+                            stringResource(
+                                R.string.food_kcal_per_100g_value,
+                                formatDecimal(food.caloriesPer100Grams)
+                            )
+                        )
+                    }
+                    TextButton(onClick = { onAction(AddMealAction.ChooseAgain) }) {
+                        Text(stringResource(R.string.food_choose_again))
+                    }
                 }
+            }
+        }
+        if (state.isCustom) {
+            OutlinedTextField(
+                value = state.customName,
+                onValueChange = { onAction(AddMealAction.UpdateCustomName(it)) },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.add_meal_name)) },
+                singleLine = true,
+                isError = state.validationError == AddMealValidationError.EMPTY_NAME
+            )
+            OutlinedTextField(
+                value = state.caloriesPer100Grams,
+                onValueChange = { onAction(AddMealAction.UpdateCaloriesPer100Grams(it)) },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.food_kcal_per_100g)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true,
+                isError = state.validationError == AddMealValidationError.INVALID_CALORIES_PER_100_GRAMS
+            )
+        }
+        OutlinedTextField(
+            value = state.consumedGrams,
+            onValueChange = { onAction(AddMealAction.UpdateConsumedGrams(it)) },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(stringResource(R.string.food_consumed_grams)) },
+            suffix = { Text(stringResource(R.string.unit_grams)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            singleLine = true,
+            isError = state.validationError == AddMealValidationError.INVALID_GRAMS
+        )
+        state.validationError?.let { error ->
+            Text(
+                text = validationMessage(error),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+        ) {
+            Column(modifier = Modifier.padding(Dimens.spaceLarge)) {
+                Text(stringResource(R.string.food_estimated_energy))
+                Text(
+                    stringResource(R.string.food_estimated_kcal, state.estimatedCalories ?: 0),
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MealTypeSelector(selected: MealType, onAction: (AddMealAction) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
+        Text(stringResource(R.string.add_meal_choose_type), fontWeight = FontWeight.Bold)
+        Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
+            MealType.entries.forEach { type ->
+                ModeCard(
+                    label = mealTypeLabel(type),
+                    selected = selected == type,
+                    modifier = Modifier.weight(1f)
+                ) { onAction(AddMealAction.SelectMealType(type)) }
             }
         }
     }
@@ -249,20 +383,15 @@ private fun mealTypeLabel(type: MealType): String = stringResource(
 )
 
 @Composable
-private fun mealTypeIcon(type: MealType): String = stringResource(
-    when (type) {
-        MealType.BREAKFAST -> R.string.dashboard_icon_breakfast
-        MealType.LUNCH -> R.string.dashboard_icon_lunch
-        MealType.DINNER -> R.string.dashboard_icon_dinner
-        MealType.SNACK -> R.string.dashboard_icon_snack
-    }
-)
-
-@Composable
-private fun addMealErrorText(error: AddMealValidationError): String = stringResource(
+private fun validationMessage(error: AddMealValidationError): String = stringResource(
     when (error) {
         AddMealValidationError.EMPTY_NAME -> R.string.add_meal_error_empty_name
-        AddMealValidationError.INVALID_CALORIES -> R.string.add_meal_error_invalid_calories
+        AddMealValidationError.INVALID_GRAMS -> R.string.add_meal_error_invalid_grams
+        AddMealValidationError.INVALID_CALORIES_PER_100_GRAMS ->
+            R.string.add_meal_error_invalid_per_100g
         AddMealValidationError.CALORIES_TOO_HIGH -> R.string.add_meal_error_calories_too_high
     }
 )
+
+private fun formatDecimal(value: Double): String =
+    NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }.format(value)
