@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.os.LocaleListCompat
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
@@ -87,4 +88,10 @@ fun LoadingScreen() {
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun PreviewLoadingScreen() {
+    LoadingScreen()
 }
