@@ -39,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.domain.model.MealType
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
@@ -133,7 +135,7 @@ private fun DashboardLoadingState(isLoading: Boolean) {
 
 @Composable
 private fun DashboardHeader(userName: String, onNavigateToSettings: () -> Unit) {
-    val locale = Locale.forLanguageTag("vi-VN")
+    val locale = LocalContext.current.resources.configuration.locales[0] ?: Locale.getDefault()
     val formattedDate = LocalDate.now()
         .format(DateTimeFormatter.ofPattern(stringResource(R.string.dashboard_date_pattern), locale))
         .replaceFirstChar { it.titlecase(locale) }
@@ -471,4 +473,23 @@ private fun DashboardCard(modifier: Modifier = Modifier, content: @Composable ()
     )
 }
 
-private fun formatNumber(value: Int): String = NumberFormat.getIntegerInstance(Locale.forLanguageTag("vi-VN")).format(value)
+private fun formatNumber(value: Int): String = NumberFormat.getIntegerInstance(Locale.getDefault()).format(value)
+
+
+@Composable
+@Preview
+private fun PreviewDashboardScreen() {
+    HealthTrackerTheme {
+        DashboardContent(
+            uiState = DashboardUiState(
+                isLoading = false,
+                hasProfile = true,
+                targetCalories = 2_000,
+                consumedCalories = 1_200,
+                userName = "Nguyễn An"
+            ),
+            onAction = {},
+            onNavigateToSettings = {}
+        )
+    }
+}

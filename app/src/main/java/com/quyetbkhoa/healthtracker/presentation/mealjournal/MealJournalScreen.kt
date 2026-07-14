@@ -41,10 +41,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
@@ -343,3 +345,22 @@ private fun formatTime(epochMillis: Long): String = Instant.ofEpochMilli(epochMi
     .atZone(ZoneId.systemDefault())
     .toLocalTime()
     .format(DateTimeFormatter.ofPattern("HH:mm"))
+
+@Preview
+@Composable
+private fun PreviewMealJournalScreen() {
+    HealthTrackerTheme {
+        MealJournalContent(
+            state = MealJournalUiState(
+                isLoading = false,
+                targetCalories = 2_000,
+                meals = listOf(
+                    MealEntry(1L, 1L, "Cơm trắng", calories = 260, mealType = MealType.BREAKFAST, consumedGrams = 200.0, caloriesPer100GramsSnapshot = 130.0, eatenAt = System.currentTimeMillis())
+                )
+            ),
+            onAction = {},
+            onNavigateBack = {},
+            onAddMeal = { _, _ -> }
+        )
+    }
+}

@@ -53,10 +53,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import kotlin.math.roundToInt
@@ -466,3 +468,24 @@ private fun addActivityErrorText(error: AddActivityError): String = stringResour
         AddActivityError.SAVE_FAILED -> R.string.add_activity_error_save
     }
 )
+
+@Preview
+@Composable
+private fun PreviewAddActivityScreen() {
+    HealthTrackerTheme {
+        AddActivityContent(
+            state = AddActivityUiState(
+                activities = listOf(ActivityItemUiModel(1L, "Đi bộ", 3.5, "walk", true)),
+                selectedActivityId = 1L,
+                durationMinutes = 30,
+                weightKg = 60.0,
+                estimatedCalories = 110.0,
+                isActivityPickerExpanded = false,
+                isLoading = false
+            ),
+            snackbar = SnackbarHostState(),
+            onAction = {},
+            onNavigateBack = {}
+        )
+    }
+}

@@ -39,11 +39,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
@@ -207,7 +209,7 @@ private fun EstimateMetric(iconRes: Int, labelRes: Int, value: Int, modifier: Mo
     }
 }
 
-private fun formatNumber(value: Int): String = NumberFormat.getIntegerInstance(Locale.forLanguageTag("vi-VN")).format(value)
+private fun formatNumber(value: Int): String = NumberFormat.getIntegerInstance(Locale.getDefault()).format(value)
 
 @Composable
 fun SelectableCard(text: String, isSelected: Boolean, onClick: () -> Unit) {
@@ -241,5 +243,17 @@ fun SelectableCard(text: String, isSelected: Boolean, onClick: () -> Unit) {
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewProfileSetupStep2Screen() {
+    HealthTrackerTheme {
+        ProfileSetupStep2Screen(
+            uiState = ProfileSetupUiState(estimatedBmr = 1_400, estimatedTdee = 1_900, estimatedTarget = 1_700),
+            onAction = {},
+            onBack = {}
+        )
     }
 }

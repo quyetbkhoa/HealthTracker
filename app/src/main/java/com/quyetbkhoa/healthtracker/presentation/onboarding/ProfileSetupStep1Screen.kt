@@ -55,6 +55,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.tooling.preview.Preview
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.domain.model.Gender
@@ -308,4 +309,15 @@ private fun onboardingFieldColors() = OutlinedTextFieldDefaults.colors(
     focusedContainerColor = MaterialTheme.colorScheme.surface,
     unfocusedContainerColor = MaterialTheme.colorScheme.surface
 )
+
+@Preview
+@Composable
+private fun PreviewProfileSetupStep1Screen() {
+    HealthTrackerTheme {
+        ProfileSetupStep1Screen(
+            uiState = ProfileSetupUiState(fullName = "Nguyễn An", weightStr = "60", heightStr = "165"),
+            onAction = {}
+        )
+    }
+}
 

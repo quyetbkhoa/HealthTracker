@@ -42,10 +42,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.domain.model.Food
@@ -418,3 +420,18 @@ private fun validationMessage(error: AddMealValidationError): String = stringRes
 
 private fun formatDecimal(value: Double): String =
     NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }.format(value)
+
+@Preview
+@Composable
+private fun PreviewAddMealScreen() {
+    HealthTrackerTheme {
+        AddMealContent(
+            state = AddMealUiState(
+                foods = listOf(Food(1L, "Cơm trắng", 130.0, 100.0, 1))
+            ),
+            snackbarHostState = SnackbarHostState(),
+            onAction = {},
+            onNavigateBack = {}
+        )
+    }
+}

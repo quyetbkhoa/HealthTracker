@@ -26,12 +26,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.domain.model.UserProfile
 
 @Composable
 fun TdeeResultScreen(
@@ -147,5 +150,21 @@ private fun ResultMetricCard(label: String, description: String, value: String) 
             }
             Text(text = value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewTdeeResultScreen() {
+    HealthTrackerTheme {
+        TdeeResultContent(
+            state = TdeeResultUiState.Success(
+                profile = UserProfile(),
+                bmrCalories = 1_400,
+                tdeeCalories = 1_900,
+                targetInput = "1700"
+            ),
+            onAction = {}
+        )
     }
 }

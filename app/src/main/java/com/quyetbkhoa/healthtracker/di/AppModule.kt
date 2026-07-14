@@ -3,7 +3,6 @@ package com.quyetbkhoa.healthtracker.di
 import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -56,7 +55,6 @@ object AppModule {
             HealthTrackerDatabase::class.java,
             "health_tracker.db"
         )
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .addCallback(DEFAULT_DATA_SEED_CALLBACK)
             .build()
 
@@ -123,110 +121,6 @@ object AppModule {
     @Singleton
     fun provideDailyCalorieRepository(dataStore: DailyCalorieDataStore): DailyCalorieRepository =
         DailyCalorieRepositoryImpl(dataStore)
-
-    private val MIGRATION_1_2 = object : Migration(1, 2) {
-        override fun migrate(db: SupportSQLiteDatabase) {
-            db.execSQL(
-                """
-                CREATE TABLE IF NOT EXISTS activity_types (
-                    id INTEGER NOT NULL,
-                    name TEXT NOT NULL,
-                    met REAL NOT NULL,
-                    iconName TEXT NOT NULL,
-                    isFavorite INTEGER NOT NULL,
-                    displayOrder INTEGER NOT NULL,
-                    PRIMARY KEY(id)
-                )
-                """.trimIndent()
-            )
-            db.execSQL(
-                """
-                CREATE TABLE IF NOT EXISTS activity_records (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                    activityTypeId INTEGER NOT NULL,
-                    durationMinutes INTEGER NOT NULL,
-                    metAtCreation REAL NOT NULL,
-                    weightKgAtCreation REAL NOT NULL,
-                    caloriesBurned REAL NOT NULL,
-                    performedAt INTEGER NOT NULL,
-                    createdAt INTEGER NOT NULL,
-                    FOREIGN KEY(activityTypeId) REFERENCES activity_types(id)
-                        ON UPDATE NO ACTION ON DELETE RESTRICT
-                )
-                """.trimIndent()
-            )
-            db.execSQL("CREATE INDEX IF NOT EXISTS index_activity_records_activityTypeId ON activity_records(activityTypeId)")
-            db.execSQL("CREATE INDEX IF NOT EXISTS index_activity_records_performedAt ON activity_records(performedAt)")
-        }
-    }
-
-    private val MIGRATION_2_3 = object : Migration(2, 3) {
-        override fun migrate(db: SupportSQLiteDatabase) {
-            db.execSQL(
-                """
-                CREATE TABLE IF NOT EXISTS foods (
-                    id INTEGER NOT NULL,
-                    caloriesPer100Grams REAL NOT NULL,
-                    defaultServingGrams REAL NOT NULL,
-                    displayOrder INTEGER NOT NULL,
-                    PRIMARY KEY(id)
-                )
-                """.trimIndent()
-            )
-            db.execSQL(
-                """
-                CREATE TABLE IF NOT EXISTS food_translations (
-                    foodId INTEGER NOT NULL,
-                    languageTag TEXT NOT NULL,
-                    name TEXT NOT NULL,
-                    normalizedName TEXT NOT NULL,
-                    PRIMARY KEY(foodId, languageTag),
-                    FOREIGN KEY(foodId) REFERENCES foods(id)
-                        ON UPDATE NO ACTION ON DELETE CASCADE
-                )
-                """.trimIndent()
-            )
-            db.execSQL(
-                "CREATE INDEX IF NOT EXISTS index_food_translations_foodId " +
-                    "ON food_translations(foodId)"
-            )
-            db.execSQL(
-                "CREATE INDEX IF NOT EXISTS index_food_translations_languageTag_normalizedName " +
-                    "ON food_translations(languageTag, normalizedName)"
-            )
-            db.execSQL(
-                """
-                CREATE TABLE meals_new (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                    foodId INTEGER,
-                    nameSnapshot TEXT NOT NULL,
-                    calories INTEGER NOT NULL,
-                    mealType TEXT NOT NULL,
-                    consumedGrams REAL NOT NULL,
-                    caloriesPer100GramsSnapshot REAL NOT NULL,
-                    eatenAt INTEGER NOT NULL,
-                    FOREIGN KEY(foodId) REFERENCES foods(id)
-                        ON UPDATE NO ACTION ON DELETE SET NULL
-                )
-                """.trimIndent()
-            )
-            db.execSQL(
-                """
-                INSERT INTO meals_new (
-                    id, foodId, nameSnapshot, calories, mealType,
-                    consumedGrams, caloriesPer100GramsSnapshot, eatenAt
-                )
-                SELECT id, NULL, name, calories, mealType,
-                    100.0, CAST(calories AS REAL), eatenAt
-                FROM meals
-                """.trimIndent()
-            )
-            db.execSQL("DROP TABLE meals")
-            db.execSQL("ALTER TABLE meals_new RENAME TO meals")
-            db.execSQL("CREATE INDEX IF NOT EXISTS index_meals_foodId ON meals(foodId)")
-            db.execSQL("CREATE INDEX IF NOT EXISTS index_meals_eatenAt ON meals(eatenAt)")
-        }
-    }
 
     private val DEFAULT_DATA_SEED_CALLBACK = object : RoomDatabase.Callback() {
         override fun onOpen(db: SupportSQLiteDatabase) {

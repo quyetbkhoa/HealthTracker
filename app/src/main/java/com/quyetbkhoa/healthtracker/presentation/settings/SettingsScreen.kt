@@ -35,11 +35,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
@@ -598,4 +600,21 @@ private fun ResetConfirmationDialog(
             }
         }
     )
+}
+
+@Preview
+@Composable
+private fun PreviewSettingsScreen() {
+    HealthTrackerTheme {
+        SettingsContent(
+            themeType = AppThemeType.LIGHT,
+            selectedLanguage = AppLanguage.VIETNAMESE,
+            isResetting = false,
+            onThemeChanged = {},
+            onLanguageChanged = {},
+            onNavigateToProfile = {},
+            onNavigateBack = {},
+            onReset = {}
+        )
+    }
 }

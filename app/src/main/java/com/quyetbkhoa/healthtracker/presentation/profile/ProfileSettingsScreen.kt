@@ -43,11 +43,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
@@ -298,5 +300,23 @@ private fun SelectableCardCompact(text: String, selected: Boolean, onClick: () -
                 overflow = TextOverflow.Ellipsis
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewProfileSettingsScreen() {
+    HealthTrackerTheme {
+        ProfileSettingsContent(
+            state = ProfileSettingsUiState(
+                isLoading = false,
+                fullName = "Nguyễn An",
+                dateOfBirth = 946684800000L,
+                weightInput = "60",
+                heightInput = "165"
+            ),
+            onAction = {},
+            onNavigateBack = {}
+        )
     }
 }
