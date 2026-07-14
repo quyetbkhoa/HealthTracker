@@ -225,7 +225,14 @@ private fun GenderOption(gender: Gender, labelRes: Int, isSelected: Boolean, mod
         elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = stringResource(labelRes), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface)
+            Text(
+                text = stringResource(labelRes),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurface,
+                maxLines = 1
+            )
         }
     }
 }

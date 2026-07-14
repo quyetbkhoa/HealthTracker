@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -234,7 +235,8 @@ private fun BmiCard(state: ProfileSettingsUiState) {
                 category?.let { Text(stringResource(it), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer) }
             }
             Text(
-                text = state.bmi?.let { stringResource(R.string.profile_bmi_value, it) } ?: "—",
+                text = state.bmi?.let { stringResource(R.string.profile_bmi_value, it) }
+                    ?: stringResource(R.string.common_not_available),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -275,14 +277,26 @@ private fun FieldTitle(labelRes: Int) {
 @Composable
 private fun SelectableCardCompact(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
     Card(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier
+            .height(Dimens.buttonHeightLarge)
+            .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+            containerColor = if (selected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.surface,
+            contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
+            else MaterialTheme.colorScheme.onSurface
         ),
         shape = Shape.pill
     ) {
         Box(modifier = Modifier.fillMaxWidth().padding(Dimens.spaceMedium), contentAlignment = Alignment.Center) {
-            Text(text, color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface)
+            Text(
+                text = text,
+                color = if (selected) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurface,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

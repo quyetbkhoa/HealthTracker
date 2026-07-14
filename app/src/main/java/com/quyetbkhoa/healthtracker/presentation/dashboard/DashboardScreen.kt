@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -437,10 +438,25 @@ private fun RowScope.NavigationItem(iconRes: Int, labelRes: Int, selected: Boole
         verticalArrangement = Arrangement.spacedBy(Dimens.spaceExtraSmall)
     ) {
         Text(text = stringResource(iconRes), style = MaterialTheme.typography.headlineSmall, color = contentColor)
-        Text(text = stringResource(labelRes), style = MaterialTheme.typography.labelMedium, color = contentColor, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, textAlign = TextAlign.Center)
-        if (selected) {
-            Box(modifier = Modifier.width(Dimens.progressBarWidth).height(Dimens.progressBarHeight).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
-        }
+        Text(
+            text = stringResource(labelRes),
+            style = MaterialTheme.typography.labelMedium,
+            color = contentColor,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Box(
+            modifier = Modifier
+                .width(Dimens.progressBarWidth)
+                .height(Dimens.progressBarHeight)
+                .clip(CircleShape)
+                .background(
+                    if (selected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.surface
+                )
+        )
     }
 }
 

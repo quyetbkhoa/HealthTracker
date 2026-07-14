@@ -248,7 +248,7 @@ private fun DailySummary(total: Int, target: Int) {
                 stringResource(R.string.meal_journal_total_value, formatNumber(total), formatNumber(target)),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Text(
                 stringResource(R.string.meal_journal_remaining, formatNumber(target - total)),

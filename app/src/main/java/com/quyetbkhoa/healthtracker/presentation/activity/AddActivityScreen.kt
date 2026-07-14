@@ -20,12 +20,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,6 +52,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
@@ -231,6 +234,7 @@ private fun ActivityCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .height(Dimens.activityChoiceCardHeight)
             .combinedClickable(
                 onClick = { onAction(AddActivityAction.SelectActivity(activity.id)) },
                 onLongClick = {
@@ -244,6 +248,11 @@ private fun ActivityCard(
                 MaterialTheme.colorScheme.primaryContainer
             } else {
                 MaterialTheme.colorScheme.surface
+            },
+            contentColor = if (isSelected) {
+                MaterialTheme.colorScheme.onPrimaryContainer
+            } else {
+                MaterialTheme.colorScheme.onSurface
             }
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)
@@ -255,31 +264,55 @@ private fun ActivityCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
         ) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(activity.iconName, style = MaterialTheme.typography.headlineMedium)
-                Icon(
-                    imageVector = if (activity.isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                    contentDescription = stringResource(
-                        if (activity.isFavorite) R.string.add_activity_favorite
-                        else R.string.add_activity_not_favorite
-                    ),
-                    tint = if (activity.isFavorite) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier.size(Dimens.selectionIndicatorSize),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = stringResource(R.string.add_activity_selected),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
-                )
+                    Icon(
+                        imageVector = if (activity.isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                        contentDescription = stringResource(
+                            if (activity.isFavorite) R.string.add_activity_favorite
+                            else R.string.add_activity_not_favorite
+                        ),
+                        tint = if (activity.isFavorite) {
+                            if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.primary
+                        } else {
+                            if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
             }
             Text(
                 activity.name,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                else MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 stringResource(R.string.add_activity_met, activity.met),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -292,7 +325,10 @@ private fun SelectedActivityCard(
 ) {
     Card(
         shape = Shape.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     ) {
         Row(
             modifier = Modifier
@@ -306,11 +342,25 @@ private fun SelectedActivityCard(
                     .weight(1f)
                     .padding(horizontal = Dimens.spaceSmall)
             ) {
-                Text(activity.name, fontWeight = FontWeight.Bold)
+                Text(
+                    text = activity.name,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Text(stringResource(R.string.add_activity_met, activity.met))
             }
-            OutlinedButton(onClick = { onAction(AddActivityAction.ReselectActivity) }) {
-                Text(stringResource(R.string.add_activity_reselect))
+            OutlinedButton(
+                onClick = { onAction(AddActivityAction.ReselectActivity) },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            ) {
+                Text(
+                    text = stringResource(R.string.add_activity_reselect),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
@@ -401,7 +451,7 @@ private fun CaloriesEstimate(calories: Int) {
                 stringResource(R.string.add_activity_kcal, calories),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
     }

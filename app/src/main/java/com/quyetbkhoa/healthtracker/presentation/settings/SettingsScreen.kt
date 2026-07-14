@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
@@ -367,12 +369,15 @@ private fun ThemeChoice(
         shape = Shape.medium,
         colors = CardDefaults.cardColors(
             containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer
-            else MaterialTheme.colorScheme.surfaceContainerHigh
+            else MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+            else MaterialTheme.colorScheme.onSurface
         )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(Dimens.selectionCardHeight)
                 .padding(Dimens.spaceMedium),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Dimens.spaceExtraSmall)
@@ -382,15 +387,22 @@ private fun ThemeChoice(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                color = if (selected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            if (selected) {
-                Text(
-                    text = stringResource(R.string.settings_selected),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
+            Box(
+                modifier = Modifier.size(Dimens.selectionIndicatorSize),
+                contentAlignment = Alignment.Center
+            ) {
+                if (selected) {
+                    Text(
+                        text = stringResource(R.string.settings_icon_check),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
         }
     }
@@ -413,19 +425,27 @@ private fun LanguageChoice(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .height(Dimens.buttonHeightLarge)
             .clickable { onClick(language) },
         shape = Shape.medium,
         colors = CardDefaults.cardColors(
             containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer
-            else MaterialTheme.colorScheme.surfaceContainerHigh
+            else MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+            else MaterialTheme.colorScheme.onSurface
         )
     ) {
         Row(
-            modifier = Modifier.padding(Dimens.spaceMedium),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(Dimens.spaceMedium),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (language == AppLanguage.VIETNAMESE) "🇻🇳" else "🇬🇧",
+                text = stringResource(
+                    if (language == AppLanguage.VIETNAMESE) R.string.settings_icon_vietnamese
+                    else R.string.settings_icon_english
+                ),
                 style = MaterialTheme.typography.titleLarge
             )
             Column(
@@ -433,15 +453,31 @@ private fun LanguageChoice(
                     .weight(1f)
                     .padding(start = Dimens.spaceMedium)
             ) {
-                Text(label, fontWeight = FontWeight.Bold)
-                Text(nativeLabel, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            if (selected) {
                 Text(
-                    text = stringResource(R.string.settings_selected),
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    text = label,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+                Text(
+                    text = nativeLabel,
+                    color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Box(
+                modifier = Modifier.size(Dimens.selectionIndicatorSize),
+                contentAlignment = Alignment.Center
+            ) {
+                if (selected) {
+                    Text(
+                        text = stringResource(R.string.settings_icon_check),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
@@ -540,7 +576,11 @@ private fun ResetConfirmationDialog(
         title = { Text(stringResource(R.string.settings_reset_title)) },
         text = { Text(stringResource(R.string.settings_reset_message)) },
         confirmButton = {
-            HealthPrimaryButton(onClick = onConfirm, enabled = !isResetting) {
+            HealthPrimaryButton(
+                onClick = onConfirm,
+                modifier = Modifier.width(Dimens.dialogActionWidth),
+                enabled = !isResetting
+            ) {
                 if (isResetting) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(Dimens.iconSizeMedium),

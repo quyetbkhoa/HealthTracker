@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">HealthTracker</string>
+    <string name="common_not_available">—</string>
     <string name="welcome_title">Welcome to HealthTracker</string>
     <string name="welcome_start">Get started</string>
     <string name="login">Sign in</string>
@@ -120,7 +121,6 @@
     <string name="settings_data_section">Data</string>
     <string name="settings_profile_description">Update your information and health goals</string>
     <string name="settings_reset_description">Delete your profile and all saved journal data</string>
-    <string name="settings_selected">Selected</string>
     <string name="settings_vietnamese_native">Tiếng Việt</string>
     <string name="settings_english_native">English</string>
     <string name="settings_icon_settings">⚙</string>
@@ -134,6 +134,9 @@
     <string name="settings_icon_dark">☾</string>
     <string name="settings_icon_pink">✿</string>
     <string name="settings_icon_system">◐</string>
+    <string name="settings_icon_check">✓</string>
+    <string name="settings_icon_vietnamese">🇻🇳</string>
+    <string name="settings_icon_english">🇬🇧</string>
     <string name="onboarding_step_format">Step %1$d/3</string>
     <string name="onboarding_continue">Continue</string>
     <string name="onboarding_cancel">Cancel</string>
@@ -255,6 +258,7 @@
     <string name="add_activity_save">Save activity</string>
     <string name="add_activity_saved">Activity added</string>
     <string name="add_activity_favorite">Favourite activity</string>
+    <string name="add_activity_selected">Selected activity</string>
     <string name="add_activity_not_favorite">Not a favourite; long press to add</string>
     <string name="add_activity_increase">Increase duration</string>
     <string name="add_activity_decrease">Decrease duration</string>

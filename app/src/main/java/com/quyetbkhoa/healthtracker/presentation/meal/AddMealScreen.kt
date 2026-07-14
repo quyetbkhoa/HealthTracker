@@ -2,6 +2,7 @@ package com.quyetbkhoa.healthtracker.presentation.meal
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
@@ -202,22 +205,33 @@ private fun ModeSelector(isCustom: Boolean, onAction: (AddMealAction) -> Unit) {
 @Composable
 private fun ModeCard(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     Card(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier
+            .height(Dimens.buttonHeightLarge)
+            .clickable(onClick = onClick),
         shape = Shape.medium,
         colors = CardDefaults.cardColors(
             containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer
-            else MaterialTheme.colorScheme.surface
+            else MaterialTheme.colorScheme.surface,
+            contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+            else MaterialTheme.colorScheme.onSurface
         )
     ) {
-        Text(
-            text = label,
+        Box(
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(Dimens.spaceMedium),
-            color = if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-        )
+                .fillMaxSize()
+                .padding(horizontal = Dimens.spaceSmall),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
     }
 }
 
@@ -297,8 +311,17 @@ private fun MealDetailsForm(state: AddMealUiState, onAction: (AddMealAction) -> 
                             )
                         )
                     }
-                    TextButton(onClick = { onAction(AddMealAction.ChooseAgain) }) {
-                        Text(stringResource(R.string.food_choose_again))
+                    TextButton(
+                        onClick = { onAction(AddMealAction.ChooseAgain) },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.food_choose_again),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
@@ -349,7 +372,7 @@ private fun MealDetailsForm(state: AddMealUiState, onAction: (AddMealAction) -> 
                     stringResource(R.string.food_estimated_kcal, state.estimatedCalories ?: 0),
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
         }
