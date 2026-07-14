@@ -13,6 +13,10 @@ object Dimens {
     val buttonHeightSmall: Dp = 36.dp
     val buttonHeightMedium: Dp = 48.dp // Chiều cao chuẩn cho vùng chạm (touch target)
     val buttonHeightLarge: Dp = 80.dp
+    val selectionCardHeight: Dp = 120.dp
+    val activityChoiceCardHeight: Dp = 152.dp
+    val selectionIndicatorSize: Dp = 24.dp
+    val dialogActionWidth: Dp = 144.dp
     
     val iconSizeSmall: Dp = 16.dp
     val iconSizeMedium: Dp = 24.dp
