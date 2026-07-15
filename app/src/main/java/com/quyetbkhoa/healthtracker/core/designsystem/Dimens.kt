@@ -6,19 +6,17 @@ import androidx.compose.ui.unit.dp
 object Dimens {
     val spaceExtraSmall: Dp = 4.dp
     val spaceSmall: Dp = 8.dp
-    val spaceMedium: Dp = 16.dp     // Thường dùng làm padding viền màn hình
+    val spaceMedium: Dp = 16.dp
     val spaceLarge: Dp = 24.dp
     val spaceExtraLarge: Dp = 32.dp
 
-    val buttonHeightSmall: Dp = 36.dp
-    val buttonHeightMedium: Dp = 48.dp // Chiều cao chuẩn cho vùng chạm (touch target)
+    val buttonHeightMedium: Dp = 48.dp
     val buttonHeightLarge: Dp = 80.dp
     val selectionCardHeight: Dp = 80.dp
     val activityChoiceCardHeight: Dp = 152.dp
     val selectionIndicatorSize: Dp = 24.dp
     val dialogActionWidth: Dp = 144.dp
     
-    val iconSizeSmall: Dp = 16.dp
     val iconSizeMedium: Dp = 24.dp
     val iconSizeLarge: Dp = 32.dp
 
@@ -28,10 +26,8 @@ object Dimens {
     
     val progressBarHeight: Dp = 4.dp
     val progressBarWidth: Dp = 32.dp
-    val genderBoxHeight: Dp = 48.dp
     val topBarSpacing: Dp = 48.dp
 
-    val cardElevationNothing: Dp = 0.dp
-    val cardElevationMedium: Dp = 3.dp
-    val cardElevationLarge: Dp = 8.dp
+    val cardElevationSmall: Dp = 0.5.dp
+    val cardElevationLarge: Dp = 1.dp
 }

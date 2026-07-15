@@ -15,9 +15,6 @@
 - **object Loading**
 - **class Success**
 
-## File: core\designsystem\Animation.kt
-- **object Animation**
-
 ## File: core\designsystem\Dimens.kt
 - **object Dimens**
 
@@ -28,11 +25,13 @@
 - **enum class AppThemeType**
   - Composable: `HealthTrackerTheme()`
 
-## File: core\designsystem\component\button\HealthOutlineButton.kt
-  - Composable: `HealthOuntlineButton()`
-
 ## File: core\designsystem\component\button\HealthPrimaryButton.kt
   - Composable: `HealthPrimaryButton()`
+
+## File: core\designsystem\component\card\HealthCard.kt
+  - Composable: `HealthCard()`
+  - Composable: `HealthElevatedCard()`
+  - Composable: `HealthOutlinedCard()`
 
 ## File: core\navigation\AppNavigation.kt
   - Composable: `AppNavigation()`
