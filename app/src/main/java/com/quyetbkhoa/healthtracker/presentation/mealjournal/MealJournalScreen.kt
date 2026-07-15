@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -49,6 +48,7 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
 import com.quyetbkhoa.healthtracker.domain.model.MealType
 import java.text.NumberFormat
@@ -200,10 +200,9 @@ private fun DateNavigator(
     onNext: () -> Unit,
     onPickDate: () -> Unit
 ) {
-    Card(
+    HealthCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = Shape.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = Shape.large
     ) {
         Row(
             modifier = Modifier
@@ -240,7 +239,7 @@ private fun DateNavigator(
 
 @Composable
 private fun DailySummary(total: Int, target: Int) {
-    Card(
+    HealthCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
@@ -282,9 +281,8 @@ private fun MealGroupHeader(type: MealType, calories: Int, onAdd: () -> Unit) {
 
 @Composable
 private fun MealRow(meal: MealEntry, onDelete: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    HealthCard(
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier.padding(Dimens.spaceMedium),

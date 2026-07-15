@@ -14,11 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.IconButton
@@ -48,6 +46,8 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
 import com.quyetbkhoa.healthtracker.domain.model.Goal
 import java.text.NumberFormat
@@ -117,11 +117,9 @@ fun ProfileSetupStep2Screen(
 
 @Composable
 private fun OnboardingSectionCard(content: @Composable ColumnScope.() -> Unit) {
-    Card(
+    HealthElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = Shape.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationLarge)
+        shape = Shape.extraLarge
     ) {
         Column(modifier = Modifier.padding(Dimens.spaceMedium), content = content)
     }
@@ -151,7 +149,7 @@ private fun GoalOption(goal: Goal, isSelected: Boolean, modifier: Modifier, onCl
 
 @Composable
 private fun SelectionCard(iconRes: Int, titleRes: Int, descriptionRes: Int?, isSelected: Boolean, height: androidx.compose.ui.unit.Dp, modifier: Modifier, onClick: () -> Unit) {
-    Card(
+    HealthElevatedCard(
         modifier = modifier.height(height).clickable(onClick = onClick),
         shape = Shape.large,
         colors = CardDefaults.cardColors(
@@ -159,8 +157,7 @@ private fun SelectionCard(iconRes: Int, titleRes: Int, descriptionRes: Int?, isS
             else MaterialTheme.colorScheme.surface,
             contentColor = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
             else MaterialTheme.colorScheme.onSurface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) Dimens.cardElevationLarge else Dimens.cardElevationMedium)
+        )
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(Dimens.spaceSmall), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
             Box(modifier = Modifier.size(Dimens.buttonHeightMedium).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {

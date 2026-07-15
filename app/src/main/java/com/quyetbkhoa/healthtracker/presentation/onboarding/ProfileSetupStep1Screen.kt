@@ -22,7 +22,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -58,6 +57,8 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.domain.model.Gender
 import java.time.Instant
 import java.time.ZoneId
@@ -157,11 +158,9 @@ fun ProfileSetupStep1Screen(
                 modifier = Modifier.fillMaxSize().padding(paddingValues).verticalScroll(rememberScrollState()).padding(horizontal = Dimens.spaceMedium).padding(bottom = Dimens.spaceExtraLarge + Dimens.buttonHeightLarge),
                 verticalArrangement = Arrangement.spacedBy(Dimens.spaceLarge)
             ) {
-                Card(
+                HealthElevatedCard(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = Shape.extraLarge,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationLarge)
+                    shape = Shape.extraLarge
                 ) {
                     Column(modifier = Modifier.padding(Dimens.spaceLarge), verticalArrangement = Arrangement.spacedBy(Dimens.spaceLarge)) {
                         ProfileInputField(R.string.onboarding_full_name, uiState.fullName, R.string.onboarding_name_placeholder, uiState.fullNameError, KeyboardType.Text) {
@@ -219,11 +218,10 @@ private fun GenderSelector(selectedGender: Gender, onGenderSelected: (Gender) ->
 
 @Composable
 private fun GenderOption(gender: Gender, labelRes: Int, isSelected: Boolean, modifier: Modifier, onGenderSelected: (Gender) -> Unit) {
-    Card(
+    HealthElevatedCard(
         modifier = modifier.height(Dimens.buttonHeightMedium).clickable { onGenderSelected(gender) },
         shape = Shape.large,
-        colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)
+        colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(

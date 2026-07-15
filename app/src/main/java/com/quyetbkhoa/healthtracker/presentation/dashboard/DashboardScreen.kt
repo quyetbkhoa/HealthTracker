@@ -14,18 +14,14 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -53,6 +49,8 @@ import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.domain.model.MealType
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
 import java.text.NumberFormat
@@ -351,11 +349,10 @@ private fun DashboardQuickActions(onAction: (DashboardAction) -> Unit) {
 private fun QuickActionCard(iconRes: Int, titleRes: Int, isPrimary: Boolean, onClick: () -> Unit, modifier: Modifier) {
     val containerColor = if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
     val contentColor = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
-    Card(
+    HealthElevatedCard(
         modifier = modifier.height(Dimens.buttonHeightLarge).clickable(onClick = onClick),
         shape = Shape.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)
+        colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
         Row(modifier = Modifier.fillMaxSize().padding(Dimens.spaceMedium), verticalAlignment = Alignment.CenterVertically) {
             Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surface, modifier = Modifier.size(Dimens.buttonHeightMedium), shadowElevation = Dimens.spaceExtraSmall) {
@@ -392,7 +389,7 @@ private fun TodayMealsSection(uiState: DashboardUiState, onAction: (DashboardAct
 @Composable
 private fun MealCard(iconRes: Int, titleRes: Int, meals: List<MealEntry>, modifier: Modifier) {
     val calories = meals.sumOf(MealEntry::calories)
-    Card(modifier = modifier.height(DashboardDimens.mealCardHeight), shape = Shape.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)) {
+    HealthElevatedCard(modifier = modifier.height(DashboardDimens.mealCardHeight), shape = Shape.large) {
         Column(modifier = Modifier.padding(Dimens.spaceSmall), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
             Box(modifier = Modifier.size(Dimens.buttonHeightMedium).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
                 Text(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
@@ -432,7 +429,7 @@ private fun DashboardBottomBar(
         shadowElevation = Dimens.spaceSmall
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(vertical = Dimens.spaceSmall),
+            modifier = Modifier.fillMaxWidth().padding(vertical = Dimens.spaceSmall),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             NavigationItem(R.string.dashboard_icon_home, R.string.dashboard_home, true, {})
@@ -477,11 +474,9 @@ private fun RowScope.NavigationItem(iconRes: Int, labelRes: Int, selected: Boole
 
 @Composable
 private fun DashboardCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Card(
+    HealthElevatedCard(
         modifier = modifier,
         shape = Shape.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium),
         content = { content() }
     )
 }

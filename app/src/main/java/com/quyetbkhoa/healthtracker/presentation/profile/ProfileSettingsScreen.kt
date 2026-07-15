@@ -17,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -52,6 +51,7 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
 import com.quyetbkhoa.healthtracker.domain.model.Gender
 import com.quyetbkhoa.healthtracker.domain.model.Goal
@@ -222,7 +222,7 @@ private fun BmiCard(state: ProfileSettingsUiState) {
         BmiCategory.OBESE -> R.string.profile_bmi_obese
         null -> null
     }
-    Card(
+    HealthCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
         shape = Shape.extraLarge
@@ -278,7 +278,7 @@ private fun FieldTitle(labelRes: Int) {
 
 @Composable
 private fun SelectableCardCompact(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
-    Card(
+    HealthCard(
         modifier = modifier
             .height(Dimens.buttonHeightLarge)
             .clickable(onClick = onClick),

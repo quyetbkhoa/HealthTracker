@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +32,8 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.domain.model.UserProfile
 
 @Composable
@@ -88,7 +88,7 @@ fun TdeeResultContent(state: TdeeResultUiState, onAction: (TdeeResultAction) -> 
                 description = stringResource(R.string.tdee_description),
                 value = stringResource(R.string.tdee_kcal_value, state.tdeeCalories)
             )
-            Card(
+            HealthCard(
                 shape = Shape.extraLarge,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
@@ -133,11 +133,9 @@ fun TdeeResultContent(state: TdeeResultUiState, onAction: (TdeeResultAction) -> 
 
 @Composable
 private fun ResultMetricCard(label: String, description: String, value: String) {
-    Card(
+    HealthElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = Shape.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(Dimens.cardElevationMedium)
+        shape = Shape.extraLarge
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(Dimens.spaceLarge),

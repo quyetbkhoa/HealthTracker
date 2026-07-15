@@ -1,7 +1,6 @@
 package com.quyetbkhoa.healthtracker.presentation.settings
 
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -46,6 +44,9 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthOutlinedCard
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
 
 @Composable
@@ -235,15 +236,9 @@ private fun SettingsSectionCard(
     title: String,
     content: @Composable ColumnScope.() -> Unit
 ){
-    Card(
+    HealthElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = Shape.large,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = Dimens.cardElevationMedium
-        )
+        shape = Shape.large
     ){
         Column(
             modifier = Modifier.padding(Dimens.spaceMedium)
@@ -276,14 +271,11 @@ private fun SettingsNavigationCard(
     subtitle: String,
     onClick: () -> Unit
 ) {
-    Card(
+    HealthOutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = Shape.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-//        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium),
-        border = BorderStroke(width = Dimens.borderWidthThin/2, color = MaterialTheme.colorScheme.primary)
+        shape = Shape.large
     ) {
         Row(
             modifier = Modifier.padding(Dimens.spaceMedium),
@@ -330,7 +322,7 @@ private fun ThemeChoice(
             AppThemeType.SYSTEM -> R.string.settings_icon_system
         }
     )
-    Card(
+    HealthCard(
         modifier = modifier.clickable { onClick(type) },
         shape = Shape.medium,
         colors = CardDefaults.cardColors(
@@ -377,7 +369,7 @@ private fun LanguageChoice(
         if (language == AppLanguage.VIETNAMESE) R.string.settings_vietnamese_native
         else R.string.settings_english_native
     )
-    Card(
+    HealthCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(Dimens.buttonHeightLarge)
@@ -433,7 +425,7 @@ private fun LanguageChoice(
 
 @Composable
 private fun DangerZoneCard(isResetting: Boolean, onClick: () -> Unit) {
-    Card(
+    HealthCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = !isResetting, onClick = onClick),
@@ -501,7 +493,7 @@ private fun SettingsIconBubble(
             .padding(Dimens.spaceExtraSmall),
         contentAlignment = Alignment.Center
     ) {
-        Card(
+        HealthCard(
             modifier = Modifier.fillMaxSize(),
             shape = Shape.pill,
             colors = CardDefaults.cardColors(containerColor = containerColor)

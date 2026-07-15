@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -25,7 +24,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -61,6 +59,8 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import kotlin.math.roundToInt
 
 @Composable
@@ -98,7 +98,6 @@ private fun AddActivityContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .statusBarsPadding()
                 .padding(horizontal = Dimens.spaceMedium),
             verticalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)
         ) {
@@ -233,7 +232,7 @@ private fun ActivityCard(
     onAction: (AddActivityAction) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
-    Card(
+    HealthElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(Dimens.activityChoiceCardHeight)
@@ -256,8 +255,7 @@ private fun ActivityCard(
             } else {
                 MaterialTheme.colorScheme.onSurface
             }
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)
+        )
     ) {
         Column(
             modifier = Modifier
@@ -325,7 +323,7 @@ private fun SelectedActivityCard(
     activity: ActivityItemUiModel,
     onAction: (AddActivityAction) -> Unit
 ) {
-    Card(
+    HealthCard(
         shape = Shape.large,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -373,7 +371,7 @@ private fun DurationSection(
     durationMinutes: Int,
     onAction: (AddActivityAction) -> Unit
 ) {
-    Card(shape = Shape.large) {
+    HealthCard(shape = Shape.large) {
         Column(
             modifier = Modifier.padding(Dimens.spaceMedium),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -437,7 +435,7 @@ private fun DurationSection(
 
 @Composable
 private fun CaloriesEstimate(calories: Int) {
-    Card(
+    HealthCard(
         modifier = Modifier.fillMaxWidth(),
         shape = Shape.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)

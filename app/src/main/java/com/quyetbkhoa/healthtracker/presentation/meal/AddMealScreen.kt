@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,6 +49,8 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
+import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.domain.model.Food
 import com.quyetbkhoa.healthtracker.domain.model.MealType
 import com.quyetbkhoa.healthtracker.domain.usecase.AddMealValidationError
@@ -159,12 +160,11 @@ private fun ScreenHeader(onNavigateBack: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)
     ) {
-        Card(
+        HealthCard(
             modifier = Modifier
                 .size(Dimens.buttonHeightMedium)
                 .clickable(onClick = onNavigateBack),
-            shape = CircleShape,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            shape = CircleShape
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -206,7 +206,7 @@ private fun ModeSelector(isCustom: Boolean, onAction: (AddMealAction) -> Unit) {
 
 @Composable
 private fun ModeCard(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    Card(
+    HealthElevatedCard(
         modifier = modifier
             .height(Dimens.buttonHeightLarge)
             .clickable(onClick = onClick),
@@ -239,13 +239,11 @@ private fun ModeCard(label: String, selected: Boolean, modifier: Modifier, onCli
 
 @Composable
 private fun FoodRow(food: Food, onClick: () -> Unit) {
-    Card(
+    HealthCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = Shape.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(Dimens.cardElevationMedium)
+        shape = Shape.large
     ) {
         Row(
             modifier = Modifier.padding(Dimens.spaceMedium),
@@ -277,7 +275,7 @@ private fun FoodRow(food: Food, onClick: () -> Unit) {
 
 @Composable
 private fun EmptyFoodCard(onCustom: () -> Unit) {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+    HealthCard {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -294,7 +292,7 @@ private fun EmptyFoodCard(onCustom: () -> Unit) {
 private fun MealDetailsForm(state: AddMealUiState, onAction: (AddMealAction) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)) {
         state.selectedFood?.let { food ->
-            Card(
+            HealthCard(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
@@ -364,7 +362,7 @@ private fun MealDetailsForm(state: AddMealUiState, onAction: (AddMealAction) -> 
                 style = MaterialTheme.typography.bodySmall
             )
         }
-        Card(
+        HealthCard(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
         ) {
