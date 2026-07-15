@@ -13,7 +13,7 @@ object Dimens {
     val buttonHeightSmall: Dp = 36.dp
     val buttonHeightMedium: Dp = 48.dp // Chiều cao chuẩn cho vùng chạm (touch target)
     val buttonHeightLarge: Dp = 80.dp
-    val selectionCardHeight: Dp = 120.dp
+    val selectionCardHeight: Dp = 80.dp
     val activityChoiceCardHeight: Dp = 152.dp
     val selectionIndicatorSize: Dp = 24.dp
     val dialogActionWidth: Dp = 144.dp
@@ -30,6 +30,8 @@ object Dimens {
     val progressBarWidth: Dp = 32.dp
     val genderBoxHeight: Dp = 48.dp
     val topBarSpacing: Dp = 48.dp
+
+    val cardElevationNothing: Dp = 0.dp
     val cardElevationMedium: Dp = 3.dp
     val cardElevationLarge: Dp = 8.dp
 }

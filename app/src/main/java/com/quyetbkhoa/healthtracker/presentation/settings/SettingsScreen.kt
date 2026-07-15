@@ -1,10 +1,12 @@
 package com.quyetbkhoa.healthtracker.presentation.settings
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -106,45 +108,36 @@ private fun SettingsContent(
     onNavigateBack: () -> Unit,
     onReset: () -> Unit
 ) {
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background,
+        topBar = { SettingsHeader(onNavigateBack) }
+        ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .statusBarsPadding()
                 .padding(horizontal = Dimens.spaceMedium),
             verticalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)
         ) {
-            item { SettingsHeader(onNavigateBack) }
-            item { SettingsHeroCard() }
+//            item { SettingsHeader(onNavigateBack) }
             item {
-                SettingsSectionTitle(
+                SettingsSectionCard(
                     icon = stringResource(R.string.settings_icon_profile),
                     title = stringResource(R.string.settings_account_section)
-                )
+                ) {
+                    SettingsNavigationCard(
+                        icon = stringResource(R.string.settings_icon_profile),
+                        title = stringResource(R.string.profile_settings_open),
+                        subtitle = stringResource(R.string.settings_profile_description),
+                        onClick = onNavigateToProfile
+                    )
+                }
             }
             item {
-                SettingsNavigationCard(
-                    icon = stringResource(R.string.settings_icon_profile),
-                    title = stringResource(R.string.profile_settings_open),
-                    subtitle = stringResource(R.string.settings_profile_description),
-                    onClick = onNavigateToProfile
-                )
-            }
-            item {
-                SettingsSectionTitle(
+                SettingsSectionCard(
                     icon = stringResource(R.string.settings_icon_appearance),
                     title = stringResource(R.string.settings_appearance_section)
-                )
-            }
-            item {
-                SettingsGroupCard {
-                    Text(
-                        stringResource(R.string.settings_select_theme),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.height(Dimens.spaceSmall))
+                ) {
+
                     Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
                             ThemeChoice(
@@ -178,19 +171,10 @@ private fun SettingsContent(
                 }
             }
             item {
-                SettingsSectionTitle(
+                SettingsSectionCard(
                     icon = stringResource(R.string.settings_icon_language),
                     title = stringResource(R.string.settings_language_section)
-                )
-            }
-            item {
-                SettingsGroupCard {
-                    Text(
-                        stringResource(R.string.settings_select_language),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.height(Dimens.spaceSmall))
+                ) {
                     LanguageChoice(
                         language = AppLanguage.VIETNAMESE,
                         selected = selectedLanguage == AppLanguage.VIETNAMESE,
@@ -205,16 +189,15 @@ private fun SettingsContent(
                 }
             }
             item {
-                SettingsSectionTitle(
+                SettingsSectionCard(
                     icon = stringResource(R.string.settings_icon_data),
                     title = stringResource(R.string.settings_data_section)
-                )
-            }
-            item {
-                DangerZoneCard(
-                    isResetting = isResetting,
-                    onClick = onReset
-                )
+                ) {
+                    DangerZoneCard(
+                        isResetting = isResetting,
+                        onClick = onReset
+                    )
+                }
             }
             item { Spacer(Modifier.height(Dimens.spaceLarge)) }
         }
@@ -226,6 +209,7 @@ private fun SettingsHeader(onNavigateBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .statusBarsPadding()
             .padding(top = Dimens.spaceSmall),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -241,56 +225,47 @@ private fun SettingsHeader(onNavigateBack: () -> Unit) {
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
-            Text(
-                text = stringResource(R.string.settings_subtitle),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
 
 @Composable
-private fun SettingsHeroCard() {
+private fun SettingsSectionCard(
+    icon: String,
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+){
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = Shape.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-    ) {
-        Row(
-            modifier = Modifier.padding(Dimens.spaceLarge),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SettingsIconBubble(
-                icon = stringResource(R.string.settings_icon_settings),
-                isPrimary = true
-            )
-            Column(modifier = Modifier.padding(start = Dimens.spaceMedium)) {
+        shape = Shape.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = Dimens.cardElevationMedium
+        )
+    ){
+        Column(
+            modifier = Modifier.padding(Dimens.spaceMedium)
+        ){
+            //title
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(icon, style = MaterialTheme.typography.titleLarge)
                 Text(
-                    text = stringResource(R.string.settings_hero_title),
-                    style = MaterialTheme.typography.titleLarge,
+                    text = title,
+                    modifier = Modifier.padding(start = Dimens.spaceSmall),
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    text = stringResource(R.string.settings_hero_description),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
-        }
-    }
-}
+            Spacer(modifier = Modifier.height(Dimens.spaceMedium))
 
-@Composable
-private fun SettingsSectionTitle(icon: String, title: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(icon, style = MaterialTheme.typography.titleLarge)
-        Text(
-            text = title,
-            modifier = Modifier.padding(start = Dimens.spaceSmall),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+            //content
+            content()
+
+
+        }
     }
 }
 
@@ -307,7 +282,8 @@ private fun SettingsNavigationCard(
             .clickable(onClick = onClick),
         shape = Shape.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)
+//        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium),
+        border = BorderStroke(width = Dimens.borderWidthThin/2, color = MaterialTheme.colorScheme.primary)
     ) {
         Row(
             modifier = Modifier.padding(Dimens.spaceMedium),
@@ -328,18 +304,6 @@ private fun SettingsNavigationCard(
                 color = MaterialTheme.colorScheme.primary
             )
         }
-    }
-}
-
-@Composable
-private fun SettingsGroupCard(content: @Composable () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = Shape.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = Dimens.cardElevationMedium)
-    ) {
-        Column(modifier = Modifier.padding(Dimens.spaceMedium), content = { content() })
     }
 }
 
@@ -379,10 +343,11 @@ private fun ThemeChoice(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(Dimens.selectionCardHeight)
+                .height(Dimens.buttonHeightLarge)
                 .padding(Dimens.spaceMedium),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Dimens.spaceExtraSmall)
+            verticalArrangement = Arrangement.Center
+
         ) {
             Text(icon, style = MaterialTheme.typography.titleLarge)
             Text(
@@ -394,18 +359,6 @@ private fun ThemeChoice(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Box(
-                modifier = Modifier.size(Dimens.selectionIndicatorSize),
-                contentAlignment = Alignment.Center
-            ) {
-                if (selected) {
-                    Text(
-                        text = stringResource(R.string.settings_icon_check),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-            }
         }
     }
 }
@@ -458,13 +411,6 @@ private fun LanguageChoice(
                 Text(
                     text = label,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = nativeLabel,
-                    color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

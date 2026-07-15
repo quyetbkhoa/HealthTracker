@@ -7,5 +7,5 @@ import androidx.compose.ui.unit.dp
 object DashboardDimens {
     val overviewHeight: Dp = 186.dp
     val mealCardHeight: Dp = 168.dp
-    val progressStroke: Dp = 14.dp
+    val progressStroke: Dp = 20.dp
 }

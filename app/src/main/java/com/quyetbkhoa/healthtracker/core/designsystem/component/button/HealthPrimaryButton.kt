@@ -22,7 +22,7 @@ fun HealthPrimaryButton(
     ),
     content: @Composable RowScope.() -> Unit
 ) {
-    Button(
+        Button(
         onClick = onClick,
         modifier = modifier.heightIn(min = Dimens.buttonHeightMedium),
         enabled = enabled,

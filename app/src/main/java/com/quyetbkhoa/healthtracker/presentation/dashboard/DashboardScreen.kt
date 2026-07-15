@@ -2,6 +2,7 @@ package com.quyetbkhoa.healthtracker.presentation.dashboard
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -118,7 +120,8 @@ fun DashboardContent(
             DashboardQuickActions(onAction = onAction)
             TodayMealsSection(uiState = uiState, onAction = onAction)
             DailyTipCard()
-            Spacer(modifier = Modifier.height(Dimens.spaceExtraSmall))
+            Spacer(Modifier.height(Dimens.spaceSmall))
+
         }
     }
 }
@@ -144,8 +147,8 @@ private fun DashboardHeader(userName: String, onNavigateToSettings: () -> Unit) 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(top = Dimens.spaceMedium),
+//            .statusBarsPadding()
+            ,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
@@ -215,8 +218,6 @@ private fun CalorieOverviewCard(uiState: DashboardUiState) {
                     OverviewMetric(R.string.dashboard_icon_burned, R.string.dashboard_burned, uiState.exerciseCalories, Modifier.weight(1f))
                     OverviewMetric(R.string.dashboard_icon_remaining, R.string.dashboard_remaining, abs(uiState.remainingCalories), Modifier.weight(1f), uiState.isExceeded)
                 }
-                Spacer(modifier = Modifier.height(Dimens.spaceLarge))
-                ProgressLine(progress = uiState.progress, progressPercent = uiState.progressPercent)
             }
         }
     }
@@ -228,21 +229,28 @@ private fun GoalRing(targetCalories: Int, progress: Float, modifier: Modifier = 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val stroke = DashboardDimens.progressStroke.toPx()
-            drawCircle(color = scheme.surfaceContainerHigh, style = Stroke(stroke))
+            drawCircle(
+                color = scheme.surfaceContainerHigh,
+                style = Stroke(stroke),
+                radius = (size.minDimension-stroke)/2f
+                )
             drawArc(
                 color = scheme.primary,
                 startAngle = -90f,
                 sweepAngle = progress.coerceIn(0f, 1f) * 360f,
                 useCenter = false,
-                topLeft = Offset(stroke / 2, stroke / 2),
-                size = Size(size.width - stroke, size.height - stroke),
-                style = Stroke(width = stroke, cap = StrokeCap.Round)
+                topLeft = Offset(
+                    x = stroke/2f,
+                    y = stroke/2f
+                ),
+                size = Size(size.width-stroke , size.height-stroke ),
+                style = Stroke(width = stroke, cap = StrokeCap.Round, join = StrokeJoin.Round)
             )
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = stringResource(R.string.dashboard_goal), style = MaterialTheme.typography.labelLarge, color = scheme.onSurfaceVariant)
             Text(text = formatNumber(targetCalories), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = scheme.onSurface)
-            Text(text = stringResource(R.string.dashboard_goal_daily), style = MaterialTheme.typography.bodyMedium, color = scheme.onSurfaceVariant)
+
         }
     }
 }
@@ -261,8 +269,13 @@ private fun OverviewMetric(iconRes: Int, labelRes: Int, value: Int, modifier: Mo
             Text(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
         }
         Spacer(modifier = Modifier.height(Dimens.spaceSmall))
-        Text(text = stringResource(labelRes), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
-        Text(text = formatNumber(value), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = valueColor)
+        Text(text = stringResource(labelRes),
+            modifier = Modifier.basicMarquee(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            )
+        Text(text = formatNumber(value), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = valueColor)
     }
 }
 
@@ -485,7 +498,7 @@ private fun PreviewDashboardScreen() {
                 isLoading = false,
                 hasProfile = true,
                 targetCalories = 2_000,
-                consumedCalories = 1_200,
+                consumedCalories = 1_900,
                 userName = "Nguyễn An"
             ),
             onAction = {},
