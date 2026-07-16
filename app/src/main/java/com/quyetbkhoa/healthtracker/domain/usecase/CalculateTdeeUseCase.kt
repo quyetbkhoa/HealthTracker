@@ -38,15 +38,15 @@ class CalculateTdeeUseCase @Inject constructor() {
         }
         val tdee = (bmr * activityFactor).roundToInt()
         val goalAdjustment = when (profile.goal) {
-            Goal.LOSE_WEIGHT -> -500
+            Goal.LOSE_WEIGHT -> -(tdee * 0.15).coerceIn(250.0, 500.0).roundToInt()
             Goal.MAINTAIN -> 0
-            Goal.GAIN_WEIGHT -> 500
+            Goal.GAIN_WEIGHT -> (tdee * 0.10).coerceIn(200.0, 350.0).roundToInt()
         }
         return TdeeResult(
             age = age,
             bmrCalories = bmr.roundToInt(),
             tdeeCalories = tdee,
-            targetCalories = (tdee + goalAdjustment).coerceAtLeast(1)
+            targetCalories = (tdee + goalAdjustment).coerceAtLeast(1_200)
         )
     }
 }

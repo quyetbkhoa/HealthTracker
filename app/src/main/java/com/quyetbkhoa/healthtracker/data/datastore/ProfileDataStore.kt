@@ -24,6 +24,7 @@ class ProfileDataStore @Inject constructor(
         val BMR_KEY = intPreferencesKey("profile_bmr")
         val TDEE_KEY = intPreferencesKey("profile_tdee")
         val CALORIE_TARGET_KEY = intPreferencesKey("profile_calorie_target")
+        val ACTIVITY_TRACKING_STARTED_AT_KEY = longPreferencesKey("activity_tracking_started_at")
     }
 
     val userProfileFlow: Flow<UserProfile?> = dataStore.data.map { preferences ->
@@ -52,7 +53,8 @@ class ProfileDataStore @Inject constructor(
             goal = goal,
             bmrCalories = preferences[BMR_KEY] ?: 0,
             tdeeCalories = preferences[TDEE_KEY] ?: 0,
-            dailyCalorieTarget = preferences[CALORIE_TARGET_KEY] ?: 0
+            dailyCalorieTarget = preferences[CALORIE_TARGET_KEY] ?: 0,
+            activityTrackingStartedAt = preferences[ACTIVITY_TRACKING_STARTED_AT_KEY] ?: 0L
         )
     }
 
@@ -68,6 +70,9 @@ class ProfileDataStore @Inject constructor(
             preferences[BMR_KEY] = profile.bmrCalories
             preferences[TDEE_KEY] = profile.tdeeCalories
             preferences[CALORIE_TARGET_KEY] = profile.dailyCalorieTarget
+            if (preferences[ACTIVITY_TRACKING_STARTED_AT_KEY] == null) {
+                preferences[ACTIVITY_TRACKING_STARTED_AT_KEY] = System.currentTimeMillis()
+            }
         }
     }
 
@@ -83,6 +88,7 @@ class ProfileDataStore @Inject constructor(
             preferences.remove(BMR_KEY)
             preferences.remove(TDEE_KEY)
             preferences.remove(CALORIE_TARGET_KEY)
+            preferences.remove(ACTIVITY_TRACKING_STARTED_AT_KEY)
         }
     }
 }

@@ -10,7 +10,8 @@ data class UserProfile(
     val goal: Goal = Goal.MAINTAIN,
     val bmrCalories: Int = 0,
     val tdeeCalories: Int = 0,
-    val dailyCalorieTarget: Int = 0
+    val dailyCalorieTarget: Int = 0,
+    val activityTrackingStartedAt: Long = 0L
 )
 
 enum class Gender {

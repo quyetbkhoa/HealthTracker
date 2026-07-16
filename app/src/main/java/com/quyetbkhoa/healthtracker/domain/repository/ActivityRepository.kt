@@ -8,6 +8,7 @@ interface ActivityRepository {
     fun observeActivityTypes(): Flow<List<PhysicalActivityType>>
     fun observeRecordsByDay(epochDay: Long): Flow<List<PhysicalActivityRecord>>
     fun observeTotalCaloriesByDay(epochDay: Long): Flow<Double>
+    fun observeTotalCaloriesBetween(startMillis: Long, endMillis: Long): Flow<Double>
     fun observeRecordsBetween(startMillis: Long, endMillis: Long): Flow<List<PhysicalActivityRecord>>
     suspend fun seedDefaultActivities()
     suspend fun getActivityType(id: Long): PhysicalActivityType?

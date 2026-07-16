@@ -28,6 +28,9 @@ class ActivityRepositoryImpl @Inject constructor(
         return activityDao.observeTotalCaloriesBetween(start, end)
     }
 
+    override fun observeTotalCaloriesBetween(startMillis: Long, endMillis: Long): Flow<Double> =
+        activityDao.observeTotalCaloriesBetween(startMillis, endMillis)
+
     override fun observeRecordsBetween(
         startMillis: Long,
         endMillis: Long
