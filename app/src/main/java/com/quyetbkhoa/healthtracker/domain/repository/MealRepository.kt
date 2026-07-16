@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface MealRepository {
     fun observeMealsByDay(epochDay: Long, languageTag: String): Flow<List<MealEntry>>
+    fun observeMealsBetween(startMillis: Long, endMillis: Long, languageTag: String): Flow<List<MealEntry>>
     suspend fun addMeal(meal: MealEntry)
     suspend fun updateMeal(meal: MealEntry)
     suspend fun deleteMeal(id: Long)

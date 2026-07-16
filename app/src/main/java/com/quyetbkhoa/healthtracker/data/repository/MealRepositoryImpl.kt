@@ -21,10 +21,15 @@ class MealRepositoryImpl @Inject constructor(
         val startMillis = date.atStartOfDay(zoneId).toInstant().toEpochMilli()
         val endMillis = date.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
 
-        return mealDao.observeMealsBetween(startMillis, endMillis, languageTag).map { rows ->
-            rows.map(LocalizedMealRow::toDomain)
-        }
+        return observeMealsBetween(startMillis, endMillis, languageTag)
     }
+
+    override fun observeMealsBetween(
+        startMillis: Long,
+        endMillis: Long,
+        languageTag: String
+    ): Flow<List<MealEntry>> = mealDao.observeMealsBetween(startMillis, endMillis, languageTag)
+        .map { rows -> rows.map(LocalizedMealRow::toDomain) }
 
     override suspend fun addMeal(meal: MealEntry) {
         mealDao.insert(meal.toEntity())

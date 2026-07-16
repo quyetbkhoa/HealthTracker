@@ -67,6 +67,7 @@ fun DashboardScreen(
     onNavigateToAddMeal: () -> Unit,
     onNavigateToAddActivity: () -> Unit,
     onNavigateToMealJournal: () -> Unit,
+    onNavigateToStatistics: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -82,7 +83,8 @@ fun DashboardScreen(
     DashboardContent(
         uiState = uiState,
         onAction = viewModel::onAction,
-        onNavigateToSettings = onNavigateToSettings
+        onNavigateToSettings = onNavigateToSettings,
+        onNavigateToStatistics = onNavigateToStatistics
     )
 }
 
@@ -90,7 +92,8 @@ fun DashboardScreen(
 fun DashboardContent(
     uiState: DashboardUiState,
     onAction: (DashboardAction) -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToStatistics: () -> Unit
 ) {
     if (uiState.isLoading || !uiState.hasProfile) {
         DashboardLoadingState(isLoading = uiState.isLoading)
@@ -102,7 +105,8 @@ fun DashboardContent(
         bottomBar = {
             DashboardBottomBar(
                 onNavigateToSettings = onNavigateToSettings,
-                onNavigateToMeals = { onAction(DashboardAction.ViewMeals) }
+                onNavigateToMeals = { onAction(DashboardAction.ViewMeals) },
+                onNavigateToStatistics = onNavigateToStatistics
             )
         }
     ) { innerPadding ->
@@ -473,7 +477,8 @@ private fun DailyTipCard() {
 @Composable
 private fun DashboardBottomBar(
     onNavigateToSettings: () -> Unit,
-    onNavigateToMeals: () -> Unit
+    onNavigateToMeals: () -> Unit,
+    onNavigateToStatistics: () -> Unit
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -487,7 +492,7 @@ private fun DashboardBottomBar(
             NavigationItem(R.string.dashboard_icon_home, R.string.dashboard_home, true, {})
             NavigationItem(R.string.dashboard_icon_meals_nav, R.string.dashboard_meals, false, onNavigateToMeals)
             NavigationItem(R.string.dashboard_icon_activity_nav, R.string.dashboard_activity, false, {})
-            NavigationItem(R.string.dashboard_icon_statistics, R.string.dashboard_statistics, false, {})
+            NavigationItem(R.string.dashboard_icon_statistics, R.string.dashboard_statistics, false, onNavigateToStatistics)
             NavigationItem(R.string.dashboard_icon_settings, R.string.dashboard_settings, false, onNavigateToSettings)
         }
     }
@@ -549,7 +554,8 @@ private fun PreviewDashboardScreen() {
                 userName = "Nguyễn An"
             ),
             onAction = {},
-            onNavigateToSettings = {}
+            onNavigateToSettings = {},
+            onNavigateToStatistics = {}
         )
     }
 }
