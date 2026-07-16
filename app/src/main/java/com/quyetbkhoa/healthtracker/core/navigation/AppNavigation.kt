@@ -23,7 +23,6 @@ import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
 import com.quyetbkhoa.healthtracker.presentation.onboarding.*
 import com.quyetbkhoa.healthtracker.presentation.dashboard.DashboardScreen
 import com.quyetbkhoa.healthtracker.presentation.settings.SettingsScreen
-import com.quyetbkhoa.healthtracker.presentation.tdee.TdeeResultScreen
 import com.quyetbkhoa.healthtracker.presentation.profile.ProfileSettingsScreen
 import com.quyetbkhoa.healthtracker.presentation.meal.AddMealScreen
 import com.quyetbkhoa.healthtracker.presentation.activity.AddActivityScreen
@@ -86,7 +85,9 @@ fun AppNavigation(
                 LaunchedEffect(Unit) {
                     viewModel.uiEvent.collect { event ->
                         when (event) {
-                            is ProfileSetupUiEvent.NavigateToTdeeResult -> navController.navigate("tdee_result")
+                            is ProfileSetupUiEvent.NavigateToDashboard -> navController.navigate("home") {
+                                popUpTo("welcome") { inclusive = true }
+                            }
                             is ProfileSetupUiEvent.ShowToast -> Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                             else -> Unit
                         }
@@ -99,16 +100,6 @@ fun AppNavigation(
                     onBack = { navController.popBackStack() }
                 )
             }
-        }
-
-        composable("tdee_result") {
-            TdeeResultScreen(
-                onNavigateToDashboard = {
-                    navController.navigate("home") {
-                        popUpTo("welcome") { inclusive = true }
-                    }
-                }
-            )
         }
 
         composable("home") {

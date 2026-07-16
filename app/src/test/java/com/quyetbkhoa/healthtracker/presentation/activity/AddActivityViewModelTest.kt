@@ -125,6 +125,7 @@ private class FakeActivityRepository : ActivityRepository {
     override fun observeActivityTypes(): Flow<List<PhysicalActivityType>> = activities
     override fun observeRecordsByDay(epochDay: Long): Flow<List<PhysicalActivityRecord>> = emptyFlow()
     override fun observeTotalCaloriesByDay(epochDay: Long): Flow<Double> = emptyFlow()
+    override fun observeTotalCaloriesBetween(startMillis: Long, endMillis: Long): Flow<Double> = emptyFlow()
     override fun observeRecordsBetween(
         startMillis: Long,
         endMillis: Long

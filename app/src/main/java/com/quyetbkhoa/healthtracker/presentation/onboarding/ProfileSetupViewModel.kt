@@ -54,7 +54,7 @@ sealed interface ProfileSetupAction {
 
 sealed interface ProfileSetupUiEvent {
     object NavigateToStep2 : ProfileSetupUiEvent
-    object NavigateToTdeeResult : ProfileSetupUiEvent
+    object NavigateToDashboard : ProfileSetupUiEvent
     data class ShowToast(val message: String) : ProfileSetupUiEvent
 }
 
@@ -146,9 +146,16 @@ class ProfileSetupViewModel @Inject constructor(
             goal = state.goal
         )
 
+        val result = calculateTdee(profile)
         viewModelScope.launch {
-            profileRepository.saveProfile(profile)
-            _uiEvent.send(ProfileSetupUiEvent.NavigateToTdeeResult)
+            profileRepository.saveProfile(
+                profile.copy(
+                    bmrCalories = result.bmrCalories,
+                    tdeeCalories = result.tdeeCalories,
+                    dailyCalorieTarget = result.targetCalories
+                )
+            )
+            _uiEvent.send(ProfileSetupUiEvent.NavigateToDashboard)
         }
     }
 

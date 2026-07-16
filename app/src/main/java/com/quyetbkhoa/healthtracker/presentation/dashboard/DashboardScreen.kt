@@ -52,6 +52,8 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.domain.model.MealType
+import com.quyetbkhoa.healthtracker.domain.model.Goal
+import com.quyetbkhoa.healthtracker.domain.usecase.DailyCalorieStatus
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
 import java.text.NumberFormat
 import java.time.LocalDate
@@ -114,12 +116,39 @@ fun DashboardContent(
         ) {
             DashboardHeader(userName = uiState.userName, onNavigateToSettings = onNavigateToSettings)
             CalorieOverviewCard(uiState = uiState)
-            AchievementCard(progressPercent = uiState.progressPercent)
+            uiState.suggestedActivityLevel?.let {
+                ActivityLevelSuggestionCard(uiState, onNavigateToSettings)
+            }
+            CalorieAdviceCard(uiState = uiState)
             DashboardQuickActions(onAction = onAction)
             TodayMealsSection(uiState = uiState, onAction = onAction)
             DailyTipCard()
             Spacer(Modifier.height(Dimens.spaceSmall))
 
+        }
+    }
+}
+
+@Composable
+private fun ActivityLevelSuggestionCard(uiState: DashboardUiState, onOpenSettings: () -> Unit) {
+    val level = uiState.suggestedActivityLevel ?: return
+    val levelName = stringResource(
+        when (level) {
+            com.quyetbkhoa.healthtracker.domain.model.ActivityLevel.SEDENTARY -> R.string.onboarding_activity_short_sedentary
+            com.quyetbkhoa.healthtracker.domain.model.ActivityLevel.LIGHT -> R.string.onboarding_activity_short_light
+            com.quyetbkhoa.healthtracker.domain.model.ActivityLevel.MODERATE -> R.string.onboarding_activity_short_moderate
+            com.quyetbkhoa.healthtracker.domain.model.ActivityLevel.VERY_ACTIVE -> R.string.onboarding_activity_short_active
+            com.quyetbkhoa.healthtracker.domain.model.ActivityLevel.EXTRA_ACTIVE -> R.string.onboarding_activity_short_extra_active
+        }
+    )
+    DashboardCard(modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenSettings)) {
+        Column(modifier = Modifier.padding(Dimens.spaceMedium), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
+            Text(stringResource(R.string.dashboard_activity_suggestion_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(
+                stringResource(R.string.dashboard_activity_suggestion_message, levelName, formatNumber(uiState.suggestedTdeeCalories)),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -304,7 +333,30 @@ private fun ProgressLine(progress: Float, progressPercent: Int) {
 }
 
 @Composable
-private fun AchievementCard(progressPercent: Int) {
+private fun CalorieAdviceCard(uiState: DashboardUiState) {
+    val evaluation = uiState.calorieEvaluation
+    val title = when (evaluation.status) {
+        DailyCalorieStatus.NEEDS_MORE -> stringResource(R.string.dashboard_advice_need_more_title)
+        DailyCalorieStatus.GOOD -> stringResource(R.string.dashboard_advice_good_title)
+        DailyCalorieStatus.EXCEEDED -> stringResource(R.string.dashboard_advice_exceeded_title)
+    }
+    val message = when (evaluation.status) {
+        DailyCalorieStatus.NEEDS_MORE -> when (uiState.goal) {
+            Goal.LOSE_WEIGHT -> stringResource(R.string.dashboard_advice_lose_need_more, formatNumber(evaluation.caloriesToBoundary))
+            Goal.MAINTAIN -> stringResource(R.string.dashboard_advice_maintain_need_more, formatNumber(evaluation.caloriesToBoundary))
+            Goal.GAIN_WEIGHT -> stringResource(R.string.dashboard_advice_gain_need_more, formatNumber(evaluation.caloriesToBoundary))
+        }
+        DailyCalorieStatus.GOOD -> when (uiState.goal) {
+            Goal.LOSE_WEIGHT -> stringResource(R.string.dashboard_advice_lose_good)
+            Goal.MAINTAIN -> stringResource(R.string.dashboard_advice_maintain_good)
+            Goal.GAIN_WEIGHT -> stringResource(R.string.dashboard_advice_gain_good)
+        }
+        DailyCalorieStatus.EXCEEDED -> when (uiState.goal) {
+            Goal.LOSE_WEIGHT -> stringResource(R.string.dashboard_advice_lose_exceeded, formatNumber(evaluation.caloriesToBoundary))
+            Goal.MAINTAIN -> stringResource(R.string.dashboard_advice_maintain_exceeded, formatNumber(evaluation.caloriesToBoundary))
+            Goal.GAIN_WEIGHT -> stringResource(R.string.dashboard_advice_gain_exceeded, formatNumber(evaluation.caloriesToBoundary))
+        }
+    }
     DashboardCard(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(Dimens.spaceMedium), verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -318,8 +370,8 @@ private fun AchievementCard(progressPercent: Int) {
             }
             Spacer(modifier = Modifier.width(Dimens.spaceSmall))
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-                Text(text = stringResource(R.string.dashboard_awesome), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text(text = stringResource(R.string.dashboard_awesome_message, progressPercent), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(text = message, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

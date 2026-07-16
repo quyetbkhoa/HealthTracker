@@ -7,6 +7,12 @@ import com.quyetbkhoa.healthtracker.domain.repository.ActivityRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
 import com.quyetbkhoa.healthtracker.domain.repository.MealRepository
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
+import com.quyetbkhoa.healthtracker.domain.model.Goal
+import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
+import com.quyetbkhoa.healthtracker.domain.usecase.DailyCalorieEvaluation
+import com.quyetbkhoa.healthtracker.domain.usecase.DailyCalorieStatus
+import com.quyetbkhoa.healthtracker.domain.usecase.EvaluateDailyCalorieGoalUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.EstimateActivityLevelUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +22,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.Instant
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import javax.inject.Inject
 
@@ -27,10 +36,19 @@ data class DashboardUiState(
     val targetCalories: Int = 0,
     val consumedCalories: Int = 0,
     val exerciseCalories: Int = 0,
+    val goal: Goal = Goal.MAINTAIN,
+    val suggestedActivityLevel: ActivityLevel? = null,
+    val suggestedTdeeCalories: Int = 0,
+    val calorieEvaluation: DailyCalorieEvaluation = DailyCalorieEvaluation(
+        status = DailyCalorieStatus.NEEDS_MORE,
+        lowerBound = 0,
+        upperBound = 0,
+        caloriesToBoundary = 0
+    ),
     val userName: String = "",
     val meals: List<MealEntry> = emptyList()
 ) {
-    val allowedCalories: Int get() = targetCalories + exerciseCalories
+    val allowedCalories: Int get() = targetCalories
     val remainingCalories: Int get() = allowedCalories - consumedCalories
     val isExceeded: Boolean get() = remainingCalories < 0
     val progress: Float get() = if (allowedCalories > 0) consumedCalories.toFloat() / allowedCalories else 0f
@@ -56,9 +74,14 @@ sealed interface DashboardUiEvent {
 class DashboardViewModel @Inject constructor(
     profileRepository: ProfileRepository,
     mealRepository: MealRepository,
-    activityRepository: ActivityRepository
+    activityRepository: ActivityRepository,
+    evaluateDailyCalorieGoal: EvaluateDailyCalorieGoalUseCase,
+    estimateActivityLevel: EstimateActivityLevelUseCase
 ) : ViewModel() {
     private val todayEpochDay = LocalDate.now().toEpochDay()
+    private val zone = ZoneId.systemDefault()
+    private val activityWindowStart = LocalDate.now().minusDays(27).atStartOfDay(zone).toInstant().toEpochMilli()
+    private val activityWindowEnd = LocalDate.now().plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
     private val languageTag = Locale.getDefault().language.takeIf { it == "en" } ?: "vi"
 
     private val _uiEvent = Channel<DashboardUiEvent>()
@@ -67,15 +90,35 @@ class DashboardViewModel @Inject constructor(
     val uiState: StateFlow<DashboardUiState> = combine(
         profileRepository.userProfile,
         mealRepository.observeMealsByDay(todayEpochDay, languageTag),
-        activityRepository.observeTotalCaloriesByDay(todayEpochDay)
-    ) { profile, meals, activityCalories ->
+        activityRepository.observeTotalCaloriesByDay(todayEpochDay),
+        activityRepository.observeTotalCaloriesBetween(activityWindowStart, activityWindowEnd)
+    ) { profile, meals, activityCalories, windowActivityCalories ->
+        val targetCalories = profile?.dailyCalorieTarget ?: 0
+        val consumedCalories = meals.sumOf { it.calories }
+        val goal = profile?.goal ?: Goal.MAINTAIN
+        val trackingDays = profile?.activityTrackingStartedAt
+            ?.takeIf { it > 0L }
+            ?.let { startedAt ->
+                val startDate = Instant.ofEpochMilli(startedAt).atZone(zone).toLocalDate()
+                (ChronoUnit.DAYS.between(startDate, LocalDate.now()).toInt() + 1).coerceIn(1, 28)
+            } ?: 0
+        val activityEstimate = profile?.let {
+            estimateActivityLevel(it.bmrCalories, windowActivityCalories, trackingDays)
+        }
+        val shouldSuggestActivityChange = profile != null && trackingDays >= 14 &&
+            activityEstimate != null && activityEstimate.activityLevel != profile.activityLevel &&
+            kotlin.math.abs(activityEstimate.estimatedTdeeCalories - profile.tdeeCalories) >= 150
         DashboardUiState(
             isLoading = false,
             hasProfile = profile != null,
             tdeeCalories = profile?.tdeeCalories ?: 0,
-            targetCalories = profile?.dailyCalorieTarget ?: 0,
-            consumedCalories = meals.sumOf { it.calories },
+            targetCalories = targetCalories,
+            consumedCalories = consumedCalories,
             exerciseCalories = activityCalories.toInt(),
+            goal = goal,
+            suggestedActivityLevel = activityEstimate?.activityLevel.takeIf { shouldSuggestActivityChange },
+            suggestedTdeeCalories = activityEstimate?.estimatedTdeeCalories?.takeIf { shouldSuggestActivityChange } ?: 0,
+            calorieEvaluation = evaluateDailyCalorieGoal(consumedCalories, targetCalories, goal),
             userName = profile?.fullName.orEmpty(),
             meals = meals
         )

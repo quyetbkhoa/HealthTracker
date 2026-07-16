@@ -22,12 +22,12 @@ class CalculateTdeeUseCaseTest {
     }
 
     @Test
-    fun goals_adjustTargetByFiveHundredCalories() {
+    fun goals_useSafePercentageBasedAdjustments() {
         val maintain = calculateTdee(profile(Gender.FEMALE, Goal.MAINTAIN), today)
         val lose = calculateTdee(profile(Gender.FEMALE, Goal.LOSE_WEIGHT), today)
         val gain = calculateTdee(profile(Gender.FEMALE, Goal.GAIN_WEIGHT), today)
-        assertEquals(maintain.targetCalories - 500, lose.targetCalories)
-        assertEquals(maintain.targetCalories + 500, gain.targetCalories)
+        assertEquals(maintain.targetCalories - 306, lose.targetCalories)
+        assertEquals(maintain.targetCalories + 204, gain.targetCalories)
     }
 
     private fun profile(gender: Gender, goal: Goal) = UserProfile(
