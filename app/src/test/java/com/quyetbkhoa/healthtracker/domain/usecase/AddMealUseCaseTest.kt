@@ -56,6 +56,8 @@ class AddMealUseCaseTest {
 }
 
 private class FakeMealRepository : MealRepository {
+    override fun observeMealsBetween(startMillis: Long, endMillis: Long, languageTag: String) =
+        kotlinx.coroutines.flow.flowOf(emptyList<MealEntry>())
     var addedMeal: MealEntry? = null
 
     override fun observeMealsByDay(

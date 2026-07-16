@@ -27,6 +27,9 @@ import com.quyetbkhoa.healthtracker.presentation.profile.ProfileSettingsScreen
 import com.quyetbkhoa.healthtracker.presentation.meal.AddMealScreen
 import com.quyetbkhoa.healthtracker.presentation.activity.AddActivityScreen
 import com.quyetbkhoa.healthtracker.presentation.mealjournal.MealJournalScreen
+import com.quyetbkhoa.healthtracker.presentation.statistics.StatisticsChartsScreen
+import com.quyetbkhoa.healthtracker.presentation.statistics.StatisticsOverviewScreen
+import com.quyetbkhoa.healthtracker.presentation.statistics.StatisticsRange
 import com.quyetbkhoa.healthtracker.domain.model.MealType
 import java.time.LocalDate
 
@@ -109,8 +112,25 @@ fun AppNavigation(
                     navController.navigate(addMealRoute(LocalDate.now().toEpochDay(), MealType.BREAKFAST))
                 },
                 onNavigateToAddActivity = { navController.navigate("add_activity") },
-                onNavigateToMealJournal = { navController.navigate("meal_journal") }
+                onNavigateToMealJournal = { navController.navigate("meal_journal") },
+                onNavigateToStatistics = { navController.navigate("statistics") }
             )
+        }
+
+        composable("statistics") {
+            StatisticsOverviewScreen(
+                onNavigateToCharts = { range -> navController.navigate("statistics_charts/${range.name}") }
+            )
+        }
+
+        composable(
+            route = "statistics_charts/{range}",
+            arguments = listOf(navArgument("range") {
+                type = NavType.StringType
+                defaultValue = StatisticsRange.LAST_7_DAYS.name
+            })
+        ) {
+            StatisticsChartsScreen(onNavigateBack = { navController.popBackStack() })
         }
 
         composable(
