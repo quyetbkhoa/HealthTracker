@@ -5,6 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
 import com.quyetbkhoa.healthtracker.domain.repository.SettingsRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
+import com.quyetbkhoa.healthtracker.domain.repository.ReminderScheduler
+import com.quyetbkhoa.healthtracker.domain.model.ReminderSettings
+import com.quyetbkhoa.healthtracker.domain.model.ReminderTime
+import com.quyetbkhoa.healthtracker.domain.model.ReminderType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,16 +20,21 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
+    private val reminderScheduler: ReminderScheduler,
     profileRepository: ProfileRepository
 ) : ViewModel() {
 
     val uiState: StateFlow<MainActivityUiState> = combine(
         settingsRepository.themeType,
-        profileRepository.userProfile
-    ) { themeType, profile ->
+        profileRepository.userProfile,
+        settingsRepository.reminderSettings,
+        settingsRepository.exactAlarmAccessRequested
+    ) { themeType, profile, reminderSettings, exactAlarmAccessRequested ->
         MainActivityUiState.Success(
             themeType = themeType,
-            hasProfile = profile != null
+            hasProfile = profile != null,
+            reminderSettings = reminderSettings,
+            exactAlarmAccessRequested = exactAlarmAccessRequested
         )
     }.stateIn(
         scope = viewModelScope,
@@ -38,12 +47,60 @@ class MainViewModel @Inject constructor(
             settingsRepository.setThemeType(themeType)
         }
     }
+
+    fun setRemindersEnabled(isEnabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setRemindersEnabled(isEnabled)
+            val currentSettings = currentReminderSettings().copy(isEnabled = isEnabled)
+            if (isEnabled) {
+                reminderScheduler.scheduleAll(currentSettings)
+            } else {
+                reminderScheduler.cancelAll()
+            }
+        }
+    }
+
+    fun setReminderTime(type: ReminderType, time: ReminderTime) {
+        viewModelScope.launch {
+            settingsRepository.setReminderTime(type, time)
+            if (currentReminderSettings().isEnabled) {
+                reminderScheduler.scheduleNext(type, time)
+            }
+        }
+    }
+
+    fun scheduleTestDinnerReminder() {
+        reminderScheduler.scheduleTestDinnerReminder()
+    }
+
+    fun syncReminderSchedule() {
+        val state = uiState.value as? MainActivityUiState.Success ?: return
+        if (state.reminderSettings.isEnabled) {
+            reminderScheduler.scheduleAll(state.reminderSettings)
+        }
+    }
+
+    fun shouldRequestExactAlarmAccess(): Boolean {
+        val state = uiState.value as? MainActivityUiState.Success ?: return false
+        return state.reminderSettings.isEnabled && !state.exactAlarmAccessRequested
+    }
+
+    fun markExactAlarmAccessRequested() {
+        viewModelScope.launch {
+            settingsRepository.markExactAlarmAccessRequested()
+        }
+    }
+
+    private fun currentReminderSettings(): ReminderSettings =
+        (uiState.value as? MainActivityUiState.Success)?.reminderSettings ?: ReminderSettings()
 }
 
 sealed interface MainActivityUiState {
     data object Loading : MainActivityUiState
     data class Success(
         val themeType: AppThemeType,
-        val hasProfile: Boolean
+        val hasProfile: Boolean,
+        val reminderSettings: ReminderSettings,
+        val exactAlarmAccessRequested: Boolean
     ) : MainActivityUiState
 }

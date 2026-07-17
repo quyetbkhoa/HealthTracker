@@ -31,6 +31,9 @@ import com.quyetbkhoa.healthtracker.presentation.statistics.StatisticsChartsScre
 import com.quyetbkhoa.healthtracker.presentation.statistics.StatisticsOverviewScreen
 import com.quyetbkhoa.healthtracker.presentation.statistics.StatisticsRange
 import com.quyetbkhoa.healthtracker.domain.model.MealType
+import com.quyetbkhoa.healthtracker.domain.model.ReminderType
+import com.quyetbkhoa.healthtracker.domain.model.ReminderSettings
+import com.quyetbkhoa.healthtracker.domain.model.ReminderTime
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -38,11 +41,38 @@ import java.time.LocalDate
 fun AppNavigation(
     themeType: AppThemeType,
     hasProfile: Boolean,
+    reminderSettings: ReminderSettings,
+    hasExactAlarmAccess: Boolean,
+    reminderToOpen: ReminderType?,
     onThemeChanged: (AppThemeType) -> Unit,
-    onLanguageChanged: (AppLanguage) -> Unit
+    onLanguageChanged: (AppLanguage) -> Unit,
+    onRemindersChanged: (Boolean) -> Unit,
+    onReminderTimeChanged: (ReminderType, ReminderTime) -> Unit,
+    onTestDinnerReminder: () -> Unit,
+    onRequestExactAlarmAccess: () -> Unit,
+    onReminderConsumed: () -> Unit
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
+
+    LaunchedEffect(reminderToOpen, hasProfile) {
+        val reminder = reminderToOpen ?: return@LaunchedEffect
+        if (hasProfile) {
+            when (reminder) {
+                ReminderType.BREAKFAST -> navController.navigate(
+                    addMealRoute(LocalDate.now().toEpochDay(), MealType.BREAKFAST)
+                )
+                ReminderType.LUNCH -> navController.navigate(
+                    addMealRoute(LocalDate.now().toEpochDay(), MealType.LUNCH)
+                )
+                ReminderType.DINNER -> navController.navigate(
+                    addMealRoute(LocalDate.now().toEpochDay(), MealType.DINNER)
+                )
+                ReminderType.ACTIVITY -> navController.navigate("add_activity")
+            }
+        }
+        onReminderConsumed()
+    }
 
     NavHost(
         navController = navController,
@@ -185,11 +215,17 @@ fun AppNavigation(
         composable("settings") {
             SettingsScreen(
                 themeType = themeType,
+                reminderSettings = reminderSettings,
+                hasExactAlarmAccess = hasExactAlarmAccess,
                 onThemeChanged = onThemeChanged,
                 selectedLanguage = AppLanguage.fromLanguageTag(
                     AppCompatDelegate.getApplicationLocales().toLanguageTags()
                 ),
                 onLanguageChanged = onLanguageChanged,
+                onRemindersChanged = onRemindersChanged,
+                onReminderTimeChanged = onReminderTimeChanged,
+                onTestDinnerReminder = onTestDinnerReminder,
+                onRequestExactAlarmAccess = onRequestExactAlarmAccess,
                 onNavigateToProfile = { navController.navigate("profile_settings") },
                 onNavigateBack = { navController.popBackStack() },
                 onResetCompleted = {

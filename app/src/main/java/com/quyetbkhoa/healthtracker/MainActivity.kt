@@ -1,6 +1,15 @@
 package com.quyetbkhoa.healthtracker
 
+import android.Manifest
+import android.app.AlarmManager
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -12,29 +21,46 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.os.LocaleListCompat
+import androidx.core.content.ContextCompat
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.navigation.AppNavigation
+import com.quyetbkhoa.healthtracker.data.notification.ReminderNotificationManager
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
+import com.quyetbkhoa.healthtracker.domain.model.ReminderType
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
+    private val pendingReminder = MutableStateFlow<ReminderType?>(null)
+    private val exactAlarmAccess = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        updatePendingReminder(intent)
+        updateExactAlarmAccess()
         ensureSupportedAppLanguage()
         enableEdgeToEdge()
         
         setContent {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val reminderToOpen by pendingReminder.collectAsStateWithLifecycle()
+            val hasExactAlarmAccess by exactAlarmAccess.collectAsStateWithLifecycle()
+            val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted ->
+                viewModel.setRemindersEnabled(isGranted)
+                if (isGranted) requestExactAlarmAccessIfNeeded()
+            }
 
             when (val state = uiState) {
                 is MainActivityUiState.Loading -> {
@@ -42,6 +68,18 @@ class MainActivity : AppCompatActivity() {
                     LoadingScreen()
                 }
                 is MainActivityUiState.Success -> {
+                    LaunchedEffect(state.reminderSettings.isEnabled) {
+                        if (state.reminderSettings.isEnabled) {
+                            if (canPostNotifications()) {
+                                viewModel.syncReminderSchedule()
+                                requestExactAlarmAccessIfNeeded()
+                            } else {
+                                notificationPermissionLauncher.launch(
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                )
+                            }
+                        }
+                    }
                     HealthTrackerTheme(
                         themeType = state.themeType
                     ) {
@@ -52,14 +90,77 @@ class MainActivity : AppCompatActivity() {
                             AppNavigation(
                                 themeType = state.themeType,
                                 hasProfile = state.hasProfile,
+                                reminderSettings = state.reminderSettings,
+                                hasExactAlarmAccess = hasExactAlarmAccess,
+                                reminderToOpen = reminderToOpen,
                                 onThemeChanged = viewModel::setTheme,
-                                onLanguageChanged = ::setAppLanguage
+                                onLanguageChanged = ::setAppLanguage,
+                                onRemindersChanged = { isEnabled ->
+                                    if (isEnabled && !canPostNotifications()) {
+                                        notificationPermissionLauncher.launch(
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        )
+                                    } else {
+                                        viewModel.setRemindersEnabled(isEnabled)
+                                    }
+                                },
+                                onReminderTimeChanged = viewModel::setReminderTime,
+                                onTestDinnerReminder = viewModel::scheduleTestDinnerReminder,
+                                onRequestExactAlarmAccess = {
+                                    requestExactAlarmAccessIfNeeded(force = true)
+                                },
+                                onReminderConsumed = { pendingReminder.value = null }
                             )
                         }
                     }
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        updatePendingReminder(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateExactAlarmAccess()
+        viewModel.syncReminderSchedule()
+    }
+
+    private fun canPostNotifications(): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+    private fun updatePendingReminder(intent: Intent?) {
+        pendingReminder.value = ReminderType.fromName(
+            intent?.getStringExtra(ReminderNotificationManager.EXTRA_OPEN_REMINDER)
+        )
+    }
+
+    private fun requestExactAlarmAccessIfNeeded(force: Boolean = false) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        val alarmManager = getSystemService(AlarmManager::class.java)
+        if (alarmManager.canScheduleExactAlarms() ||
+            (!force && !viewModel.shouldRequestExactAlarmAccess())
+        ) return
+
+        viewModel.markExactAlarmAccessRequested()
+        startActivity(
+            Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                data = Uri.parse("package:$packageName")
+            }
+        )
+    }
+
+    private fun updateExactAlarmAccess() {
+        exactAlarmAccess.value = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+            getSystemService(AlarmManager::class.java).canScheduleExactAlarms()
     }
 
     private fun ensureSupportedAppLanguage() {
