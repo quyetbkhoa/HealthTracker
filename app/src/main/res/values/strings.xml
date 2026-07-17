@@ -380,4 +380,26 @@
     <string name="statistics_highest_date">Ghi nhận vào ngày %1$s.</string>
     <string name="statistics_no_consumed_history">Chưa có lịch sử calo nạp trong khoảng này.</string>
     <string name="statistics_no_burned_history">Chưa có lịch sử calo đốt trong khoảng này.</string>
+    <string name="settings_notifications_section">Thông báo</string>
+    <string name="settings_notifications_title">Nhắc cập nhật hằng ngày</string>
+    <string name="settings_notifications_description">Bật hoặc tắt toàn bộ lời nhắc</string>
+    <string name="settings_notification_breakfast">Bữa sáng</string>
+    <string name="settings_notification_lunch">Bữa trưa</string>
+    <string name="settings_notification_dinner">Bữa tối</string>
+    <string name="settings_notification_activity">Hoạt động</string>
+    <string name="settings_notification_time_value">%1$02d:%2$02d</string>
+    <string name="settings_exact_alarm_enabled">Thông báo đúng giờ đã sẵn sàng</string>
+    <string name="settings_exact_alarm_disabled">Thông báo có thể đến trễ</string>
+    <string name="settings_exact_alarm_allow">Cho phép đúng giờ</string>
+    <string name="settings_exact_alarm_granted">Đã cho phép</string>
+    <string name="settings_icon_notifications">🔔</string>
+    <string name="notification_channel_name">Nhắc nhở sức khỏe</string>
+    <string name="notification_channel_description">Nhắc cập nhật bữa ăn và hoạt động hằng ngày</string>
+    <string name="notification_breakfast_message">Đã đến lúc cập nhật bữa sáng của bạn</string>
+    <string name="notification_lunch_message">Đã đến lúc cập nhật bữa trưa của bạn</string>
+    <string name="notification_dinner_message">Đã đến lúc cập nhật bữa tối của bạn</string>
+    <string name="notification_activity_message">Bạn đã ghi lại hoạt động hôm nay chưa?</string>
+    <string name="notification_test_dinner_message">Test: đã đến lúc nhập bữa tối</string>
+    <string name="settings_notification_test_button">Test thông báo bữa tối sau 30 giây</string>
+    <string name="settings_notification_test_scheduled">Đã đặt thông báo test sau 30 giây</string>
 </resources>

@@ -366,4 +366,26 @@
     <string name="statistics_highest_date">Recorded on %1$s.</string>
     <string name="statistics_no_consumed_history">There is no calorie intake history in this period yet.</string>
     <string name="statistics_no_burned_history">There is no calorie burn history in this period yet.</string>
+    <string name="settings_notifications_section">Notifications</string>
+    <string name="settings_notifications_title">Daily update reminders</string>
+    <string name="settings_notifications_description">Turn all reminders on or off</string>
+    <string name="settings_notification_breakfast">Breakfast</string>
+    <string name="settings_notification_lunch">Lunch</string>
+    <string name="settings_notification_dinner">Dinner</string>
+    <string name="settings_notification_activity">Activity</string>
+    <string name="settings_notification_time_value">%1$02d:%2$02d</string>
+    <string name="settings_exact_alarm_enabled">On-time notifications are ready</string>
+    <string name="settings_exact_alarm_disabled">Notifications may arrive late</string>
+    <string name="settings_exact_alarm_allow">Allow on-time alerts</string>
+    <string name="settings_exact_alarm_granted">Allowed</string>
+    <string name="settings_icon_notifications">🔔</string>
+    <string name="notification_channel_name">Health reminders</string>
+    <string name="notification_channel_description">Daily reminders to update meals and activity</string>
+    <string name="notification_breakfast_message">It’s time to update your breakfast</string>
+    <string name="notification_lunch_message">It’s time to update your lunch</string>
+    <string name="notification_dinner_message">It’s time to update your dinner</string>
+    <string name="notification_activity_message">Have you logged today’s activity yet?</string>
+    <string name="notification_test_dinner_message">Test: it’s time to log dinner</string>
+    <string name="settings_notification_test_button">Test dinner reminder in 30 seconds</string>
+    <string name="settings_notification_test_scheduled">Test reminder scheduled in 30 seconds</string>
 </resources>

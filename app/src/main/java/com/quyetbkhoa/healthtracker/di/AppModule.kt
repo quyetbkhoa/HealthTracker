@@ -9,8 +9,10 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.quyetbkhoa.healthtracker.data.datastore.SettingsDataStore
+import com.quyetbkhoa.healthtracker.data.notification.AlarmReminderScheduler
 import com.quyetbkhoa.healthtracker.data.repository.SettingsRepositoryImpl
 import com.quyetbkhoa.healthtracker.domain.repository.SettingsRepository
+import com.quyetbkhoa.healthtracker.domain.repository.ReminderScheduler
 import com.quyetbkhoa.healthtracker.data.datastore.ProfileDataStore
 import com.quyetbkhoa.healthtracker.data.repository.ProfileRepositoryImpl
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
@@ -99,6 +101,12 @@ object AppModule {
     fun provideSettingsRepository(settingsDataStore: SettingsDataStore): SettingsRepository {
         return SettingsRepositoryImpl(settingsDataStore)
     }
+
+    @Provides
+    @Singleton
+    fun provideReminderScheduler(
+        @ApplicationContext context: Context
+    ): ReminderScheduler = AlarmReminderScheduler(context)
 
     @Provides
     @Singleton
