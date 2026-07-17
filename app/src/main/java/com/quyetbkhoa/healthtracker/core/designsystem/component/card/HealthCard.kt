@@ -59,7 +59,7 @@ fun HealthElevatedCard(
     modifier: Modifier = Modifier,
     shape: Shape = HealthShape.large,
     colors: CardColors = CardDefaults.cardColors(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.surface
     ),
     content: @Composable ColumnScope.() -> Unit
 ) {

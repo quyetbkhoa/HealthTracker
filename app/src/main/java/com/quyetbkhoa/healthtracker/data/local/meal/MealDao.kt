@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MealDao {
+    @Query("SELECT COUNT(*) FROM meals")
+    suspend fun count(): Int
+
     @Insert
     suspend fun insert(meal: MealEntity): Long
 

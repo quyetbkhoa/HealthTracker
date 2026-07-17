@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ActivityDao {
+    @Query("SELECT COUNT(*) FROM activity_records")
+    suspend fun countActivityRecords(): Int
+
     @Query("SELECT * FROM activity_types ORDER BY isFavorite DESC, displayOrder ASC, name ASC")
     fun observeActivityTypes(): Flow<List<ActivityTypeEntity>>
 
