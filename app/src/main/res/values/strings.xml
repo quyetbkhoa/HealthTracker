@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">HealthTracker</string>
+    <string name="widget_name">Thêm nhanh</string>
+    <string name="widget_description">Thêm nhanh bữa ăn hoặc hoạt động từ màn hình chính</string>
+    <string name="widget_add_meal_description">Mở màn hình thêm bữa ăn</string>
+    <string name="widget_add_activity_description">Mở màn hình thêm hoạt động</string>
     <string name="common_not_available">—</string>
     <string name="welcome_title">Chào mừng bạn đến với HealthTracker</string>
     <string name="welcome_start">Bắt đầu</string>

@@ -70,8 +70,8 @@ fun AppNavigation(
                 )
                 ReminderType.ACTIVITY -> navController.navigate("add_activity")
             }
+            onReminderConsumed()
         }
-        onReminderConsumed()
     }
 
     NavHost(

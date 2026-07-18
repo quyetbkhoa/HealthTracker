@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">HealthTracker</string>
+    <string name="widget_name">Quick add</string>
+    <string name="widget_description">Quickly add a meal or activity from the home screen</string>
+    <string name="widget_add_meal_description">Open the add meal screen</string>
+    <string name="widget_add_activity_description">Open the add activity screen</string>
     <string name="common_not_available">—</string>
     <string name="welcome_title">Welcome to HealthTracker</string>
     <string name="welcome_start">Get started</string>
