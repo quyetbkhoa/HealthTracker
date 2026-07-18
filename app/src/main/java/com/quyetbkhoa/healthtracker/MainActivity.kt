@@ -31,6 +31,7 @@ import androidx.core.os.LocaleListCompat
 import androidx.core.content.ContextCompat
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.navigation.AppNavigation
+import com.quyetbkhoa.healthtracker.core.navigation.AppDestination
 import com.quyetbkhoa.healthtracker.data.notification.ReminderNotificationManager
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
 import com.quyetbkhoa.healthtracker.domain.model.ReminderType
@@ -41,19 +42,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
-    private val pendingReminder = MutableStateFlow<ReminderType?>(null)
+    private val pendingDestination = MutableStateFlow<AppDestination?>(null)
     private val exactAlarmAccess = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        updatePendingReminder(intent)
+        updatePendingDestination(intent)
         updateExactAlarmAccess()
         ensureSupportedAppLanguage()
         enableEdgeToEdge()
         
         setContent {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            val reminderToOpen by pendingReminder.collectAsStateWithLifecycle()
+            val destinationToOpen by pendingDestination.collectAsStateWithLifecycle()
             val hasExactAlarmAccess by exactAlarmAccess.collectAsStateWithLifecycle()
             val notificationPermissionLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -92,7 +93,7 @@ class MainActivity : AppCompatActivity() {
                                 hasProfile = state.hasProfile,
                                 reminderSettings = state.reminderSettings,
                                 hasExactAlarmAccess = hasExactAlarmAccess,
-                                reminderToOpen = reminderToOpen,
+                                destinationToOpen = destinationToOpen,
                                 onThemeChanged = viewModel::setTheme,
                                 onLanguageChanged = ::setAppLanguage,
                                 onRemindersChanged = { isEnabled ->
@@ -109,7 +110,7 @@ class MainActivity : AppCompatActivity() {
                                 onRequestExactAlarmAccess = {
                                     requestExactAlarmAccessIfNeeded(force = true)
                                 },
-                                onReminderConsumed = { pendingReminder.value = null }
+                                onDestinationConsumed = { pendingDestination.value = null }
                             )
                         }
                     }
@@ -121,7 +122,7 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        updatePendingReminder(intent)
+        updatePendingDestination(intent)
     }
 
     override fun onResume() {
@@ -137,10 +138,25 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
 
-    private fun updatePendingReminder(intent: Intent?) {
-        pendingReminder.value = ReminderType.fromName(
-            intent?.getStringExtra(ReminderNotificationManager.EXTRA_OPEN_REMINDER)
+    private fun updatePendingDestination(intent: Intent?) {
+        if (intent == null) return
+        val widgetDestination = AppDestination.fromName(
+            intent.getStringExtra(AppDestination.EXTRA_APP_DESTINATION)
         )
+        val reminderDestination = ReminderType.fromName(
+            intent.getStringExtra(ReminderNotificationManager.EXTRA_OPEN_REMINDER)
+        ).toAppDestination()
+        pendingDestination.value = widgetDestination ?: reminderDestination
+        intent.removeExtra(AppDestination.EXTRA_APP_DESTINATION)
+        intent.removeExtra(ReminderNotificationManager.EXTRA_OPEN_REMINDER)
+    }
+
+    private fun ReminderType?.toAppDestination(): AppDestination? = when (this) {
+        ReminderType.BREAKFAST -> AppDestination.ADD_MEAL
+        ReminderType.LUNCH -> AppDestination.ADD_LUNCH
+        ReminderType.DINNER -> AppDestination.ADD_DINNER
+        ReminderType.ACTIVITY -> AppDestination.ADD_ACTIVITY
+        null -> null
     }
 
     private fun requestExactAlarmAccessIfNeeded(force: Boolean = false) {

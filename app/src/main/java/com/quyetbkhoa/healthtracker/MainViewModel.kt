@@ -9,6 +9,8 @@ import com.quyetbkhoa.healthtracker.domain.repository.ReminderScheduler
 import com.quyetbkhoa.healthtracker.domain.model.ReminderSettings
 import com.quyetbkhoa.healthtracker.domain.model.ReminderTime
 import com.quyetbkhoa.healthtracker.domain.model.ReminderType
+import com.quyetbkhoa.healthtracker.domain.usecase.SetRemindersEnabledUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.SetReminderTimeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +23,9 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val reminderScheduler: ReminderScheduler,
-    profileRepository: ProfileRepository
+    profileRepository: ProfileRepository,
+    private val updateRemindersEnabled: SetRemindersEnabledUseCase,
+    private val updateReminderTime: SetReminderTimeUseCase
 ) : ViewModel() {
 
     val uiState: StateFlow<MainActivityUiState> = combine(
@@ -50,22 +54,13 @@ class MainViewModel @Inject constructor(
 
     fun setRemindersEnabled(isEnabled: Boolean) {
         viewModelScope.launch {
-            settingsRepository.setRemindersEnabled(isEnabled)
-            val currentSettings = currentReminderSettings().copy(isEnabled = isEnabled)
-            if (isEnabled) {
-                reminderScheduler.scheduleAll(currentSettings)
-            } else {
-                reminderScheduler.cancelAll()
-            }
+            updateRemindersEnabled(isEnabled, currentReminderSettings())
         }
     }
 
     fun setReminderTime(type: ReminderType, time: ReminderTime) {
         viewModelScope.launch {
-            settingsRepository.setReminderTime(type, time)
-            if (currentReminderSettings().isEnabled) {
-                reminderScheduler.scheduleNext(type, time)
-            }
+            updateReminderTime(type, time, currentReminderSettings().isEnabled)
         }
     }
 

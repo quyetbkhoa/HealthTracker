@@ -1,13 +1,12 @@
 package com.quyetbkhoa.healthtracker.core.navigation
 
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.appcompat.app.AppCompatDelegate
@@ -15,8 +14,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
@@ -29,65 +26,55 @@ import com.quyetbkhoa.healthtracker.presentation.activity.AddActivityScreen
 import com.quyetbkhoa.healthtracker.presentation.mealjournal.MealJournalScreen
 import com.quyetbkhoa.healthtracker.presentation.statistics.StatisticsChartsScreen
 import com.quyetbkhoa.healthtracker.presentation.statistics.StatisticsOverviewScreen
-import com.quyetbkhoa.healthtracker.presentation.statistics.StatisticsRange
 import com.quyetbkhoa.healthtracker.domain.model.MealType
 import com.quyetbkhoa.healthtracker.domain.model.ReminderType
 import com.quyetbkhoa.healthtracker.domain.model.ReminderSettings
 import com.quyetbkhoa.healthtracker.domain.model.ReminderTime
 import java.time.LocalDate
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
     themeType: AppThemeType,
     hasProfile: Boolean,
     reminderSettings: ReminderSettings,
     hasExactAlarmAccess: Boolean,
-    reminderToOpen: ReminderType?,
+    destinationToOpen: AppDestination?,
     onThemeChanged: (AppThemeType) -> Unit,
     onLanguageChanged: (AppLanguage) -> Unit,
     onRemindersChanged: (Boolean) -> Unit,
     onReminderTimeChanged: (ReminderType, ReminderTime) -> Unit,
     onTestDinnerReminder: () -> Unit,
     onRequestExactAlarmAccess: () -> Unit,
-    onReminderConsumed: () -> Unit
+    onDestinationConsumed: () -> Unit
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
+    val addMealSavedMessage = stringResource(R.string.add_meal_saved)
+    val addActivitySavedMessage = stringResource(R.string.add_activity_saved)
+    val profileSavedMessage = stringResource(R.string.profile_settings_saved)
 
-    LaunchedEffect(reminderToOpen, hasProfile) {
-        val reminder = reminderToOpen ?: return@LaunchedEffect
+    LaunchedEffect(destinationToOpen, hasProfile) {
+        val destination = destinationToOpen ?: return@LaunchedEffect
         if (hasProfile) {
-            when (reminder) {
-                ReminderType.BREAKFAST -> navController.navigate(
-                    addMealRoute(LocalDate.now().toEpochDay(), MealType.BREAKFAST)
-                )
-                ReminderType.LUNCH -> navController.navigate(
-                    addMealRoute(LocalDate.now().toEpochDay(), MealType.LUNCH)
-                )
-                ReminderType.DINNER -> navController.navigate(
-                    addMealRoute(LocalDate.now().toEpochDay(), MealType.DINNER)
-                )
-                ReminderType.ACTIVITY -> navController.navigate("add_activity")
-            }
-            onReminderConsumed()
+            navController.navigate(destination.toRoute(LocalDate.now().toEpochDay()))
+            onDestinationConsumed()
         }
     }
 
     NavHost(
         navController = navController,
-        startDestination = if (hasProfile) "home" else "welcome"
+        startDestination = if (hasProfile) AppRoute.Home else AppRoute.Welcome
     ) {
-        composable("welcome") {
+        composable<AppRoute.Welcome> {
             WelcomeScreen(
-                onStartClick = { navController.navigate("onboarding_graph") }
+                onStartClick = { navController.navigate(AppRoute.OnboardingGraph) }
             )
         }
 
-        navigation(startDestination = "profile_step1", route = "onboarding_graph") {
-            composable("profile_step1") { backStackEntry ->
+        navigation<AppRoute.OnboardingGraph>(startDestination = AppRoute.ProfileStep1) {
+            composable<AppRoute.ProfileStep1> { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry("onboarding_graph")
+                    navController.getBackStackEntry(AppRoute.OnboardingGraph)
                 }
                 val viewModel: ProfileSetupViewModel = hiltViewModel(parentEntry)
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -95,8 +82,9 @@ fun AppNavigation(
                 LaunchedEffect(Unit) {
                     viewModel.uiEvent.collect { event ->
                         when (event) {
-                            is ProfileSetupUiEvent.NavigateToStep2 -> navController.navigate("profile_step2")
-                            is ProfileSetupUiEvent.ShowToast -> Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                            is ProfileSetupUiEvent.NavigateToStep2 ->
+                                navController.navigate(AppRoute.ProfileStep2)
+                            is ProfileSetupUiEvent.ShowToast -> Toast.makeText(context, event.messageRes, Toast.LENGTH_SHORT).show()
                             else -> Unit
                         }
                     }
@@ -108,9 +96,9 @@ fun AppNavigation(
                 )
             }
 
-            composable("profile_step2") { backStackEntry ->
+            composable<AppRoute.ProfileStep2> { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry("onboarding_graph")
+                    navController.getBackStackEntry(AppRoute.OnboardingGraph)
                 }
                 val viewModel: ProfileSetupViewModel = hiltViewModel(parentEntry)
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -118,10 +106,10 @@ fun AppNavigation(
                 LaunchedEffect(Unit) {
                     viewModel.uiEvent.collect { event ->
                         when (event) {
-                            is ProfileSetupUiEvent.NavigateToDashboard -> navController.navigate("home") {
-                                popUpTo("welcome") { inclusive = true }
+                            is ProfileSetupUiEvent.NavigateToDashboard -> navController.navigate(AppRoute.Home) {
+                                popUpTo<AppRoute.Welcome> { inclusive = true }
                             }
-                            is ProfileSetupUiEvent.ShowToast -> Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                            is ProfileSetupUiEvent.ShowToast -> Toast.makeText(context, event.messageRes, Toast.LENGTH_SHORT).show()
                             else -> Unit
                         }
                     }
@@ -135,53 +123,39 @@ fun AppNavigation(
             }
         }
 
-        composable("home") {
+        composable<AppRoute.Home> {
             DashboardScreen(
-                onNavigateToSettings = { navController.navigate("settings") },
+                onNavigateToSettings = { navController.navigate(AppRoute.Settings) },
                 onNavigateToAddMeal = {
-                    navController.navigate(addMealRoute(LocalDate.now().toEpochDay(), MealType.BREAKFAST))
+                    navController.navigate(
+                        AppRoute.AddMeal(LocalDate.now().toEpochDay(), MealType.BREAKFAST)
+                    )
                 },
-                onNavigateToAddActivity = { navController.navigate("add_activity") },
-                onNavigateToMealJournal = { navController.navigate("meal_journal") },
-                onNavigateToStatistics = { navController.navigate("statistics") }
+                onNavigateToAddActivity = { navController.navigate(AppRoute.AddActivity) },
+                onNavigateToMealJournal = { navController.navigate(AppRoute.MealJournal) },
+                onNavigateToStatistics = { navController.navigate(AppRoute.Statistics) }
             )
         }
 
-        composable("statistics") {
+        composable<AppRoute.Statistics> {
             StatisticsOverviewScreen(
-                onNavigateToCharts = { range -> navController.navigate("statistics_charts/${range.name}") }
+                onNavigateToCharts = { range ->
+                    navController.navigate(AppRoute.StatisticsCharts(range))
+                }
             )
         }
 
-        composable(
-            route = "statistics_charts/{range}",
-            arguments = listOf(navArgument("range") {
-                type = NavType.StringType
-                defaultValue = StatisticsRange.LAST_7_DAYS.name
-            })
-        ) {
+        composable<AppRoute.StatisticsCharts> {
             StatisticsChartsScreen(onNavigateBack = { navController.popBackStack() })
         }
 
-        composable(
-            route = "add_meal?epochDay={epochDay}&mealType={mealType}",
-            arguments = listOf(
-                navArgument("epochDay") {
-                    type = NavType.LongType
-                    defaultValue = LocalDate.now().toEpochDay()
-                },
-                navArgument("mealType") {
-                    type = NavType.StringType
-                    defaultValue = MealType.BREAKFAST.name
-                }
-            )
-        ) {
+        composable<AppRoute.AddMeal> {
             AddMealScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onSaved = {
                     Toast.makeText(
                         context,
-                        context.getString(R.string.add_meal_saved),
+                        addMealSavedMessage,
                         Toast.LENGTH_SHORT
                     ).show()
                     navController.popBackStack()
@@ -189,22 +163,22 @@ fun AppNavigation(
             )
         }
 
-        composable("meal_journal") {
+        composable<AppRoute.MealJournal> {
             MealJournalScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onAddMeal = { epochDay, mealType ->
-                    navController.navigate(addMealRoute(epochDay, mealType))
+                    navController.navigate(AppRoute.AddMeal(epochDay, mealType))
                 }
             )
         }
 
-        composable("add_activity") {
+        composable<AppRoute.AddActivity> {
             AddActivityScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onSaved = {
                     Toast.makeText(
                         context,
-                        context.getString(R.string.add_activity_saved),
+                        addActivitySavedMessage,
                         Toast.LENGTH_SHORT
                     ).show()
                     navController.popBackStack()
@@ -212,7 +186,7 @@ fun AppNavigation(
             )
         }
 
-        composable("settings") {
+        composable<AppRoute.Settings> {
             SettingsScreen(
                 themeType = themeType,
                 reminderSettings = reminderSettings,
@@ -226,10 +200,10 @@ fun AppNavigation(
                 onReminderTimeChanged = onReminderTimeChanged,
                 onTestDinnerReminder = onTestDinnerReminder,
                 onRequestExactAlarmAccess = onRequestExactAlarmAccess,
-                onNavigateToProfile = { navController.navigate("profile_settings") },
+                onNavigateToProfile = { navController.navigate(AppRoute.ProfileSettings) },
                 onNavigateBack = { navController.popBackStack() },
                 onResetCompleted = {
-                    navController.navigate("welcome") {
+                    navController.navigate(AppRoute.Welcome) {
                         popUpTo(navController.graph.id) { inclusive = true }
                         launchSingleTop = true
                     }
@@ -237,13 +211,13 @@ fun AppNavigation(
             )
         }
 
-        composable("profile_settings") {
+        composable<AppRoute.ProfileSettings> {
             ProfileSettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onSaved = {
-                    Toast.makeText(context, context.getString(R.string.profile_settings_saved), Toast.LENGTH_SHORT).show()
-                    navController.navigate("home") {
-                        popUpTo("home") { inclusive = true }
+                    Toast.makeText(context, profileSavedMessage, Toast.LENGTH_SHORT).show()
+                    navController.navigate(AppRoute.Home) {
+                        popUpTo<AppRoute.Home> { inclusive = true }
                     }
                 }
             )
@@ -251,5 +225,9 @@ fun AppNavigation(
     }
 }
 
-private fun addMealRoute(epochDay: Long, mealType: MealType): String =
-    "add_meal?epochDay=$epochDay&mealType=${mealType.name}"
+private fun AppDestination.toRoute(epochDay: Long): AppRoute = when (this) {
+    AppDestination.ADD_MEAL -> AppRoute.AddMeal(epochDay, MealType.BREAKFAST)
+    AppDestination.ADD_LUNCH -> AppRoute.AddMeal(epochDay, MealType.LUNCH)
+    AppDestination.ADD_DINNER -> AppRoute.AddMeal(epochDay, MealType.DINNER)
+    AppDestination.ADD_ACTIVITY -> AppRoute.AddActivity
+}

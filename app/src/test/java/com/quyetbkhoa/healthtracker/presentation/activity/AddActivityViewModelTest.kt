@@ -5,7 +5,13 @@ import com.quyetbkhoa.healthtracker.domain.model.PhysicalActivityType
 import com.quyetbkhoa.healthtracker.domain.model.UserProfile
 import com.quyetbkhoa.healthtracker.domain.repository.ActivityRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
+import com.quyetbkhoa.healthtracker.domain.usecase.AddActivityRecordUseCase
 import com.quyetbkhoa.healthtracker.domain.usecase.CalculateActivityCaloriesUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.EnsureDefaultActivitiesUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.SetActivityFavoriteUseCase
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -93,14 +99,25 @@ class AddActivityViewModelTest {
         advanceUntilIdle()
         assertEquals(1, repository.records.size)
         assertEquals(84.0, repository.records.single().caloriesBurned, 0.0001)
+        assertFalse(viewModel.uiState.value.isSaving)
         collection.cancel()
     }
 
-    private fun createViewModel(repository: FakeActivityRepository) = AddActivityViewModel(
-        activityRepository = repository,
-        profileRepository = FakeProfileRepository(),
-        calculateCalories = CalculateActivityCaloriesUseCase()
-    )
+    private fun createViewModel(repository: FakeActivityRepository): AddActivityViewModel {
+        val calculateCalories = CalculateActivityCaloriesUseCase()
+        return AddActivityViewModel(
+            activityRepository = repository,
+            profileRepository = FakeProfileRepository(),
+            calculateCalories = calculateCalories,
+            addActivityRecord = AddActivityRecordUseCase(
+                repository,
+                calculateCalories,
+                Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC)
+            ),
+            ensureDefaultActivities = EnsureDefaultActivitiesUseCase(repository),
+            setActivityFavorite = SetActivityFavoriteUseCase(repository)
+        )
+    }
 }
 
 private class FakeProfileRepository : ProfileRepository {
