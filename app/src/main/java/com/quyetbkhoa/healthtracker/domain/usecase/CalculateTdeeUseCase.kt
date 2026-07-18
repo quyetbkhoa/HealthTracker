@@ -1,7 +1,5 @@
 package com.quyetbkhoa.healthtracker.domain.usecase
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
 import com.quyetbkhoa.healthtracker.domain.model.Gender
 import com.quyetbkhoa.healthtracker.domain.model.Goal
@@ -21,7 +19,6 @@ data class TdeeResult(
 )
 
 class CalculateTdeeUseCase @Inject constructor() {
-    @RequiresApi(Build.VERSION_CODES.O)
     operator fun invoke(profile: UserProfile, today: LocalDate = LocalDate.now()): TdeeResult {
         val birthDate = Instant.ofEpochMilli(profile.dateOfBirth)
             .atZone(ZoneId.systemDefault())
