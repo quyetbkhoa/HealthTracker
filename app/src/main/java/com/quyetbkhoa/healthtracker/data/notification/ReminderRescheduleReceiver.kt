@@ -19,6 +19,7 @@ class ReminderRescheduleReceiver : BroadcastReceiver() {
     @Inject lateinit var reminderScheduler: ReminderScheduler
 
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action !in SUPPORTED_ACTIONS) return
         val pendingResult = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
@@ -32,5 +33,14 @@ class ReminderRescheduleReceiver : BroadcastReceiver() {
                 pendingResult.finish()
             }
         }
+    }
+
+    private companion object {
+        val SUPPORTED_ACTIONS = setOf(
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED,
+            Intent.ACTION_MY_PACKAGE_REPLACED
+        )
     }
 }

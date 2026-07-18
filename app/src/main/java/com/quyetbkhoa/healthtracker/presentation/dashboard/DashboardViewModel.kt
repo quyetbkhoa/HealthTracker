@@ -3,28 +3,20 @@ package com.quyetbkhoa.healthtracker.presentation.dashboard
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.quyetbkhoa.healthtracker.domain.repository.ActivityRepository
-import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
-import com.quyetbkhoa.healthtracker.domain.repository.MealRepository
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
 import com.quyetbkhoa.healthtracker.domain.model.Goal
 import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
 import com.quyetbkhoa.healthtracker.domain.usecase.DailyCalorieEvaluation
 import com.quyetbkhoa.healthtracker.domain.usecase.DailyCalorieStatus
-import com.quyetbkhoa.healthtracker.domain.usecase.EvaluateDailyCalorieGoalUseCase
-import com.quyetbkhoa.healthtracker.domain.usecase.EstimateActivityLevelUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.ObserveDashboardUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.Instant
-import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 import java.util.Locale
 import javax.inject.Inject
 
@@ -72,53 +64,29 @@ sealed interface DashboardUiEvent {
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    profileRepository: ProfileRepository,
-    mealRepository: MealRepository,
-    activityRepository: ActivityRepository,
-    evaluateDailyCalorieGoal: EvaluateDailyCalorieGoalUseCase,
-    estimateActivityLevel: EstimateActivityLevelUseCase
+    observeDashboard: ObserveDashboardUseCase
 ) : ViewModel() {
-    private val todayEpochDay = LocalDate.now().toEpochDay()
-    private val zone = ZoneId.systemDefault()
-    private val activityWindowStart = LocalDate.now().minusDays(27).atStartOfDay(zone).toInstant().toEpochMilli()
-    private val activityWindowEnd = LocalDate.now().plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
     private val languageTag = Locale.getDefault().language.takeIf { it == "en" } ?: "vi"
 
-    private val _uiEvent = Channel<DashboardUiEvent>()
+    private val _uiEvent = Channel<DashboardUiEvent>(Channel.BUFFERED)
     val uiEvent = _uiEvent.receiveAsFlow()
 
-    val uiState: StateFlow<DashboardUiState> = combine(
-        profileRepository.userProfile,
-        mealRepository.observeMealsByDay(todayEpochDay, languageTag),
-        activityRepository.observeTotalCaloriesByDay(todayEpochDay),
-        activityRepository.observeTotalCaloriesBetween(activityWindowStart, activityWindowEnd)
-    ) { profile, meals, activityCalories, windowActivityCalories ->
+    val uiState: StateFlow<DashboardUiState> = observeDashboard(languageTag).map { data ->
+        val profile = data.profile
+        val meals = data.meals
         val targetCalories = profile?.dailyCalorieTarget ?: 0
-        val consumedCalories = meals.sumOf { it.calories }
         val goal = profile?.goal ?: Goal.MAINTAIN
-        val trackingDays = profile?.activityTrackingStartedAt
-            ?.takeIf { it > 0L }
-            ?.let { startedAt ->
-                val startDate = Instant.ofEpochMilli(startedAt).atZone(zone).toLocalDate()
-                (ChronoUnit.DAYS.between(startDate, LocalDate.now()).toInt() + 1).coerceIn(1, 28)
-            } ?: 0
-        val activityEstimate = profile?.let {
-            estimateActivityLevel(it.bmrCalories, windowActivityCalories, trackingDays)
-        }
-        val shouldSuggestActivityChange = profile != null && trackingDays >= 14 &&
-            activityEstimate != null && activityEstimate.activityLevel != profile.activityLevel &&
-            kotlin.math.abs(activityEstimate.estimatedTdeeCalories - profile.tdeeCalories) >= 150
         DashboardUiState(
             isLoading = false,
             hasProfile = profile != null,
             tdeeCalories = profile?.tdeeCalories ?: 0,
             targetCalories = targetCalories,
-            consumedCalories = consumedCalories,
-            exerciseCalories = activityCalories.toInt(),
+            consumedCalories = data.consumedCalories,
+            exerciseCalories = data.exerciseCalories,
             goal = goal,
-            suggestedActivityLevel = activityEstimate?.activityLevel.takeIf { shouldSuggestActivityChange },
-            suggestedTdeeCalories = activityEstimate?.estimatedTdeeCalories?.takeIf { shouldSuggestActivityChange } ?: 0,
-            calorieEvaluation = evaluateDailyCalorieGoal(consumedCalories, targetCalories, goal),
+            suggestedActivityLevel = data.suggestedActivityLevel,
+            suggestedTdeeCalories = data.suggestedTdeeCalories,
+            calorieEvaluation = data.calorieEvaluation,
             userName = profile?.fullName.orEmpty(),
             meals = meals
         )

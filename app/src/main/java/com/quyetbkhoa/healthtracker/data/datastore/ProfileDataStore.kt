@@ -70,9 +70,10 @@ class ProfileDataStore @Inject constructor(
             preferences[BMR_KEY] = profile.bmrCalories
             preferences[TDEE_KEY] = profile.tdeeCalories
             preferences[CALORIE_TARGET_KEY] = profile.dailyCalorieTarget
-            if (preferences[ACTIVITY_TRACKING_STARTED_AT_KEY] == null) {
-                preferences[ACTIVITY_TRACKING_STARTED_AT_KEY] = System.currentTimeMillis()
-            }
+            preferences[ACTIVITY_TRACKING_STARTED_AT_KEY] = profile.activityTrackingStartedAt
+                .takeIf { it > 0L }
+                ?: preferences[ACTIVITY_TRACKING_STARTED_AT_KEY]
+                ?: System.currentTimeMillis()
         }
     }
 

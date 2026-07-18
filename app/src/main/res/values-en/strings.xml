@@ -4,6 +4,12 @@
     <string name="widget_description">Quickly add a meal or activity from the home screen</string>
     <string name="widget_add_meal_description">Open the add meal screen</string>
     <string name="widget_add_activity_description">Open the add activity screen</string>
+    <string name="widget_meal_short">Meal</string>
+    <string name="widget_activity_short">Activity</string>
+    <string name="widget_calories_remaining">Calories remaining</string>
+    <string name="widget_calories_exceeded">Over goal</string>
+    <string name="widget_no_calorie_goal">No calorie goal</string>
+    <string name="widget_calorie_value">%1$d kcal</string>
     <string name="common_not_available">—</string>
     <string name="welcome_title">Welcome to HealthTracker</string>
     <string name="welcome_start">Get started</string>
@@ -392,4 +398,5 @@
     <string name="notification_test_dinner_message">Test: it’s time to log dinner</string>
     <string name="settings_notification_test_button">Test dinner reminder in 30 seconds</string>
     <string name="settings_notification_test_scheduled">Test reminder scheduled in 30 seconds</string>
+    <string name="error_profile_save_failed">Could not save the profile. Please try again.</string>
 </resources>

@@ -4,6 +4,8 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import com.quyetbkhoa.healthtracker.core.navigation.AppRoute
 import com.quyetbkhoa.healthtracker.domain.model.Food
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
 import com.quyetbkhoa.healthtracker.domain.model.MealType
@@ -20,6 +22,7 @@ import java.time.Clock
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,6 +65,7 @@ sealed interface AddMealUiEvent {
 }
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class AddMealViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val foodRepository: FoodRepository,
@@ -73,18 +77,16 @@ class AddMealViewModel @Inject constructor(
         .takeIf { it == "en" }
         ?: "vi"
     private val query = MutableStateFlow("")
-    private val initialEpochDay = savedStateHandle.get<Long>("epochDay")
-        ?: LocalDate.now(clock).toEpochDay()
-    private val initialMealType = savedStateHandle.get<String>("mealType")
-        ?.let { runCatching { MealType.valueOf(it) }.getOrNull() }
-        ?: MealType.BREAKFAST
+    private val initialRoute = savedStateHandle.toRoute<AppRoute.AddMeal>()
+    private val initialEpochDay = initialRoute.epochDay
+    private val initialMealType = initialRoute.mealType
 
     private val _uiState = MutableStateFlow(
         AddMealUiState(epochDay = initialEpochDay, mealType = initialMealType)
     )
     val uiState: StateFlow<AddMealUiState> = _uiState.asStateFlow()
 
-    private val _uiEvent = Channel<AddMealUiEvent>()
+    private val _uiEvent = Channel<AddMealUiEvent>(Channel.BUFFERED)
     val uiEvent = _uiEvent.receiveAsFlow()
 
     init {

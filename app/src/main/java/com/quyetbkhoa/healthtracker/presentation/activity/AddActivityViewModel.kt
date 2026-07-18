@@ -3,13 +3,16 @@ package com.quyetbkhoa.healthtracker.presentation.activity
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.quyetbkhoa.healthtracker.domain.model.PhysicalActivityRecord
 import com.quyetbkhoa.healthtracker.domain.model.PhysicalActivityType
 import com.quyetbkhoa.healthtracker.domain.repository.ActivityRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
+import com.quyetbkhoa.healthtracker.domain.usecase.AddActivityRecordError
+import com.quyetbkhoa.healthtracker.domain.usecase.AddActivityRecordResult
+import com.quyetbkhoa.healthtracker.domain.usecase.AddActivityRecordUseCase
 import com.quyetbkhoa.healthtracker.domain.usecase.CalculateActivityCaloriesUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.EnsureDefaultActivitiesUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.SetActivityFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Instant
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -76,13 +79,17 @@ sealed interface AddActivityUiEvent {
 
 @HiltViewModel
 class AddActivityViewModel @Inject constructor(
-    private val activityRepository: ActivityRepository,
+    activityRepository: ActivityRepository,
     profileRepository: ProfileRepository,
-    private val calculateCalories: CalculateActivityCaloriesUseCase
+    private val calculateCalories: CalculateActivityCaloriesUseCase,
+    private val addActivityRecord: AddActivityRecordUseCase,
+    private val ensureDefaultActivities: EnsureDefaultActivitiesUseCase,
+    private val setActivityFavorite: SetActivityFavoriteUseCase
 ) : ViewModel() {
     private val editorState = MutableStateFlow(EditorState())
     private var isSaveInProgress = false
-    private val uiEventChannel = Channel<AddActivityUiEvent>()
+    private var hasSaved = false
+    private val uiEventChannel = Channel<AddActivityUiEvent>(Channel.BUFFERED)
     val uiEvent = uiEventChannel.receiveAsFlow()
 
     val uiState: StateFlow<AddActivityUiState> = combine(
@@ -118,7 +125,7 @@ class AddActivityViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            runCatching { activityRepository.seedDefaultActivities() }
+            runCatching { ensureDefaultActivities() }
                 .onFailure {
                     editorState.update { state -> state.copy(error = AddActivityError.SAVE_FAILED) }
                 }
@@ -154,7 +161,7 @@ class AddActivityViewModel @Inject constructor(
     private fun toggleFavorite(activityId: Long) {
         val activity = uiState.value.activities.firstOrNull { it.id == activityId } ?: return
         viewModelScope.launch {
-            runCatching { activityRepository.setFavorite(activityId, !activity.isFavorite) }
+            runCatching { setActivityFavorite(activityId, !activity.isFavorite) }
                 .onFailure {
                     editorState.update { state -> state.copy(error = AddActivityError.SAVE_FAILED) }
                 }
@@ -163,7 +170,7 @@ class AddActivityViewModel @Inject constructor(
 
     private fun saveActivity() {
         val state = uiState.value
-        if (isSaveInProgress) return
+        if (isSaveInProgress || hasSaved) return
         val activity = state.selectedActivity
         val weight = state.weightKg
         val validationError = when {
@@ -182,21 +189,23 @@ class AddActivityViewModel @Inject constructor(
         isSaveInProgress = true
         editorState.update { it.copy(isSaving = true, error = null) }
         viewModelScope.launch {
-            val now = Instant.now().toEpochMilli()
             runCatching {
-                activityRepository.addActivityRecord(
-                    PhysicalActivityRecord(
-                        activityTypeId = checkNotNull(activity).id,
-                        durationMinutes = state.durationMinutes,
-                        metAtCreation = activity.met,
-                        weightKgAtCreation = checkNotNull(weight),
-                        caloriesBurned = state.estimatedCalories,
-                        performedAt = now,
-                        createdAt = now
-                    )
+                addActivityRecord(
+                    activityTypeId = checkNotNull(activity).id,
+                    met = activity.met,
+                    weightKg = checkNotNull(weight),
+                    durationMinutes = state.durationMinutes
                 )
-            }.onSuccess {
-                uiEventChannel.send(AddActivityUiEvent.Saved)
+            }.onSuccess { result ->
+                when (result) {
+                    AddActivityRecordResult.Success -> {
+                        hasSaved = true
+                        uiEventChannel.send(AddActivityUiEvent.Saved)
+                    }
+                    is AddActivityRecordResult.Invalid -> editorState.update {
+                        state -> state.copy(error = result.error.toUiError())
+                    }
+                }
             }.onFailure {
                 editorState.update { it.copy(error = AddActivityError.SAVE_FAILED) }
             }
@@ -221,6 +230,12 @@ class AddActivityViewModel @Inject constructor(
         const val DURATION_STEP_MINUTES = 5
         const val DEFAULT_DURATION_MINUTES = 30
     }
+}
+
+private fun AddActivityRecordError.toUiError(): AddActivityError = when (this) {
+    AddActivityRecordError.INVALID_ACTIVITY -> AddActivityError.INVALID_ACTIVITY
+    AddActivityRecordError.INVALID_DURATION -> AddActivityError.INVALID_DURATION
+    AddActivityRecordError.INVALID_WEIGHT -> AddActivityError.NO_PROFILE_WEIGHT
 }
 
 private fun PhysicalActivityType.toUiModel() = ActivityItemUiModel(

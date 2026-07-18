@@ -38,6 +38,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import java.time.Clock
+import com.quyetbkhoa.healthtracker.core.widget.HealthWidgetUpdater
+import com.quyetbkhoa.healthtracker.widget.QuickAddWidgetUpdater
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -107,6 +109,12 @@ object AppModule {
     fun provideReminderScheduler(
         @ApplicationContext context: Context
     ): ReminderScheduler = AlarmReminderScheduler(context)
+
+    @Provides
+    @Singleton
+    fun provideHealthWidgetUpdater(
+        @ApplicationContext context: Context
+    ): HealthWidgetUpdater = QuickAddWidgetUpdater(context)
 
     @Provides
     @Singleton

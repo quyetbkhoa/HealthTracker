@@ -37,7 +37,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -169,7 +169,7 @@ private fun DashboardLoadingState(isLoading: Boolean) {
 
 @Composable
 private fun DashboardHeader(userName: String, onNavigateToSettings: () -> Unit) {
-    val locale = LocalContext.current.resources.configuration.locales[0] ?: Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0]
     val formattedDate = LocalDate.now()
         .format(DateTimeFormatter.ofPattern(stringResource(R.string.dashboard_date_pattern), locale))
         .replaceFirstChar { it.titlecase(locale) }
