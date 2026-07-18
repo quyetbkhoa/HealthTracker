@@ -11,7 +11,7 @@ import com.quyetbkhoa.healthtracker.domain.model.UserProfile
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
 import com.quyetbkhoa.healthtracker.domain.usecase.BmiCategory
 import com.quyetbkhoa.healthtracker.domain.usecase.CalculateBmiUseCase
-import com.quyetbkhoa.healthtracker.domain.usecase.CalculateTdeeUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.SaveProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,14 +58,15 @@ sealed interface ProfileSettingsEvent {
 @HiltViewModel
 class ProfileSettingsViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
-    private val calculateTdee: CalculateTdeeUseCase,
+    private val saveProfile: SaveProfileUseCase,
     private val calculateBmi: CalculateBmiUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileSettingsUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val _event = Channel<ProfileSettingsEvent>()
+    private val _event = Channel<ProfileSettingsEvent>(Channel.BUFFERED)
     val event = _event.receiveAsFlow()
+    private var loadedProfile: UserProfile? = null
 
     init {
         viewModelScope.launch {
@@ -88,6 +89,7 @@ class ProfileSettingsViewModel @Inject constructor(
     }
 
     private fun loadProfile(profile: UserProfile) {
+        loadedProfile = profile
         val bmi = calculateBmi(profile.weightKg, profile.heightCm)
         _uiState.value = ProfileSettingsUiState(
             isLoading = false,
@@ -148,13 +150,10 @@ class ProfileSettingsViewModel @Inject constructor(
             activityLevel = state.activityLevel,
             goal = state.goal
         )
-        val tdee = calculateTdee(baseProfile)
         viewModelScope.launch {
-            profileRepository.saveProfile(
+            saveProfile(
                 baseProfile.copy(
-                    bmrCalories = tdee.bmrCalories,
-                    tdeeCalories = tdee.tdeeCalories,
-                    dailyCalorieTarget = tdee.targetCalories
+                    activityTrackingStartedAt = loadedProfile?.activityTrackingStartedAt ?: 0L
                 )
             )
             _event.send(ProfileSettingsEvent.Saved)

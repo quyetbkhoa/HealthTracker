@@ -1,7 +1,5 @@
 package com.quyetbkhoa.healthtracker.presentation.onboarding
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -132,7 +130,6 @@ private fun StepMarker(textRes: Int, isActive: Boolean) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileSetupStep1Screen(

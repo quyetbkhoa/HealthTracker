@@ -5,15 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
 import com.quyetbkhoa.healthtracker.domain.model.MealType
-import com.quyetbkhoa.healthtracker.domain.repository.MealRepository
-import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
 import com.quyetbkhoa.healthtracker.domain.usecase.DeleteMealUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.ObserveMealJournalUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.Clock
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -45,9 +45,9 @@ sealed interface MealJournalAction {
 }
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class MealJournalViewModel @Inject constructor(
-    mealRepository: MealRepository,
-    profileRepository: ProfileRepository,
+    observeMealJournal: ObserveMealJournalUseCase,
     private val deleteMeal: DeleteMealUseCase,
     clock: Clock
 ) : ViewModel() {
@@ -55,21 +55,20 @@ class MealJournalViewModel @Inject constructor(
     private val pendingDeleteId = MutableStateFlow<Long?>(null)
     private val languageTag = Locale.getDefault().language.takeIf { it == "en" } ?: "vi"
 
-    private val meals = selectedDay.flatMapLatest { day ->
-        mealRepository.observeMealsByDay(day, languageTag)
+    private val journalData = selectedDay.flatMapLatest { day ->
+        observeMealJournal(day, languageTag)
     }
 
     val uiState: StateFlow<MealJournalUiState> = combine(
         selectedDay,
-        meals,
-        profileRepository.userProfile,
+        journalData,
         pendingDeleteId
-    ) { day, entries, profile, deleteId ->
+    ) { day, data, deleteId ->
         MealJournalUiState(
             isLoading = false,
             selectedEpochDay = day,
-            targetCalories = profile?.dailyCalorieTarget ?: 0,
-            meals = entries,
+            targetCalories = data.targetCalories,
+            meals = data.meals,
             pendingDeleteId = deleteId
         )
     }.stateIn(

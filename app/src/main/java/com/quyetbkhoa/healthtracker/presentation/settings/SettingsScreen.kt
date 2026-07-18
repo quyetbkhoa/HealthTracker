@@ -255,6 +255,7 @@ private fun ReminderSettingsCard(
     onRequestExactAlarmAccess: () -> Unit
 ) {
     val context = LocalContext.current
+    val testScheduledMessage = stringResource(R.string.settings_notification_test_scheduled)
     HealthOutlinedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = Shape.large
@@ -322,7 +323,7 @@ private fun ReminderSettingsCard(
                     onTestDinnerReminder()
                     Toast.makeText(
                         context,
-                        context.getString(R.string.settings_notification_test_scheduled),
+                        testScheduledMessage,
                         Toast.LENGTH_SHORT
                     ).show()
                 },

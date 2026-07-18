@@ -41,7 +41,7 @@ class SettingsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
-    private val _uiEvent = Channel<SettingsUiEvent>()
+    private val _uiEvent = Channel<SettingsUiEvent>(Channel.BUFFERED)
     val uiEvent = _uiEvent.receiveAsFlow()
 
     fun onAction(action: SettingsAction) {

@@ -3,12 +3,13 @@ package com.quyetbkhoa.healthtracker.presentation.onboarding
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.compose.runtime.Immutable
+import androidx.annotation.StringRes
 import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
 import com.quyetbkhoa.healthtracker.domain.model.Gender
 import com.quyetbkhoa.healthtracker.domain.model.Goal
 import com.quyetbkhoa.healthtracker.domain.model.UserProfile
-import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
 import com.quyetbkhoa.healthtracker.domain.usecase.CalculateTdeeUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.SaveProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +34,7 @@ data class ProfileSetupUiState(
     val weightError: Int? = null,
     val heightError: Int? = null,
     val termsError: Int? = null,
+    val isSubmitting: Boolean = false,
     val estimatedBmr: Int = 0,
     val estimatedTdee: Int = 0,
     val estimatedTarget: Int = 0
@@ -55,19 +57,19 @@ sealed interface ProfileSetupAction {
 sealed interface ProfileSetupUiEvent {
     object NavigateToStep2 : ProfileSetupUiEvent
     object NavigateToDashboard : ProfileSetupUiEvent
-    data class ShowToast(val message: String) : ProfileSetupUiEvent
+    data class ShowToast(@param:StringRes val messageRes: Int) : ProfileSetupUiEvent
 }
 
 @HiltViewModel
 class ProfileSetupViewModel @Inject constructor(
-    private val profileRepository: ProfileRepository,
+    private val saveProfile: SaveProfileUseCase,
     private val calculateTdee: CalculateTdeeUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileSetupUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val _uiEvent = Channel<ProfileSetupUiEvent>()
+    private val _uiEvent = Channel<ProfileSetupUiEvent>(Channel.BUFFERED)
     val uiEvent = _uiEvent.receiveAsFlow()
 
     fun onAction(action: ProfileSetupAction) {
@@ -136,6 +138,11 @@ class ProfileSetupViewModel @Inject constructor(
 
     private fun submitProfile() {
         val state = _uiState.value
+        if (state.isSubmitting) return
+        if (!state.acceptedTerms) {
+            _uiState.update { it.copy(termsError = com.quyetbkhoa.healthtracker.R.string.error_terms_not_accepted) }
+            return
+        }
         val profile = UserProfile(
             fullName = state.fullName,
             dateOfBirth = state.dateOfBirth ?: 0L,
@@ -146,16 +153,14 @@ class ProfileSetupViewModel @Inject constructor(
             goal = state.goal
         )
 
-        val result = calculateTdee(profile)
         viewModelScope.launch {
-            profileRepository.saveProfile(
-                profile.copy(
-                    bmrCalories = result.bmrCalories,
-                    tdeeCalories = result.tdeeCalories,
-                    dailyCalorieTarget = result.targetCalories
-                )
-            )
-            _uiEvent.send(ProfileSetupUiEvent.NavigateToDashboard)
+            _uiState.update { it.copy(isSubmitting = true) }
+            runCatching { saveProfile(profile) }
+                .onSuccess { _uiEvent.send(ProfileSetupUiEvent.NavigateToDashboard) }
+                .onFailure {
+                    _uiEvent.send(ProfileSetupUiEvent.ShowToast(com.quyetbkhoa.healthtracker.R.string.error_profile_save_failed))
+                }
+            _uiState.update { it.copy(isSubmitting = false) }
         }
     }
 

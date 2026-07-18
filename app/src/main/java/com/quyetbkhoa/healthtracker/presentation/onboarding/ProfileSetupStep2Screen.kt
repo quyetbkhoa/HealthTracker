@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -100,7 +101,34 @@ fun ProfileSetupStep2Screen(
                     EstimateMetric(R.string.dashboard_icon_goal, R.string.onboarding_calorie_target, uiState.estimatedTarget, Modifier.weight(1f))
                 }
             }
-            HealthPrimaryButton(onClick = { onAction(ProfileSetupAction.SubmitProfile) }, modifier = Modifier.fillMaxWidth().height(Dimens.buttonHeightLarge).padding(bottom = Dimens.spaceLarge)) {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onAction(ProfileSetupAction.UpdateAcceptedTerms(!uiState.acceptedTerms))
+                        },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(checked = uiState.acceptedTerms, onCheckedChange = null)
+                    Text(
+                        text = "${stringResource(R.string.onboarding_terms_prefix)} ${stringResource(R.string.onboarding_terms_highlight)}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                uiState.termsError?.let { errorRes ->
+                    Text(
+                        text = stringResource(errorRes),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+            HealthPrimaryButton(
+                onClick = { onAction(ProfileSetupAction.SubmitProfile) },
+                modifier = Modifier.fillMaxWidth().height(Dimens.buttonHeightLarge).padding(bottom = Dimens.spaceLarge),
+                enabled = !uiState.isSubmitting
+            ) {
                 Text(text = stringResource(R.string.onboarding_complete), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
         }
