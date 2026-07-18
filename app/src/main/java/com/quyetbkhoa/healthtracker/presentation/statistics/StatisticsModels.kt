@@ -1,14 +1,8 @@
 package com.quyetbkhoa.healthtracker.presentation.statistics
 
 import androidx.compose.runtime.Immutable
+import com.quyetbkhoa.healthtracker.domain.model.StatisticsRange
 import java.time.LocalDate
-
-enum class StatisticsRange {
-    TODAY,
-    LAST_7_DAYS,
-    LAST_30_DAYS,
-    ALL
-}
 
 sealed interface StatisticsAction {
     data class SelectRange(val range: StatisticsRange) : StatisticsAction

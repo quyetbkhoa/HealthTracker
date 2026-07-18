@@ -1,5 +1,7 @@
 package com.quyetbkhoa.healthtracker.presentation.statistics
 
+import com.quyetbkhoa.healthtracker.domain.model.StatisticsRange
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -31,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -48,7 +51,6 @@ import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthOutli
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Composable
 fun StatisticsOverviewScreen(
@@ -239,7 +241,7 @@ private data class StatisticsFormatter(
 
 @Composable
 private fun rememberStatisticsFormatter(): StatisticsFormatter {
-    val locale = Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0]
     val numberFormat = remember(locale) { NumberFormat.getIntegerInstance(locale) }
     val datePattern = stringResource(R.string.statistics_date_pattern)
     val dateFormat = remember(locale, datePattern) { DateTimeFormatter.ofPattern(datePattern, locale) }

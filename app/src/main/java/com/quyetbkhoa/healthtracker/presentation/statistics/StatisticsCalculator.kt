@@ -1,5 +1,7 @@
 package com.quyetbkhoa.healthtracker.presentation.statistics
 
+import com.quyetbkhoa.healthtracker.domain.model.StatisticsRange
+
 import com.quyetbkhoa.healthtracker.domain.model.Goal
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
 import com.quyetbkhoa.healthtracker.domain.model.PhysicalActivityRecord

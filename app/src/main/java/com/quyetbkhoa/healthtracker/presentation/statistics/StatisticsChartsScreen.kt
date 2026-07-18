@@ -1,5 +1,7 @@
 package com.quyetbkhoa.healthtracker.presentation.statistics
 
+import com.quyetbkhoa.healthtracker.domain.model.StatisticsRange
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +35,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -47,7 +50,6 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlin.math.absoluteValue
 
 @Composable
@@ -102,7 +104,7 @@ private data class ChartPoint(val label: String, val consumed: Int, val burned: 
 
 @Composable
 private fun rememberChartPoints(state: StatisticsUiState): List<ChartPoint> {
-    val locale = Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0]
     val datePattern = stringResource(R.string.statistics_chart_date_pattern)
     val rangePattern = stringResource(R.string.statistics_chart_range)
     val formatter = remember(locale, datePattern) { DateTimeFormatter.ofPattern(datePattern, locale) }
@@ -265,7 +267,8 @@ private fun PeriodSummary(state: StatisticsUiState) {
 
 @Composable
 private fun SummaryRow(label: String, value: Int, color: Color, isSigned: Boolean = false) {
-    val formatted = NumberFormat.getIntegerInstance(Locale.getDefault()).format(value)
+    val locale = LocalConfiguration.current.locales[0]
+    val formatted = NumberFormat.getIntegerInstance(locale).format(value)
     Row(Modifier.fillMaxWidth()) {
         Text(label, Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(
