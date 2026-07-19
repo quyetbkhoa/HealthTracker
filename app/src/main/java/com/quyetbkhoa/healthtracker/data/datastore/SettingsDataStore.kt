@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
+import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
 import com.quyetbkhoa.healthtracker.domain.model.ReminderSettings
 import com.quyetbkhoa.healthtracker.domain.model.ReminderTime
 import com.quyetbkhoa.healthtracker.domain.model.ReminderType
@@ -20,6 +21,7 @@ class SettingsDataStore @Inject constructor(
 
     companion object {
         val THEME_TYPE_KEY = stringPreferencesKey("theme_type")
+        val FONT_SIZE_KEY = stringPreferencesKey("font_size")
         val REMINDERS_ENABLED_KEY = booleanPreferencesKey("reminders_enabled")
         val EXACT_ALARM_ACCESS_REQUESTED_KEY = booleanPreferencesKey("exact_alarm_access_requested")
         val BREAKFAST_TIME_KEY = intPreferencesKey("breakfast_reminder_minutes")
@@ -34,6 +36,12 @@ class SettingsDataStore @Inject constructor(
         .map { preferences ->
             val themeString = preferences[THEME_TYPE_KEY] ?: AppThemeType.SYSTEM.name
             runCatching { AppThemeType.valueOf(themeString) }.getOrDefault(AppThemeType.SYSTEM)
+        }
+
+    val fontSizeFlow: Flow<AppFontSize> = dataStore.data
+        .map { preferences ->
+            val fontSize = preferences[FONT_SIZE_KEY] ?: AppFontSize.MEDIUM.name
+            runCatching { AppFontSize.valueOf(fontSize) }.getOrDefault(AppFontSize.MEDIUM)
         }
 
     val reminderSettingsFlow: Flow<ReminderSettings> = dataStore.data
@@ -53,6 +61,12 @@ class SettingsDataStore @Inject constructor(
     suspend fun saveThemeType(themeType: AppThemeType) {
         dataStore.edit { preferences ->
             preferences[THEME_TYPE_KEY] = themeType.name
+        }
+    }
+
+    suspend fun saveFontSize(fontSize: AppFontSize) {
+        dataStore.edit { preferences ->
+            preferences[FONT_SIZE_KEY] = fontSize.name
         }
     }
 

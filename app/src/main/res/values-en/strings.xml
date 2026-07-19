@@ -7,9 +7,10 @@
     <string name="widget_meal_short">Meal</string>
     <string name="widget_activity_short">Activity</string>
     <string name="widget_calories_remaining">Calories remaining</string>
-    <string name="widget_calories_exceeded">Over goal</string>
+    <string name="widget_calories_exceeded">Calories exceeded</string>
     <string name="widget_no_calorie_goal">No calorie goal</string>
     <string name="widget_calorie_value">%1$d kcal</string>
+    <string name="widget_calorie_unavailable">—</string>
     <string name="common_not_available">—</string>
     <string name="welcome_title">Welcome to HealthTracker</string>
     <string name="welcome_start">Get started</string>
@@ -24,9 +25,9 @@
     <string name="dashboard_progress_percent">%1$d%%</string>
     <string name="dashboard_goal">GOAL</string>
     <string name="dashboard_tdee">TDEE / GOAL</string>
-    <string name="dashboard_consumed">CONSUMED</string>
+    <string name="dashboard_consumed">EATEN</string>
     <string name="dashboard_burned">BURNED</string>
-    <string name="dashboard_remaining">REMAINING</string>
+    <string name="dashboard_remaining">LEFT</string>
     <string name="dashboard_kcal_value">%1$s kcal</string>
     <string name="dashboard_advice">ADVICE</string>
     <string name="dashboard_advice_message">You need %1$s kcal more — have a light meal!</string>
@@ -47,7 +48,8 @@
     <string name="dashboard_remaining_burn">LEFT TO BURN</string>
     <string name="dashboard_greeting">Hi %1$s</string>
     <string name="dashboard_guest_name">there</string>
-    <string name="dashboard_date_with_icon">📅  %1$s</string>
+    <string name="dashboard_date_with_icon">%1$s</string>
+    <string name="dashboard_brand_mark">✦</string>
     <string name="dashboard_goal_daily">/ day</string>
     <string name="dashboard_percent_goal">%1$d%% of goal</string>
     <string name="dashboard_awesome">Great work!</string>
@@ -55,6 +57,12 @@
     <string name="dashboard_advice_need_more_title">More calories needed</string>
     <string name="dashboard_advice_good_title">Within your target range</string>
     <string name="dashboard_advice_exceeded_title">Above your target range</string>
+    <string name="dashboard_advice_short_need_more_detail">%1$s kcal needed today</string>
+    <string name="dashboard_advice_short_need_more_outcome">Keep your energy balanced</string>
+    <string name="dashboard_advice_short_good_detail">Calories are on target</string>
+    <string name="dashboard_advice_short_good_outcome">Today’s goal is on track</string>
+    <string name="dashboard_advice_short_exceeded_detail">%1$s kcal above your target</string>
+    <string name="dashboard_advice_short_exceeded_outcome">Goal not met</string>
     <string name="dashboard_advice_lose_need_more">You need %1$s kcal more to avoid an excessive deficit today.</string>
     <string name="dashboard_advice_lose_good">Great! Today’s intake is appropriate for your weight-loss goal.</string>
     <string name="dashboard_advice_lose_exceeded">You are %1$s kcal above your weight-loss range. One slightly higher day will not erase your progress.</string>
@@ -106,7 +114,7 @@
     <string name="dashboard_icon_statistics">▥</string>
     <string name="dashboard_icon_settings">⚙</string>
     <string name="dashboard_notification_count">3</string>
-    <string name="dashboard_date_pattern">EEEE, MMMM d, yyyy</string>
+    <string name="dashboard_date_pattern">EEE, MMM d</string>
     <string name="dashboard_ring_remaining">%1$d kcal\nremaining</string>
     <string name="dashboard_ring_exceeded">-%1$d kcal\nexceeded</string>
     <string name="screen_settings">Settings</string>
@@ -124,12 +132,17 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="theme_pink">Pink</string>
-    <string name="theme_system">System default</string>
+    <string name="theme_system">System</string>
     <string name="settings_subtitle">Personalize your HealthTracker experience</string>
     <string name="settings_hero_title">Your personal space</string>
     <string name="settings_hero_description">Adjust your profile, appearance, and data your way.</string>
     <string name="settings_account_section">Account</string>
     <string name="settings_appearance_section">Appearance</string>
+    <string name="settings_font_size_title">App text size</string>
+    <string name="settings_font_size_small">Small</string>
+    <string name="settings_font_size_medium">Medium</string>
+    <string name="settings_font_size_large">Large</string>
+    <string name="settings_font_size_sample">Aa</string>
     <string name="settings_language_section">Language</string>
     <string name="settings_data_section">Data</string>
     <string name="settings_profile_description">Update your information and health goals</string>
@@ -289,6 +302,7 @@
     <string name="food_kcal_per_100g">Energy per 100 g</string>
     <string name="food_consumed_grams">Amount consumed</string>
     <string name="unit_grams">g</string>
+    <string name="unit_minutes">min</string>
     <string name="food_select">Select food</string>
     <string name="food_empty_search">No matching food was found</string>
     <string name="food_enter_custom">Enter a custom food</string>
@@ -384,8 +398,8 @@
     <string name="settings_notification_dinner">Dinner</string>
     <string name="settings_notification_activity">Activity</string>
     <string name="settings_notification_time_value">%1$02d:%2$02d</string>
-    <string name="settings_exact_alarm_enabled">On-time notifications are ready</string>
-    <string name="settings_exact_alarm_disabled">Notifications may arrive late</string>
+    <string name="settings_exact_alarm_enabled">On-time alerts</string>
+    <string name="settings_exact_alarm_disabled">Alerts may be late</string>
     <string name="settings_exact_alarm_allow">Allow on-time alerts</string>
     <string name="settings_exact_alarm_granted">Allowed</string>
     <string name="settings_icon_notifications">🔔</string>
@@ -396,7 +410,12 @@
     <string name="notification_dinner_message">It’s time to update your dinner</string>
     <string name="notification_activity_message">Have you logged today’s activity yet?</string>
     <string name="notification_test_dinner_message">Test: it’s time to log dinner</string>
-    <string name="settings_notification_test_button">Test dinner reminder in 30 seconds</string>
+    <string name="settings_notification_test_button">Test dinner alert in 30 seconds</string>
     <string name="settings_notification_test_scheduled">Test reminder scheduled in 30 seconds</string>
     <string name="error_profile_save_failed">Could not save the profile. Please try again.</string>
+    <string name="numeric_value_with_unit">%1$s %2$s</string>
+    <string name="numeric_input_title">Enter %1$s</string>
+    <string name="common_apply">Apply</string>
+    <string name="add_meal_choose_food">Choose food</string>
+    <string name="add_meal_amount_section">Adjust serving</string>
 </resources>

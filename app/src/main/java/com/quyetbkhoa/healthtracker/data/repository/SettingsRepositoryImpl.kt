@@ -1,6 +1,7 @@
 package com.quyetbkhoa.healthtracker.data.repository
 
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
+import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
 import com.quyetbkhoa.healthtracker.data.datastore.SettingsDataStore
 import com.quyetbkhoa.healthtracker.domain.repository.SettingsRepository
 import com.quyetbkhoa.healthtracker.domain.model.ReminderSettings
@@ -15,6 +16,8 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val themeType: Flow<AppThemeType>
         get() = settingsDataStore.themeTypeFlow
+    override val fontSize: Flow<AppFontSize>
+        get() = settingsDataStore.fontSizeFlow
     override val reminderSettings: Flow<ReminderSettings>
         get() = settingsDataStore.reminderSettingsFlow
     override val exactAlarmAccessRequested: Flow<Boolean>
@@ -22,6 +25,10 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setThemeType(themeType: AppThemeType) {
         settingsDataStore.saveThemeType(themeType)
+    }
+
+    override suspend fun setFontSize(fontSize: AppFontSize) {
+        settingsDataStore.saveFontSize(fontSize)
     }
 
     override suspend fun setRemindersEnabled(isEnabled: Boolean) {

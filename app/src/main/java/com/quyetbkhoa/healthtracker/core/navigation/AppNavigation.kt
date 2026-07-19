@@ -16,6 +16,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
+import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
 import com.quyetbkhoa.healthtracker.presentation.onboarding.*
 import com.quyetbkhoa.healthtracker.presentation.dashboard.DashboardScreen
@@ -35,11 +36,13 @@ import java.time.LocalDate
 @Composable
 fun AppNavigation(
     themeType: AppThemeType,
+    fontSize: AppFontSize,
     hasProfile: Boolean,
     reminderSettings: ReminderSettings,
     hasExactAlarmAccess: Boolean,
     destinationToOpen: AppDestination?,
     onThemeChanged: (AppThemeType) -> Unit,
+    onFontSizeChanged: (AppFontSize) -> Unit,
     onLanguageChanged: (AppLanguage) -> Unit,
     onRemindersChanged: (Boolean) -> Unit,
     onReminderTimeChanged: (ReminderType, ReminderTime) -> Unit,
@@ -189,9 +192,11 @@ fun AppNavigation(
         composable<AppRoute.Settings> {
             SettingsScreen(
                 themeType = themeType,
+                fontSize = fontSize,
                 reminderSettings = reminderSettings,
                 hasExactAlarmAccess = hasExactAlarmAccess,
                 onThemeChanged = onThemeChanged,
+                onFontSizeChanged = onFontSizeChanged,
                 selectedLanguage = AppLanguage.fromLanguageTag(
                     AppCompatDelegate.getApplicationLocales().toLanguageTags()
                 ),

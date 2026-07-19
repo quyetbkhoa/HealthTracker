@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -27,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,19 +37,23 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
+import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthIconText
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthOutlinedCard
@@ -59,9 +65,11 @@ import com.quyetbkhoa.healthtracker.domain.model.ReminderType
 @Composable
 fun SettingsScreen(
     themeType: AppThemeType,
+    fontSize: AppFontSize,
     reminderSettings: ReminderSettings,
     hasExactAlarmAccess: Boolean,
     onThemeChanged: (AppThemeType) -> Unit,
+    onFontSizeChanged: (AppFontSize) -> Unit,
     selectedLanguage: AppLanguage,
     onLanguageChanged: (AppLanguage) -> Unit,
     onRemindersChanged: (Boolean) -> Unit,
@@ -101,11 +109,13 @@ fun SettingsScreen(
 
     SettingsContent(
         themeType = themeType,
+        fontSize = fontSize,
         reminderSettings = reminderSettings,
         hasExactAlarmAccess = hasExactAlarmAccess,
         selectedLanguage = selectedLanguage,
         isResetting = uiState.isResetting,
         onThemeChanged = onThemeChanged,
+        onFontSizeChanged = onFontSizeChanged,
         onLanguageChanged = { viewModel.onAction(SettingsAction.SelectLanguage(it)) },
         onRemindersChanged = onRemindersChanged,
         onReminderTimeChanged = onReminderTimeChanged,
@@ -120,11 +130,13 @@ fun SettingsScreen(
 @Composable
 private fun SettingsContent(
     themeType: AppThemeType,
+    fontSize: AppFontSize,
     reminderSettings: ReminderSettings,
     hasExactAlarmAccess: Boolean,
     selectedLanguage: AppLanguage,
     isResetting: Boolean,
     onThemeChanged: (AppThemeType) -> Unit,
+    onFontSizeChanged: (AppFontSize) -> Unit,
     onLanguageChanged: (AppLanguage) -> Unit,
     onRemindersChanged: (Boolean) -> Unit,
     onReminderTimeChanged: (ReminderType, ReminderTime) -> Unit,
@@ -141,6 +153,7 @@ private fun SettingsContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .clipToBounds()
                 .padding(horizontal = Dimens.spaceMedium),
             verticalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)
         ) {
@@ -192,6 +205,24 @@ private fun SettingsContent(
                                 modifier = Modifier.weight(1f),
                                 onClick = onThemeChanged
                             )
+                        }
+                        Spacer(Modifier.height(Dimens.spaceSmall))
+                        Text(
+                            text = stringResource(R.string.settings_font_size_title),
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
+                            AppFontSize.entries.forEach { size ->
+                                FontSizeChoice(
+                                    size = size,
+                                    selected = fontSize == size,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = onFontSizeChanged
+                                )
+                            }
                         }
                     }
                 }
@@ -409,7 +440,7 @@ private fun ReminderTimeRow(
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
-        Text(
+        HealthIconText(
             text = stringResource(R.string.settings_icon_chevron),
             modifier = Modifier.padding(start = Dimens.spaceSmall),
             style = MaterialTheme.typography.titleLarge,
@@ -420,23 +451,27 @@ private fun ReminderTimeRow(
 
 @Composable
 private fun SettingsHeader(onNavigateBack: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(top = Dimens.spaceSmall),
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        IconButton(onClick = onNavigateBack) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(R.string.navigate_back)
-            )
-        }
-        Column(modifier = Modifier.padding(start = Dimens.spaceSmall)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(top = Dimens.spaceSmall),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onNavigateBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.navigate_back)
+                )
+            }
             Text(
                 text = stringResource(R.string.screen_settings),
-                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(start = Dimens.spaceSmall),
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -458,7 +493,7 @@ private fun SettingsSectionCard(
         ){
             //title
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(icon, style = MaterialTheme.typography.titleLarge)
+                HealthIconText(text = icon, style = MaterialTheme.typography.titleLarge)
                 Text(
                     text = title,
                     modifier = Modifier.padding(start = Dimens.spaceSmall),
@@ -503,7 +538,7 @@ private fun SettingsNavigationCard(
                 Text(title, fontWeight = FontWeight.Bold)
                 Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(
+            HealthIconText(
                 text = stringResource(R.string.settings_icon_chevron),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.primary
@@ -548,19 +583,75 @@ private fun ThemeChoice(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(Dimens.buttonHeightLarge)
+                .heightIn(min = Dimens.buttonHeightLarge)
                 .padding(Dimens.spaceMedium),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
 
         ) {
-            Text(icon, style = MaterialTheme.typography.titleLarge)
+            HealthIconText(text = icon, style = MaterialTheme.typography.titleLarge)
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
                 else MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun FontSizeChoice(
+    size: AppFontSize,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: (AppFontSize) -> Unit
+) {
+    val label = stringResource(
+        when (size) {
+            AppFontSize.SMALL -> R.string.settings_font_size_small
+            AppFontSize.MEDIUM -> R.string.settings_font_size_medium
+            AppFontSize.LARGE -> R.string.settings_font_size_large
+        }
+    )
+    val sampleStyle = when (size) {
+        AppFontSize.SMALL -> MaterialTheme.typography.bodyMedium
+        AppFontSize.MEDIUM -> MaterialTheme.typography.titleMedium
+        AppFontSize.LARGE -> MaterialTheme.typography.headlineSmall
+    }
+    HealthCard(
+        modifier = modifier
+            .heightIn(min = Dimens.buttonHeightLarge)
+            .clickable { onClick(size) },
+        shape = Shape.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+            else MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dimens.spaceSmall),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(R.string.settings_font_size_sample),
+                style = sampleStyle,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -585,7 +676,7 @@ private fun LanguageChoice(
     HealthCard(
         modifier = Modifier
             .fillMaxWidth()
-            .height(Dimens.buttonHeightLarge)
+            .heightIn(min = Dimens.buttonHeightLarge)
             .clickable { onClick(language) },
         shape = Shape.medium,
         colors = CardDefaults.cardColors(
@@ -601,7 +692,7 @@ private fun LanguageChoice(
                 .padding(Dimens.spaceMedium),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
+            HealthIconText(
                 text = stringResource(
                     if (language == AppLanguage.VIETNAMESE) R.string.settings_icon_vietnamese
                     else R.string.settings_icon_english
@@ -625,7 +716,7 @@ private fun LanguageChoice(
                 contentAlignment = Alignment.Center
             ) {
                 if (selected) {
-                    Text(
+                    HealthIconText(
                         text = stringResource(R.string.settings_icon_check),
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         fontWeight = FontWeight.Bold
@@ -660,12 +751,18 @@ private fun DangerZoneCard(isResetting: Boolean, onClick: () -> Unit) {
             ) {
                 Text(
                     stringResource(R.string.settings_reset_data),
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onErrorContainer
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     stringResource(R.string.settings_reset_description),
-                    color = MaterialTheme.colorScheme.onErrorContainer
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             if (isResetting) {
@@ -674,7 +771,7 @@ private fun DangerZoneCard(isResetting: Boolean, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
             } else {
-                Text(
+                HealthIconText(
                     stringResource(R.string.settings_icon_chevron),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onErrorContainer
@@ -712,7 +809,7 @@ private fun SettingsIconBubble(
             colors = CardDefaults.cardColors(containerColor = containerColor)
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(icon, color = contentColor, style = MaterialTheme.typography.titleLarge)
+                HealthIconText(text = icon, color = contentColor, style = MaterialTheme.typography.titleLarge)
             }
         }
     }
@@ -759,11 +856,13 @@ private fun PreviewSettingsScreen() {
     HealthTrackerTheme {
         SettingsContent(
             themeType = AppThemeType.LIGHT,
+            fontSize = AppFontSize.MEDIUM,
             reminderSettings = ReminderSettings(),
             hasExactAlarmAccess = true,
             selectedLanguage = AppLanguage.VIETNAMESE,
             isResetting = false,
             onThemeChanged = {},
+            onFontSizeChanged = {},
             onLanguageChanged = {},
             onRemindersChanged = {},
             onReminderTimeChanged = { _, _ -> },
