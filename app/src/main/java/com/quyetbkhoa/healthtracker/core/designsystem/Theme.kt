@@ -5,6 +5,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 
 enum class AppThemeType {
     LIGHT,
@@ -12,6 +16,14 @@ enum class AppThemeType {
     PINK,
     SYSTEM
 }
+
+enum class AppFontSize(val scale: Float) {
+    SMALL(0.9f),
+    MEDIUM(1f),
+    LARGE(1.1f)
+}
+
+internal val LocalAppFontScale = staticCompositionLocalOf { 1f }
 
 private val LightColorScheme = lightColorScheme(
     primary = LightPrimary,
@@ -130,17 +142,34 @@ private val PinkColorScheme = lightColorScheme(
 @Composable
 fun HealthTrackerTheme(
     themeType: AppThemeType = AppThemeType.SYSTEM,
+    fontSize: AppFontSize = AppFontSize.MEDIUM,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when (themeType) {
-        AppThemeType.LIGHT -> LightColorScheme
-        AppThemeType.DARK -> DarkColorScheme
-        AppThemeType.PINK -> PinkColorScheme
-        AppThemeType.SYSTEM -> if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme
-    }
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+    val isDark = isSystemInDarkTheme()
+    val systemDensity = LocalDensity.current
+    val appDensity = Density(
+        density = systemDensity.density,
+        fontScale = systemDensity.fontScale * fontSize.scale
     )
+    val (colorScheme, healthColors) = when (themeType) {
+        AppThemeType.LIGHT -> LightColorScheme to LightHealthColors
+        AppThemeType.DARK -> DarkColorScheme to DarkHealthColors
+        AppThemeType.PINK -> PinkColorScheme to PinkHealthColors
+        AppThemeType.SYSTEM -> if (isDark) {
+            DarkColorScheme to DarkHealthColors
+        } else {
+            LightColorScheme to LightHealthColors
+        }
+    }
+    CompositionLocalProvider(
+        LocalHealthColors provides healthColors,
+        LocalAppFontScale provides fontSize.scale,
+        LocalDensity provides appDensity
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

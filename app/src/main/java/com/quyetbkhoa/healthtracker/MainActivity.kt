@@ -82,7 +82,8 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     HealthTrackerTheme(
-                        themeType = state.themeType
+                        themeType = state.themeType,
+                        fontSize = state.fontSize
                     ) {
                         Surface(
                             modifier = Modifier.fillMaxSize(),
@@ -90,11 +91,13 @@ class MainActivity : AppCompatActivity() {
                         ) {
                             AppNavigation(
                                 themeType = state.themeType,
+                                fontSize = state.fontSize,
                                 hasProfile = state.hasProfile,
                                 reminderSettings = state.reminderSettings,
                                 hasExactAlarmAccess = hasExactAlarmAccess,
                                 destinationToOpen = destinationToOpen,
                                 onThemeChanged = viewModel::setTheme,
+                                onFontSizeChanged = viewModel::setFontSize,
                                 onLanguageChanged = ::setAppLanguage,
                                 onRemindersChanged = { isEnabled ->
                                     if (isEnabled && !canPostNotifications()) {

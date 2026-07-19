@@ -19,6 +19,7 @@ object Dimens {
     
     val iconSizeMedium: Dp = 24.dp
     val iconSizeLarge: Dp = 32.dp
+    val iconSizeExtraLarge: Dp = 48.dp
 
 
     val borderWidthThin: Dp = 1.dp

@@ -3,6 +3,7 @@ package com.quyetbkhoa.healthtracker
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
+import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
 import com.quyetbkhoa.healthtracker.domain.repository.SettingsRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ReminderScheduler
@@ -30,12 +31,14 @@ class MainViewModel @Inject constructor(
 
     val uiState: StateFlow<MainActivityUiState> = combine(
         settingsRepository.themeType,
+        settingsRepository.fontSize,
         profileRepository.userProfile,
         settingsRepository.reminderSettings,
         settingsRepository.exactAlarmAccessRequested
-    ) { themeType, profile, reminderSettings, exactAlarmAccessRequested ->
+    ) { themeType, fontSize, profile, reminderSettings, exactAlarmAccessRequested ->
         MainActivityUiState.Success(
             themeType = themeType,
+            fontSize = fontSize,
             hasProfile = profile != null,
             reminderSettings = reminderSettings,
             exactAlarmAccessRequested = exactAlarmAccessRequested
@@ -49,6 +52,12 @@ class MainViewModel @Inject constructor(
     fun setTheme(themeType: AppThemeType) {
         viewModelScope.launch {
             settingsRepository.setThemeType(themeType)
+        }
+    }
+
+    fun setFontSize(fontSize: AppFontSize) {
+        viewModelScope.launch {
+            settingsRepository.setFontSize(fontSize)
         }
     }
 
@@ -94,6 +103,7 @@ sealed interface MainActivityUiState {
     data object Loading : MainActivityUiState
     data class Success(
         val themeType: AppThemeType,
+        val fontSize: AppFontSize,
         val hasProfile: Boolean,
         val reminderSettings: ReminderSettings,
         val exactAlarmAccessRequested: Boolean
