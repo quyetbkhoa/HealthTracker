@@ -10,15 +10,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Info
@@ -32,7 +35,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -58,10 +60,12 @@ import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
+import com.quyetbkhoa.healthtracker.core.designsystem.healthColors
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthIconText
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthNumericSlider
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
-import kotlin.math.roundToInt
 
 @Composable
 fun AddActivityScreen(
@@ -111,27 +115,38 @@ private fun AddActivityContent(
                     ActivityGrid(state.activities, state.selectedActivityId, onAction)
                 }
                 else -> {
-                    state.selectedActivity?.let { SelectedActivityCard(it, onAction) }
-                    DurationSection(state.durationMinutes, onAction)
-                    CaloriesEstimate(state.displayedCalories)
-                    Spacer(Modifier.weight(1f))
-                    HealthPrimaryButton(
-                        onClick = { onAction(AddActivityAction.SaveActivity) },
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(Dimens.buttonHeightMedium),
-                        enabled = state.canSave
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .navigationBarsPadding(),
+                        verticalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)
                     ) {
-                        if (state.isSaving) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(Dimens.iconSizeMedium),
-                                color = MaterialTheme.colorScheme.onPrimary
+                        state.selectedActivity?.let { SelectedActivityCard(it, onAction) }
+                        DurationSection(state.durationMinutes, onAction)
+                        CaloriesEstimate(state.displayedCalories)
+                        HealthPrimaryButton(
+                            onClick = { onAction(AddActivityAction.SaveActivity) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = Dimens.buttonHeightMedium),
+                            enabled = state.canSave,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.healthColors.activity,
+                                contentColor = MaterialTheme.healthColors.onActivity
                             )
-                        } else {
-                            Text(stringResource(R.string.add_activity_save))
+                        ) {
+                            if (state.isSaving) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(Dimens.iconSizeMedium),
+                                    color = MaterialTheme.healthColors.onActivity
+                                )
+                            } else {
+                                Text(stringResource(R.string.add_activity_save))
+                            }
                         }
+                        Spacer(Modifier.height(Dimens.spaceMedium))
                     }
-                    Spacer(Modifier.height(Dimens.spaceMedium))
                 }
             }
         }
@@ -235,7 +250,7 @@ private fun ActivityCard(
     HealthElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .height(Dimens.activityChoiceCardHeight)
+            .heightIn(min = Dimens.activityChoiceCardHeight)
             .combinedClickable(
                 onClick = { onAction(AddActivityAction.SelectActivity(activity.id)) },
                 onLongClick = {
@@ -246,12 +261,12 @@ private fun ActivityCard(
         shape = Shape.large,
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
+                MaterialTheme.healthColors.activityContainer
             } else {
                 MaterialTheme.colorScheme.surface
             },
             contentColor = if (isSelected) {
-                MaterialTheme.colorScheme.onPrimaryContainer
+                MaterialTheme.healthColors.onActivityContainer
             } else {
                 MaterialTheme.colorScheme.onSurface
             }
@@ -269,7 +284,7 @@ private fun ActivityCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(activity.iconName, style = MaterialTheme.typography.headlineMedium)
+                HealthIconText(text = activity.iconName, style = MaterialTheme.typography.headlineMedium)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier.size(Dimens.selectionIndicatorSize),
@@ -279,7 +294,7 @@ private fun ActivityCard(
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
                                 contentDescription = stringResource(R.string.add_activity_selected),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                tint = MaterialTheme.healthColors.onActivityContainer
                             )
                         }
                     }
@@ -290,10 +305,10 @@ private fun ActivityCard(
                             else R.string.add_activity_not_favorite
                         ),
                         tint = if (activity.isFavorite) {
-                            if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                            else MaterialTheme.colorScheme.primary
+                            if (isSelected) MaterialTheme.healthColors.onActivityContainer
+                            else MaterialTheme.healthColors.activity
                         } else {
-                            if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                            if (isSelected) MaterialTheme.healthColors.onActivityContainer
                             else MaterialTheme.colorScheme.onSurfaceVariant
                         }
                     )
@@ -303,7 +318,7 @@ private fun ActivityCard(
                 activity.name,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                color = if (isSelected) MaterialTheme.healthColors.onActivityContainer
                 else MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -311,7 +326,7 @@ private fun ActivityCard(
             Text(
                 stringResource(R.string.add_activity_met, activity.met),
                 style = MaterialTheme.typography.bodySmall,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                color = if (isSelected) MaterialTheme.healthColors.onActivityContainer
                 else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -326,34 +341,37 @@ private fun SelectedActivityCard(
     HealthCard(
         shape = Shape.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            containerColor = MaterialTheme.healthColors.activityContainer,
+            contentColor = MaterialTheme.healthColors.onActivityContainer
         )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(Dimens.spaceMedium),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
         ) {
-            Text(activity.iconName, style = MaterialTheme.typography.headlineMedium)
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = Dimens.spaceSmall)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
             ) {
-                Text(
-                    text = activity.name,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(stringResource(R.string.add_activity_met, activity.met))
+                HealthIconText(text = activity.iconName, style = MaterialTheme.typography.headlineMedium)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = activity.name,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(stringResource(R.string.add_activity_met, activity.met))
+                }
             }
             OutlinedButton(
                 onClick = { onAction(AddActivityAction.ReselectActivity) },
+                modifier = Modifier.align(Alignment.End),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    contentColor = MaterialTheme.healthColors.onActivityContainer
                 )
             ) {
                 Text(
@@ -371,66 +389,22 @@ private fun DurationSection(
     durationMinutes: Int,
     onAction: (AddActivityAction) -> Unit
 ) {
-    HealthCard(shape = Shape.large) {
-        Column(
-            modifier = Modifier.padding(Dimens.spaceMedium),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                stringResource(R.string.add_activity_duration),
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    onClick = {
-                        onAction(
-                            AddActivityAction.ChangeDuration(
-                                durationMinutes - AddActivityViewModel.DURATION_STEP_MINUTES
-                            )
-                        )
-                    },
-                    enabled = durationMinutes > AddActivityViewModel.SLIDER_MIN_DURATION_MINUTES
-                ) {
-                    Text(
-                        text = stringResource(R.string.add_activity_minus_symbol),
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                }
-                Text(
-                    stringResource(R.string.add_activity_minutes, durationMinutes),
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                IconButton(
-                    onClick = {
-                        onAction(
-                            AddActivityAction.ChangeDuration(
-                                durationMinutes + AddActivityViewModel.DURATION_STEP_MINUTES
-                            )
-                        )
-                    },
-                    enabled = durationMinutes < AddActivityViewModel.SLIDER_MAX_DURATION_MINUTES
-                ) {
-                    Icon(Icons.Filled.Add, stringResource(R.string.add_activity_increase))
-                }
+    HealthNumericSlider(
+        label = stringResource(R.string.add_activity_duration),
+        value = durationMinutes.toString(),
+        onValueChange = { input ->
+            input.replace(',', '.').toFloatOrNull()?.let { value ->
+                onAction(AddActivityAction.ChangeDuration(value.toInt()))
             }
-            Slider(
-                value = durationMinutes.toFloat(),
-                onValueChange = {
-                    val stepped = (it / AddActivityViewModel.DURATION_STEP_MINUTES).roundToInt() *
-                        AddActivityViewModel.DURATION_STEP_MINUTES
-                    onAction(AddActivityAction.ChangeDuration(stepped))
-                },
-                valueRange = AddActivityViewModel.SLIDER_MIN_DURATION_MINUTES.toFloat()..
-                    AddActivityViewModel.SLIDER_MAX_DURATION_MINUTES.toFloat(),
-                steps = 34
-            )
-        }
-    }
+        },
+        valueRange = AddActivityViewModel.SLIDER_MIN_DURATION_MINUTES.toFloat()..
+            AddActivityViewModel.SLIDER_MAX_DURATION_MINUTES.toFloat(),
+        unit = stringResource(R.string.unit_minutes),
+        step = AddActivityViewModel.DURATION_STEP_MINUTES.toFloat(),
+        accentColor = MaterialTheme.healthColors.activity,
+        accentContainerColor = MaterialTheme.healthColors.activityContainer,
+        onAccentContainerColor = MaterialTheme.healthColors.onActivityContainer
+    )
 }
 
 @Composable
@@ -438,7 +412,9 @@ private fun CaloriesEstimate(calories: Int) {
     HealthCard(
         modifier = Modifier.fillMaxWidth(),
         shape = Shape.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.healthColors.activityContainer
+        )
     ) {
         Column(
             modifier = Modifier
@@ -451,7 +427,7 @@ private fun CaloriesEstimate(calories: Int) {
                 stringResource(R.string.add_activity_kcal, calories),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
+                color = MaterialTheme.healthColors.onActivityContainer
             )
         }
     }

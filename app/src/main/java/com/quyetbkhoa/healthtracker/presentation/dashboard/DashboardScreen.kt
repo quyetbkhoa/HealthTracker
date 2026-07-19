@@ -2,7 +2,6 @@ package com.quyetbkhoa.healthtracker.presentation.dashboard
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,10 +9,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -36,12 +36,18 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,8 +55,10 @@ import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
+import com.quyetbkhoa.healthtracker.core.designsystem.healthColors
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthIconText
 import com.quyetbkhoa.healthtracker.domain.model.MealType
 import com.quyetbkhoa.healthtracker.domain.model.Goal
 import com.quyetbkhoa.healthtracker.domain.usecase.DailyCalorieStatus
@@ -116,9 +124,9 @@ fun DashboardContent(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = Dimens.spaceMedium),
-            verticalArrangement = Arrangement.spacedBy(Dimens.spaceLarge)
+            verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
         ) {
-            DashboardHeader(userName = uiState.userName, onNavigateToSettings = onNavigateToSettings)
+            DashboardHeader(userName = uiState.userName)
             CalorieOverviewCard(uiState = uiState)
             uiState.suggestedActivityLevel?.let {
                 ActivityLevelSuggestionCard(uiState, onNavigateToSettings)
@@ -168,62 +176,59 @@ private fun DashboardLoadingState(isLoading: Boolean) {
 }
 
 @Composable
-private fun DashboardHeader(userName: String, onNavigateToSettings: () -> Unit) {
+private fun DashboardHeader(userName: String) {
     val locale = LocalConfiguration.current.locales[0]
     val formattedDate = LocalDate.now()
         .format(DateTimeFormatter.ofPattern(stringResource(R.string.dashboard_date_pattern), locale))
         .replaceFirstChar { it.titlecase(locale) }
     val displayName = userName.substringBeforeLast(' ').ifBlank { stringResource(R.string.dashboard_guest_name) }
+    val greeting = buildAnnotatedString {
+        append(stringResource(R.string.dashboard_greeting, ""))
+        withStyle(SpanStyle(color = MaterialTheme.healthColors.meal)) {
+            append(displayName)
+        }
+    }
 
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-//            .statusBarsPadding()
-            ,
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-            Text(
-                text = stringResource(R.string.dashboard_greeting, displayName),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = stringResource(R.string.dashboard_date_with_icon, formattedDate),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        NotificationButton(onClick = onNavigateToSettings)
+        Text(
+            text = greeting,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        DashboardBrandMark()
+        Spacer(modifier = Modifier.width(Dimens.spaceSmall))
+        Text(
+            text = stringResource(R.string.dashboard_date_with_icon, formattedDate),
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.healthColors.meal,
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
+/** Reserved visual slot for the dashboard brand asset. */
 @Composable
-private fun NotificationButton(onClick: () -> Unit) {
+private fun DashboardBrandMark() {
     Box(
-        modifier = Modifier
-            .size(Dimens.buttonHeightMedium)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.secondaryContainer)
-            .clickable(onClick = onClick),
+        modifier = Modifier.size(Dimens.iconSizeLarge),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = stringResource(R.string.dashboard_icon_notification), style = MaterialTheme.typography.headlineSmall)
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(Dimens.iconSizeLarge)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = stringResource(R.string.dashboard_notification_count),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        }
+        HealthIconText(
+            text = stringResource(R.string.dashboard_brand_mark),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -233,25 +238,52 @@ private fun CalorieOverviewCard(uiState: DashboardUiState) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(DashboardDimens.overviewHeight)
+                .heightIn(min = DashboardDimens.overviewHeight)
                 .padding(Dimens.spaceMedium),
             verticalAlignment = Alignment.CenterVertically
         ) {
             GoalRing(
                 targetCalories = uiState.targetCalories,
                 progress = uiState.progress,
-                modifier = Modifier.weight(1f).aspectRatio(1f)
+                modifier = Modifier.size(DashboardDimens.goalRingSize)
             )
             Spacer(modifier = Modifier.width(Dimens.spaceSmall))
-            Column(modifier = Modifier.weight(1.55f)) {
-                Row {
-                    OverviewMetric(R.string.dashboard_icon_eaten, R.string.dashboard_consumed, uiState.consumedCalories, Modifier.weight(1f))
-                    OverviewMetric(R.string.dashboard_icon_burned, R.string.dashboard_burned, uiState.exerciseCalories, Modifier.weight(1f))
-                    OverviewMetric(R.string.dashboard_icon_remaining, R.string.dashboard_remaining, abs(uiState.remainingCalories), Modifier.weight(1f), uiState.isExceeded)
-                }
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+            ) {
+                OverviewMetric(
+                    R.string.dashboard_icon_eaten,
+                    R.string.dashboard_consumed,
+                    uiState.consumedCalories,
+                    MaterialTheme.healthColors.mealContainer
+                )
+                DashboardSubtleDivider()
+                OverviewMetric(
+                    R.string.dashboard_icon_burned,
+                    R.string.dashboard_burned,
+                    uiState.exerciseCalories,
+                    MaterialTheme.healthColors.activityContainer
+                )
+                DashboardSubtleDivider()
+                OverviewMetric(
+                    R.string.dashboard_icon_remaining,
+                    R.string.dashboard_remaining,
+                    abs(uiState.remainingCalories),
+                    MaterialTheme.colorScheme.secondaryContainer,
+                    isExceeded = uiState.isExceeded
+                )
             }
         }
     }
+}
+
+@Composable
+private fun DashboardSubtleDivider() {
+    HorizontalDivider(
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+    )
 }
 
 @Composable
@@ -287,26 +319,46 @@ private fun GoalRing(targetCalories: Int, progress: Float, modifier: Modifier = 
 }
 
 @Composable
-private fun OverviewMetric(iconRes: Int, labelRes: Int, value: Int, modifier: Modifier, isExceeded: Boolean = false) {
+private fun OverviewMetric(
+    iconRes: Int,
+    labelRes: Int,
+    value: Int,
+    iconContainerColor: Color,
+    modifier: Modifier = Modifier,
+    isExceeded: Boolean = false
+) {
     val valueColor = if (isExceeded) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(Dimens.buttonHeightMedium)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.secondaryContainer),
-            contentAlignment = Alignment.Center
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.End
         ) {
-            Text(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
-        }
-        Spacer(modifier = Modifier.height(Dimens.spaceSmall))
-        Text(text = stringResource(labelRes),
-            modifier = Modifier.basicMarquee(),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
+            Text(
+                text = stringResource(labelRes),
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-        Text(text = formatNumber(value), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = valueColor)
+            Text(
+                text = formatNumber(value),
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = valueColor,
+                textAlign = TextAlign.End,
+                maxLines = 1
+            )
+        }
+        Spacer(modifier = Modifier.width(Dimens.spaceSmall))
+            HealthIconText(text = stringResource(iconRes), style = MaterialTheme.typography.displaySmall)
+
     }
 }
 
@@ -339,27 +391,28 @@ private fun ProgressLine(progress: Float, progressPercent: Int) {
 @Composable
 private fun CalorieAdviceCard(uiState: DashboardUiState) {
     val evaluation = uiState.calorieEvaluation
-    val title = when (evaluation.status) {
-        DailyCalorieStatus.NEEDS_MORE -> stringResource(R.string.dashboard_advice_need_more_title)
-        DailyCalorieStatus.GOOD -> stringResource(R.string.dashboard_advice_good_title)
-        DailyCalorieStatus.EXCEEDED -> stringResource(R.string.dashboard_advice_exceeded_title)
-    }
-    val message = when (evaluation.status) {
-        DailyCalorieStatus.NEEDS_MORE -> when (uiState.goal) {
-            Goal.LOSE_WEIGHT -> stringResource(R.string.dashboard_advice_lose_need_more, formatNumber(evaluation.caloriesToBoundary))
-            Goal.MAINTAIN -> stringResource(R.string.dashboard_advice_maintain_need_more, formatNumber(evaluation.caloriesToBoundary))
-            Goal.GAIN_WEIGHT -> stringResource(R.string.dashboard_advice_gain_need_more, formatNumber(evaluation.caloriesToBoundary))
-        }
-        DailyCalorieStatus.GOOD -> when (uiState.goal) {
-            Goal.LOSE_WEIGHT -> stringResource(R.string.dashboard_advice_lose_good)
-            Goal.MAINTAIN -> stringResource(R.string.dashboard_advice_maintain_good)
-            Goal.GAIN_WEIGHT -> stringResource(R.string.dashboard_advice_gain_good)
-        }
-        DailyCalorieStatus.EXCEEDED -> when (uiState.goal) {
-            Goal.LOSE_WEIGHT -> stringResource(R.string.dashboard_advice_lose_exceeded, formatNumber(evaluation.caloriesToBoundary))
-            Goal.MAINTAIN -> stringResource(R.string.dashboard_advice_maintain_exceeded, formatNumber(evaluation.caloriesToBoundary))
-            Goal.GAIN_WEIGHT -> stringResource(R.string.dashboard_advice_gain_exceeded, formatNumber(evaluation.caloriesToBoundary))
-        }
+    val advice = when (evaluation.status) {
+        DailyCalorieStatus.NEEDS_MORE -> DashboardAdvice(
+            title = stringResource(R.string.dashboard_advice_need_more_title),
+            detail = stringResource(
+                R.string.dashboard_advice_short_need_more_detail,
+                formatNumber(evaluation.caloriesToBoundary)
+            ),
+            outcome = stringResource(R.string.dashboard_advice_short_need_more_outcome)
+        )
+        DailyCalorieStatus.GOOD -> DashboardAdvice(
+            title = stringResource(R.string.dashboard_advice_good_title),
+            detail = stringResource(R.string.dashboard_advice_short_good_detail),
+            outcome = stringResource(R.string.dashboard_advice_short_good_outcome)
+        )
+        DailyCalorieStatus.EXCEEDED -> DashboardAdvice(
+            title = stringResource(R.string.dashboard_advice_exceeded_title),
+            detail = stringResource(
+                R.string.dashboard_advice_short_exceeded_detail,
+                formatNumber(evaluation.caloriesToBoundary)
+            ),
+            outcome = stringResource(R.string.dashboard_advice_short_exceeded_outcome)
+        )
     }
     DashboardCard(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(Dimens.spaceMedium), verticalAlignment = Alignment.CenterVertically) {
@@ -370,16 +423,40 @@ private fun CalorieAdviceCard(uiState: DashboardUiState) {
                     .background(MaterialTheme.colorScheme.tertiaryContainer),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = stringResource(R.string.dashboard_icon_star), style = MaterialTheme.typography.displaySmall)
+                HealthIconText(text = stringResource(R.string.dashboard_icon_star), style = MaterialTheme.typography.displaySmall)
             }
             Spacer(modifier = Modifier.width(Dimens.spaceSmall))
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-                Text(text = title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Text(text = message, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = advice.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                DashboardSubtleDivider()
+                Text(
+                    text = advice.detail,
+                    modifier = Modifier.padding(vertical = Dimens.spaceExtraSmall),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                DashboardSubtleDivider()
+                Text(
+                    text = advice.outcome,
+                    modifier = Modifier.padding(top = Dimens.spaceExtraSmall),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
 }
+
+private data class DashboardAdvice(
+    val title: String,
+    val detail: String,
+    val outcome: String
+)
 
 @Composable
 private fun DashboardQuickActions(onAction: (DashboardAction) -> Unit) {
@@ -387,14 +464,14 @@ private fun DashboardQuickActions(onAction: (DashboardAction) -> Unit) {
         QuickActionCard(
             iconRes = R.string.dashboard_icon_meal,
             titleRes = R.string.dashboard_add_meal,
-            isPrimary = true,
+            isMeal = true,
             onClick = { onAction(DashboardAction.AddMeal) },
             modifier = Modifier.weight(1f)
         )
         QuickActionCard(
             iconRes = R.string.dashboard_icon_activity,
             titleRes = R.string.dashboard_add_activity,
-            isPrimary = false,
+            isMeal = false,
             onClick = { onAction(DashboardAction.AddActivity) },
             modifier = Modifier.weight(1f)
         )
@@ -402,20 +479,48 @@ private fun DashboardQuickActions(onAction: (DashboardAction) -> Unit) {
 }
 
 @Composable
-private fun QuickActionCard(iconRes: Int, titleRes: Int, isPrimary: Boolean, onClick: () -> Unit, modifier: Modifier) {
-    val containerColor = if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
-    val contentColor = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+private fun QuickActionCard(
+    iconRes: Int,
+    titleRes: Int,
+    isMeal: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier
+) {
+    val containerColor = if (isMeal) {
+        MaterialTheme.healthColors.meal
+    } else {
+        MaterialTheme.healthColors.activity
+    }
+    val contentColor = if (isMeal) {
+        MaterialTheme.healthColors.onMeal
+    } else {
+        MaterialTheme.healthColors.onActivity
+    }
     HealthElevatedCard(
-        modifier = modifier.height(Dimens.buttonHeightLarge).clickable(onClick = onClick),
+        modifier = modifier
+            .heightIn(min = Dimens.buttonHeightLarge)
+            .clickable(onClick = onClick),
         shape = Shape.extraLarge,
         colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
-        Row(modifier = Modifier.fillMaxSize().padding(Dimens.spaceMedium), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(Dimens.spaceMedium),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surface, modifier = Modifier.size(Dimens.buttonHeightMedium), shadowElevation = Dimens.spaceExtraSmall) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) { Text(text = stringResource(iconRes), style = MaterialTheme.typography.headlineSmall) }
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    HealthIconText(text = stringResource(iconRes), style = MaterialTheme.typography.headlineSmall)
+                }
             }
             Spacer(modifier = Modifier.width(Dimens.spaceSmall))
-            Text(text = stringResource(titleRes), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = contentColor)
+            Text(
+                text = stringResource(titleRes),
+            style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = contentColor,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -429,15 +534,30 @@ private fun TodayMealsSection(uiState: DashboardUiState, onAction: (DashboardAct
                 text = stringResource(R.string.dashboard_view_all),
                 modifier = Modifier.clickable { onAction(DashboardAction.ViewMeals) },
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.healthColors.meal
             )
-            Text(text = stringResource(R.string.dashboard_icon_arrow), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
+            HealthIconText(text = stringResource(R.string.dashboard_icon_arrow), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.healthColors.meal)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-            MealCard(R.string.dashboard_icon_breakfast, R.string.dashboard_breakfast, uiState.meals.filter { it.mealType == MealType.BREAKFAST }, Modifier.weight(1f))
-            MealCard(R.string.dashboard_icon_lunch, R.string.dashboard_lunch, uiState.meals.filter { it.mealType == MealType.LUNCH }, Modifier.weight(1f))
-            MealCard(R.string.dashboard_icon_dinner, R.string.dashboard_dinner, uiState.meals.filter { it.mealType == MealType.DINNER }, Modifier.weight(1f))
-            MealCard(R.string.dashboard_icon_snack, R.string.dashboard_snack, uiState.meals.filter { it.mealType == MealType.SNACK }, Modifier.weight(1f))
+        val mealCards = listOf(
+            Triple(R.string.dashboard_icon_breakfast, R.string.dashboard_breakfast, MealType.BREAKFAST),
+            Triple(R.string.dashboard_icon_lunch, R.string.dashboard_lunch, MealType.LUNCH),
+            Triple(R.string.dashboard_icon_dinner, R.string.dashboard_dinner, MealType.DINNER),
+            Triple(R.string.dashboard_icon_snack, R.string.dashboard_snack, MealType.SNACK)
+        )
+        mealCards.chunked(2).forEach { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+            ) {
+                rowItems.forEach { (iconRes, titleRes, mealType) ->
+                    MealCard(
+                        iconRes,
+                        titleRes,
+                        uiState.meals.filter { it.mealType == mealType },
+                        Modifier.weight(1f)
+                    )
+                }
+            }
         }
     }
 }
@@ -445,14 +565,21 @@ private fun TodayMealsSection(uiState: DashboardUiState, onAction: (DashboardAct
 @Composable
 private fun MealCard(iconRes: Int, titleRes: Int, meals: List<MealEntry>, modifier: Modifier) {
     val calories = meals.sumOf(MealEntry::calories)
-    HealthElevatedCard(modifier = modifier.height(DashboardDimens.mealCardHeight), shape = Shape.large) {
+    HealthElevatedCard(
+        modifier = modifier.heightIn(min = DashboardDimens.mealCardHeight),
+        shape = Shape.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.healthColors.mealContainer,
+            contentColor = MaterialTheme.healthColors.onMealContainer
+        )
+    ) {
         Column(modifier = Modifier.padding(Dimens.spaceSmall), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-            Box(modifier = Modifier.size(Dimens.buttonHeightMedium).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
-                Text(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
+            Box(modifier = Modifier.size(Dimens.buttonHeightMedium).clip(CircleShape).background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
+                HealthIconText(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
             }
-            Text(text = stringResource(titleRes), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-            Text(text = stringResource(R.string.dashboard_meal_records, meals.size), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(text = stringResource(R.string.dashboard_meal_kcal, calories), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = stringResource(titleRes), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.healthColors.onMealContainer)
+            Text(text = stringResource(R.string.dashboard_meal_records, meals.size), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.healthColors.onMealContainer)
+            Text(text = stringResource(R.string.dashboard_meal_kcal, calories), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.healthColors.onMealContainer)
         }
     }
 }
@@ -462,14 +589,14 @@ private fun DailyTipCard() {
     DashboardCard(modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(Dimens.spaceMedium), verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(Dimens.buttonHeightLarge).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
-                Text(text = stringResource(R.string.dashboard_icon_tip), style = MaterialTheme.typography.headlineMedium)
+                HealthIconText(text = stringResource(R.string.dashboard_icon_tip), style = MaterialTheme.typography.headlineMedium)
             }
             Spacer(modifier = Modifier.width(Dimens.spaceSmall))
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.spaceExtraSmall)) {
                 Text(text = stringResource(R.string.dashboard_tip_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Text(text = stringResource(R.string.dashboard_tip_message), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(text = stringResource(R.string.dashboard_icon_arrow), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
+            HealthIconText(text = stringResource(R.string.dashboard_icon_arrow), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
         }
     }
 }
@@ -501,15 +628,23 @@ private fun DashboardBottomBar(
 @Composable
 private fun RowScope.NavigationItem(iconRes: Int, labelRes: Int, selected: Boolean, onClick: () -> Unit) {
     val contentColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp
+    val fontScale = LocalDensity.current.fontScale
+    val labelStyle = if (screenWidthDp < COMPACT_NAVIGATION_WIDTH_DP || fontScale > LARGE_FONT_SCALE) {
+        MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 12.sp)
+    } else {
+        MaterialTheme.typography.labelMedium
+    }
     Column(
         modifier = Modifier.weight(1f).clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Dimens.spaceExtraSmall)
     ) {
-        Text(text = stringResource(iconRes), style = MaterialTheme.typography.headlineSmall, color = contentColor)
+        HealthIconText(text = stringResource(iconRes), style = MaterialTheme.typography.headlineSmall, color = contentColor)
         Text(
             text = stringResource(labelRes),
-            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.fillMaxWidth(),
+            style = labelStyle,
             color = contentColor,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
             textAlign = TextAlign.Center,
@@ -539,6 +674,9 @@ private fun DashboardCard(modifier: Modifier = Modifier, content: @Composable ()
 }
 
 private fun formatNumber(value: Int): String = NumberFormat.getIntegerInstance(Locale.getDefault()).format(value)
+
+private const val COMPACT_NAVIGATION_WIDTH_DP = 360
+private const val LARGE_FONT_SCALE = 1.15f
 
 
 @Composable
