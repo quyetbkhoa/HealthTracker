@@ -5,6 +5,7 @@ import com.quyetbkhoa.healthtracker.domain.model.StatisticsRange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,11 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.healthColors
 
 internal data class StatisticsPalette(
     val consumed: Color,
@@ -39,19 +42,20 @@ internal data class StatisticsPalette(
 )
 
 @Composable
-internal fun statisticsPalette(): StatisticsPalette = MaterialTheme.colorScheme.run {
-    StatisticsPalette(
-        consumed = primary,
-        consumedContainer = primaryContainer,
-        onConsumedContainer = onPrimaryContainer,
-        burned = error,
-        burnedContainer = errorContainer,
-        onBurnedContainer = onErrorContainer,
-        balance = tertiary,
-        balanceContainer = tertiaryContainer,
-        onBalanceContainer = onTertiaryContainer,
-        goalContainer = secondaryContainer,
-        onGoalContainer = onSecondaryContainer
+internal fun statisticsPalette(): StatisticsPalette {
+    val healthColors = MaterialTheme.healthColors
+    return StatisticsPalette(
+        consumed = healthColors.chartGreen,
+        consumedContainer = healthColors.mealContainer,
+        onConsumedContainer = healthColors.onMealContainer,
+        burned = healthColors.chartOrange,
+        burnedContainer = healthColors.activityContainer,
+        onBurnedContainer = healthColors.onActivityContainer,
+        balance = healthColors.chartBlue,
+        balanceContainer = MaterialTheme.colorScheme.primaryContainer,
+        onBalanceContainer = MaterialTheme.colorScheme.onPrimaryContainer,
+        goalContainer = MaterialTheme.colorScheme.secondaryContainer,
+        onGoalContainer = MaterialTheme.colorScheme.onSecondaryContainer
     )
 }
 
@@ -61,8 +65,17 @@ internal fun StatisticsRangeSelector(
     onRangeSelected: (StatisticsRange) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isLargeFont = LocalDensity.current.fontScale > STATISTICS_LARGE_FONT_SCALE
+    val optionRows = if (isLargeFont) RANGE_OPTIONS.chunked(RANGE_COLUMNS_LARGE_FONT) else {
+        listOf(RANGE_OPTIONS)
+    }
     Surface(
-        modifier = modifier.fillMaxWidth().height(StatisticsDimens.rangeHeight),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(
+                if (isLargeFont) StatisticsDimens.rangeHeight * optionRows.size
+                else StatisticsDimens.rangeHeight
+            ),
         shape = RoundedCornerShape(StatisticsDimens.rangeOuterRadius),
         color = MaterialTheme.colorScheme.surface,
         border = androidx.compose.foundation.BorderStroke(
@@ -70,14 +83,21 @@ internal fun StatisticsRangeSelector(
             MaterialTheme.colorScheme.outlineVariant
         )
     ) {
-        Row(Modifier.fillMaxSize().padding(Dimens.spaceExtraSmall)) {
-            RANGE_OPTIONS.forEach { option ->
-                RangeOption(
-                    option = option,
-                    isSelected = option.range == selectedRange,
-                    onClick = { onRangeSelected(option.range) },
-                    modifier = Modifier.weight(option.weight)
-                )
+        Column(Modifier.fillMaxSize().padding(Dimens.spaceExtraSmall)) {
+            optionRows.forEach { options ->
+                Row(Modifier.fillMaxWidth().weight(1f)) {
+                    options.forEach { option ->
+                        RangeOption(
+                            option = option,
+                            isSelected = option.range == selectedRange,
+                            onClick = { onRangeSelected(option.range) },
+                            modifier = Modifier.weight(option.weight)
+                        )
+                    }
+                    if (options.size < RANGE_COLUMNS_LARGE_FONT) {
+                        Box(Modifier.weight(1f))
+                    }
+                }
             }
         }
     }
@@ -117,3 +137,6 @@ private val RANGE_OPTIONS = listOf(
     RangeOption(StatisticsRange.LAST_30_DAYS, R.string.statistics_last_30_days, 1.35f),
     RangeOption(StatisticsRange.ALL, R.string.statistics_all)
 )
+
+private const val RANGE_COLUMNS_LARGE_FONT = 2
+private const val STATISTICS_LARGE_FONT_SCALE = 1.15f

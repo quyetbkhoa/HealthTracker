@@ -3,7 +3,6 @@ package com.quyetbkhoa.healthtracker.presentation.statistics
 import com.quyetbkhoa.healthtracker.domain.model.StatisticsRange
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +46,7 @@ import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthIconText
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthOutlinedCard
 import java.text.NumberFormat
@@ -77,7 +78,13 @@ private fun StatisticsOverviewContent(
             return@Box
         }
 
-        val metricRows = buildMetricRows(state)
+        val pairedMetricRows = buildMetricRows(state)
+        val isLargeFont = LocalDensity.current.fontScale > STATISTICS_LARGE_FONT_SCALE
+        val metricRows = if (isLargeFont) {
+            pairedMetricRows.flatten().map(::listOf)
+        } else {
+            pairedMetricRows
+        }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
@@ -183,15 +190,23 @@ private fun MetricCard(model: MetricCardModel, modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = model.title,
-                modifier = Modifier.fillMaxWidth().basicMarquee(),
+                modifier = Modifier.fillMaxWidth(),
                 color = model.contentColor,
                 fontSize = StatisticsDimens.metricTitleSize,
                 fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                overflow = TextOverflow.Clip
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Start
             )
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(model.value, color = model.contentColor, fontSize = StatisticsDimens.metricValueSize, fontWeight = FontWeight.Bold)
+                Text(
+                    text = model.value,
+                    color = model.contentColor,
+                    fontSize = StatisticsDimens.metricValueSize,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Text(model.unit, color = model.contentColor.copy(alpha = 0.75f), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
             }
         }
@@ -228,7 +243,11 @@ private fun ChartsButton(onClick: () -> Unit) {
                 Text(stringResource(R.string.statistics_charts), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(stringResource(R.string.statistics_charts_subtitle), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
             }
-            Text(stringResource(R.string.dashboard_icon_arrow), color = MaterialTheme.colorScheme.onPrimaryContainer, fontSize = StatisticsDimens.chartsButtonArrowSize)
+            HealthIconText(
+                text = stringResource(R.string.dashboard_icon_arrow),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = StatisticsDimens.chartsButtonArrowSize)
+            )
         }
     }
 }
@@ -252,6 +271,8 @@ private fun rememberStatisticsFormatter(): StatisticsFormatter {
         date = dateFormat
     )
 }
+
+private const val STATISTICS_LARGE_FONT_SCALE = 1.15f
 
 @Composable
 private fun streakHistory(streak: GoalStreak, formatter: DateTimeFormatter): String = when {

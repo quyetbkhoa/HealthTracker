@@ -107,12 +107,21 @@ class AddMealViewModel @Inject constructor(
                 it.copy(selectedFood = null, consumedGrams = "", estimatedCalories = null)
             }
             is AddMealAction.SetCustomMode -> _uiState.update {
+                val defaultGrams = if (action.enabled) DEFAULT_CUSTOM_GRAMS else ""
+                val defaultCalories = if (action.enabled) DEFAULT_CUSTOM_CALORIES else ""
                 it.copy(
                     isCustom = action.enabled,
                     selectedFood = null,
-                    consumedGrams = "",
-                    caloriesPer100Grams = "",
-                    estimatedCalories = null,
+                    consumedGrams = defaultGrams,
+                    caloriesPer100Grams = defaultCalories,
+                    estimatedCalories = if (action.enabled) {
+                        calculateMealCalories(
+                            defaultCalories.toDouble(),
+                            defaultGrams.toDouble()
+                        )
+                    } else {
+                        null
+                    },
                     validationError = null
                 )
             }
@@ -204,6 +213,11 @@ class AddMealViewModel @Inject constructor(
                 _uiState.update { it.copy(isSaving = false) }
             }
         }
+    }
+
+    private companion object {
+        const val DEFAULT_CUSTOM_GRAMS = "100"
+        const val DEFAULT_CUSTOM_CALORIES = "100"
     }
 }
 

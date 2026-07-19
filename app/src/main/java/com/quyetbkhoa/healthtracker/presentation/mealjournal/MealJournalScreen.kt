@@ -47,6 +47,8 @@ import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthIconText
+import com.quyetbkhoa.healthtracker.core.designsystem.healthColors
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
@@ -220,14 +222,14 @@ private fun DateNavigator(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.DateRange, null, tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Default.DateRange, null, tint = MaterialTheme.healthColors.meal)
                 Text(
                     text = LocalDate.ofEpochDay(epochDay).format(
                         DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
                     ),
                     modifier = Modifier.padding(start = Dimens.spaceSmall),
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.healthColors.meal
                 )
             }
             IconButton(onClick = onNext) {
@@ -241,7 +243,10 @@ private fun DateNavigator(
 private fun DailySummary(total: Int, target: Int) {
     HealthCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.healthColors.mealContainer,
+            contentColor = MaterialTheme.healthColors.onMealContainer
+        )
     ) {
         Column(modifier = Modifier.padding(Dimens.spaceLarge)) {
             Text(stringResource(R.string.meal_journal_total_today))
@@ -249,12 +254,12 @@ private fun DailySummary(total: Int, target: Int) {
                 stringResource(R.string.meal_journal_total_value, formatNumber(total), formatNumber(target)),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.healthColors.onMealContainer
             )
             Text(
                 stringResource(R.string.meal_journal_remaining, formatNumber(target - total)),
                 color = if (total > target) MaterialTheme.colorScheme.error
-                else MaterialTheme.colorScheme.onPrimaryContainer
+                else MaterialTheme.healthColors.onMealContainer
             )
         }
     }
@@ -263,14 +268,17 @@ private fun DailySummary(total: Int, target: Int) {
 @Composable
 private fun MealGroupHeader(type: MealType, calories: Int, onAdd: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(mealIcon(type), style = MaterialTheme.typography.headlineSmall)
+        HealthIconText(text = mealIcon(type), style = MaterialTheme.typography.headlineSmall)
         Column(
             modifier = Modifier
                 .weight(1f)
                 .padding(start = Dimens.spaceSmall)
         ) {
             Text(mealLabel(type), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text(stringResource(R.string.meal_journal_group_kcal, calories), color = MaterialTheme.colorScheme.primary)
+            Text(
+                stringResource(R.string.meal_journal_group_kcal, calories),
+                color = MaterialTheme.healthColors.meal
+            )
         }
         TextButton(onClick = onAdd) {
             Icon(Icons.Default.Add, null)

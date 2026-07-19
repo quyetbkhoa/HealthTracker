@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -46,6 +47,7 @@ import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthIconText
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
@@ -72,18 +74,38 @@ fun ProfileSetupStep2Screen(
             OnboardingSectionCard {
                 Text(text = stringResource(R.string.onboarding_activity_section), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(Dimens.spaceMedium))
-                Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-                    ActivityLevel.entries.forEach { level ->
-                        ActivityOption(level, uiState.activityLevel == level, Modifier.weight(1f)) { onAction(ProfileSetupAction.UpdateActivityLevel(level)) }
+                ActivityLevel.entries.chunked(SELECTION_COLUMNS).forEach { levels ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+                    ) {
+                        levels.forEach { level ->
+                            ActivityOption(
+                                level,
+                                uiState.activityLevel == level,
+                                Modifier.weight(1f)
+                            ) { onAction(ProfileSetupAction.UpdateActivityLevel(level)) }
+                        }
+                        if (levels.size < SELECTION_COLUMNS) Spacer(Modifier.weight(1f))
                     }
                 }
             }
             OnboardingSectionCard {
                 Text(text = stringResource(R.string.onboarding_goal_section), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(modifier = Modifier.height(Dimens.spaceMedium))
-                Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-                    Goal.entries.forEach { goal ->
-                        GoalOption(goal, uiState.goal == goal, Modifier.weight(1f)) { onAction(ProfileSetupAction.UpdateGoal(goal)) }
+                Goal.entries.chunked(SELECTION_COLUMNS).forEach { goals ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+                    ) {
+                        goals.forEach { goal ->
+                            GoalOption(
+                                goal,
+                                uiState.goal == goal,
+                                Modifier.weight(1f)
+                            ) { onAction(ProfileSetupAction.UpdateGoal(goal)) }
+                        }
+                        if (goals.size < SELECTION_COLUMNS) Spacer(Modifier.weight(1f))
                     }
                 }
             }
@@ -178,7 +200,7 @@ private fun GoalOption(goal: Goal, isSelected: Boolean, modifier: Modifier, onCl
 @Composable
 private fun SelectionCard(iconRes: Int, titleRes: Int, descriptionRes: Int?, isSelected: Boolean, height: androidx.compose.ui.unit.Dp, modifier: Modifier, onClick: () -> Unit) {
     HealthElevatedCard(
-        modifier = modifier.height(height).clickable(onClick = onClick),
+        modifier = modifier.heightIn(min = height).clickable(onClick = onClick),
         shape = Shape.large,
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer
@@ -189,34 +211,30 @@ private fun SelectionCard(iconRes: Int, titleRes: Int, descriptionRes: Int?, isS
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(Dimens.spaceSmall), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
             Box(modifier = Modifier.size(Dimens.buttonHeightMedium).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
-                Text(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
+                HealthIconText(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
             }
-            Box(modifier = Modifier.height(Dimens.buttonHeightMedium), contentAlignment = Alignment.Center) {
+            Text(
+                text = stringResource(titleRes),
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
+                else MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (descriptionRes != null) {
                 Text(
-                    text = stringResource(titleRes),
+                    text = stringResource(descriptionRes),
                     modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelSmall,
                     color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
-                    else MaterialTheme.colorScheme.onSurface,
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    maxLines = 2,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-            }
-            if (descriptionRes != null) {
-                Box(modifier = Modifier.height(Dimens.buttonHeightMedium), contentAlignment = Alignment.TopCenter) {
-                    Text(
-                        text = stringResource(descriptionRes),
-                        modifier = Modifier.fillMaxWidth(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
             }
         }
     }
@@ -226,7 +244,7 @@ private fun SelectionCard(iconRes: Int, titleRes: Int, descriptionRes: Int?, isS
 private fun EstimateMetric(iconRes: Int, labelRes: Int, value: Int, modifier: Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
         Box(modifier = Modifier.size(Dimens.buttonHeightMedium).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
-            Text(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
+            HealthIconText(text = stringResource(iconRes), style = MaterialTheme.typography.titleLarge)
         }
         Text(text = stringResource(labelRes), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
         Text(text = formatNumber(value), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -236,12 +254,14 @@ private fun EstimateMetric(iconRes: Int, labelRes: Int, value: Int, modifier: Mo
 
 private fun formatNumber(value: Int): String = NumberFormat.getIntegerInstance(Locale.getDefault()).format(value)
 
+private const val SELECTION_COLUMNS = 2
+
 @Composable
 fun SelectableCard(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(Dimens.buttonHeightLarge)
+            .heightIn(min = Dimens.buttonHeightLarge)
             .border(Dimens.borderWidthThin, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, Shape.large)
             .clickable(onClick = onClick)
             .padding(horizontal = Dimens.spaceLarge),
@@ -253,7 +273,7 @@ fun SelectableCard(text: String, isSelected: Boolean, onClick: () -> Unit) {
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
         Box(

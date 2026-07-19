@@ -55,6 +55,7 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthNumericSlider
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.domain.model.Gender
@@ -171,12 +172,23 @@ fun ProfileSetupStep1Screen(
                             focusManager.clearFocus()
                             onAction(ProfileSetupAction.UpdateGender(it))
                         }
-                        ProfileInputField(R.string.onboarding_height, uiState.heightStr, R.string.onboarding_height, uiState.heightError, KeyboardType.Number) {
-                            onAction(ProfileSetupAction.UpdateHeight(it))
-                        }
-                        ProfileInputField(R.string.onboarding_weight, uiState.weightStr, R.string.onboarding_weight, uiState.weightError, KeyboardType.Number) {
-                            onAction(ProfileSetupAction.UpdateWeight(it))
-                        }
+                        HealthNumericSlider(
+                            label = stringResource(R.string.onboarding_height),
+                            value = uiState.heightStr,
+                            onValueChange = { onAction(ProfileSetupAction.UpdateHeight(it)) },
+                            valueRange = 1f..300f,
+                            unit = stringResource(R.string.onboarding_height_unit),
+                            errorText = uiState.heightError?.let { stringResource(it) }
+                        )
+                        HealthNumericSlider(
+                            label = stringResource(R.string.onboarding_weight),
+                            value = uiState.weightStr,
+                            onValueChange = { onAction(ProfileSetupAction.UpdateWeight(it)) },
+                            valueRange = 1f..300f,
+                            unit = stringResource(R.string.onboarding_weight_unit),
+                            step = 0.5f,
+                            errorText = uiState.weightError?.let { stringResource(it) }
+                        )
                     }
                 }
             }
@@ -204,12 +216,23 @@ fun ProfileSetupStep1Screen(
 
 @Composable
 private fun GenderSelector(selectedGender: Gender, onGenderSelected: (Gender) -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(text = stringResource(R.string.onboarding_gender), modifier = Modifier.width(OnboardingDimens.formLabelWidth), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-        Spacer(modifier = Modifier.width(Dimens.spaceSmall))
-        GenderOption(Gender.MALE, R.string.onboarding_gender_male, selectedGender == Gender.MALE, Modifier.weight(1f), onGenderSelected)
-        Spacer(modifier = Modifier.width(Dimens.spaceSmall))
-        GenderOption(Gender.FEMALE, R.string.onboarding_gender_female, selectedGender == Gender.FEMALE, Modifier.weight(1f), onGenderSelected)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_gender),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+        ) {
+            GenderOption(Gender.MALE, R.string.onboarding_gender_male, selectedGender == Gender.MALE, Modifier.weight(1f), onGenderSelected)
+            GenderOption(Gender.FEMALE, R.string.onboarding_gender_female, selectedGender == Gender.FEMALE, Modifier.weight(1f), onGenderSelected)
+        }
     }
 }
 
@@ -236,58 +259,68 @@ private fun GenderOption(gender: Gender, labelRes: Int, isSelected: Boolean, mod
 @Composable
 private fun ProfileInputField(labelRes: Int, value: String, placeholderRes: Int, errorRes: Int?, keyboardType: KeyboardType, onValueChange: (String) -> Unit) {
     val focusManager = LocalFocusManager.current
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = stringResource(labelRes), modifier = Modifier.width(OnboardingDimens.formLabelWidth), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-        Spacer(modifier = Modifier.width(Dimens.spaceSmall))
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-            OutlinedTextField(
-                value = value,
-                onValueChange = onValueChange,
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(stringResource(placeholderRes)) },
-                isError = errorRes != null,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = keyboardType,
-                    imeAction = if (keyboardType == KeyboardType.Number) ImeAction.Done else ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                shape = Shape.large,
-                colors = onboardingFieldColors()
-            )
-            FieldError(errorRes)
-        }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+    ) {
+        Text(
+            text = stringResource(labelRes),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(stringResource(placeholderRes)) },
+            isError = errorRes != null,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyboardType,
+                imeAction = if (keyboardType == KeyboardType.Number) ImeAction.Done else ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            shape = Shape.large,
+            colors = onboardingFieldColors()
+        )
+        FieldError(errorRes)
     }
 }
 
 @Composable
 private fun ProfileDateRow(value: String, errorRes: Int?, onClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = stringResource(R.string.onboarding_dob), modifier = Modifier.width(OnboardingDimens.formLabelWidth), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-        Spacer(modifier = Modifier.width(Dimens.spaceSmall))
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(Dimens.buttonHeightLarge)
-                    .clip(Shape.large)
-                    .border(
-                        width = Dimens.borderWidthThin,
-                        color = if (errorRes != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant,
-                        shape = Shape.large
-                    )
-                    .clickable(onClick = onClick)
-                    .padding(horizontal = Dimens.spaceMedium),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Text(
-                    text = value.ifBlank { stringResource(R.string.onboarding_dob_placeholder) },
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = if (value.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_dob),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(Dimens.buttonHeightLarge)
+                .clip(Shape.large)
+                .border(
+                    width = Dimens.borderWidthThin,
+                    color = if (errorRes != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant,
+                    shape = Shape.large
                 )
-            }
-            FieldError(errorRes)
+                .clickable(onClick = onClick)
+                .padding(horizontal = Dimens.spaceMedium),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = value.ifBlank { stringResource(R.string.onboarding_dob_placeholder) },
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (value.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+            )
         }
+        FieldError(errorRes)
     }
 }
 

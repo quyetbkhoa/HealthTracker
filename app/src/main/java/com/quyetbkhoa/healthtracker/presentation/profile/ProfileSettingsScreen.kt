@@ -51,6 +51,7 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthNumericSlider
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
 import com.quyetbkhoa.healthtracker.domain.model.Gender
@@ -146,26 +147,23 @@ fun ProfileSettingsContent(
                     )
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)) {
-                ProfileTextField(
-                    label = stringResource(R.string.onboarding_weight),
-                    value = state.weightInput,
-                    onValueChange = { onAction(ProfileSettingsAction.UpdateWeight(it)) },
-                    errorRes = state.weightError,
-                    suffix = stringResource(R.string.onboarding_weight_unit),
-                    numeric = true,
-                    modifier = Modifier.weight(1f)
-                )
-                ProfileTextField(
-                    label = stringResource(R.string.onboarding_height),
-                    value = state.heightInput,
-                    onValueChange = { onAction(ProfileSettingsAction.UpdateHeight(it)) },
-                    errorRes = state.heightError,
-                    suffix = stringResource(R.string.onboarding_height_unit),
-                    numeric = true,
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            HealthNumericSlider(
+                label = stringResource(R.string.onboarding_weight),
+                value = state.weightInput,
+                onValueChange = { onAction(ProfileSettingsAction.UpdateWeight(it)) },
+                valueRange = 1f..300f,
+                unit = stringResource(R.string.onboarding_weight_unit),
+                step = 0.5f,
+                errorText = state.weightError?.let { stringResource(it) }
+            )
+            HealthNumericSlider(
+                label = stringResource(R.string.onboarding_height),
+                value = state.heightInput,
+                onValueChange = { onAction(ProfileSettingsAction.UpdateHeight(it)) },
+                valueRange = 1f..300f,
+                unit = stringResource(R.string.onboarding_height_unit),
+                errorText = state.heightError?.let { stringResource(it) }
+            )
             FieldTitle(R.string.onboarding_activity_level)
             ActivityLevel.entries.forEach { level ->
                 val label = when (level) {
@@ -232,16 +230,21 @@ private fun BmiCard(state: ProfileSettingsUiState) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(stringResource(R.string.profile_settings_bmi), color = MaterialTheme.colorScheme.onPrimaryContainer)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.profile_settings_bmi),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
                 category?.let { Text(stringResource(it), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer) }
             }
             Text(
                 text = state.bmi?.let { stringResource(R.string.profile_bmi_value, it) }
                     ?: stringResource(R.string.common_not_available),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                maxLines = 1
             )
         }
     }
@@ -254,8 +257,7 @@ private fun ProfileTextField(
     onValueChange: (String) -> Unit,
     errorRes: Int?,
     modifier: Modifier = Modifier,
-    suffix: String? = null,
-    numeric: Boolean = false
+    suffix: String? = null
 ) {
     OutlinedTextField(
         value = value,
@@ -263,7 +265,7 @@ private fun ProfileTextField(
         modifier = modifier.fillMaxWidth(),
         label = { Text(label) },
         suffix = suffix?.let { { Text(it) } },
-        keyboardOptions = KeyboardOptions(keyboardType = if (numeric) KeyboardType.Decimal else KeyboardType.Text),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         isError = errorRes != null,
         supportingText = errorRes?.let { error -> { Text(stringResource(error)) } },
         singleLine = true,

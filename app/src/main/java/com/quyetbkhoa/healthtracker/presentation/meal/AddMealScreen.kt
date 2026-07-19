@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -39,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -48,6 +47,8 @@ import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
+import com.quyetbkhoa.healthtracker.core.designsystem.healthColors
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthNumericSlider
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
@@ -101,6 +102,13 @@ private fun AddMealContent(
 
             if (!state.isCustom && state.selectedFood == null) {
                 item {
+                    Text(
+                        text = stringResource(R.string.add_meal_choose_food),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                item {
                     OutlinedTextField(
                         value = state.query,
                         onValueChange = { onAction(AddMealAction.UpdateQuery(it)) },
@@ -126,12 +134,17 @@ private fun AddMealContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(Dimens.buttonHeightMedium),
-                        enabled = !state.isSaving && state.estimatedCalories != null
+                        enabled = !state.isSaving && state.estimatedCalories != null &&
+                            (!state.isCustom || state.customName.isNotBlank()),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.healthColors.meal,
+                            contentColor = MaterialTheme.healthColors.onMeal
+                        )
                     ) {
                         if (state.isSaving) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(Dimens.iconSizeMedium),
-                                color = MaterialTheme.colorScheme.onPrimary
+                                color = MaterialTheme.healthColors.onMeal
                             )
                         } else {
                             Text(stringResource(R.string.add_meal_save))
@@ -208,13 +221,13 @@ private fun ModeSelector(isCustom: Boolean, onAction: (AddMealAction) -> Unit) {
 private fun ModeCard(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     HealthElevatedCard(
         modifier = modifier
-            .height(Dimens.buttonHeightLarge)
+            .heightIn(min = Dimens.buttonHeightLarge)
             .clickable(onClick = onClick),
         shape = Shape.medium,
         colors = CardDefaults.cardColors(
-            containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer
+            containerColor = if (selected) MaterialTheme.healthColors.mealContainer
             else MaterialTheme.colorScheme.surface,
-            contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+            contentColor = if (selected) MaterialTheme.healthColors.onMealContainer
             else MaterialTheme.colorScheme.onSurface
         )
     ) {
@@ -226,10 +239,10 @@ private fun ModeCard(label: String, selected: Boolean, modifier: Modifier, onCli
         ) {
             Text(
                 text = label,
-                color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+                color = if (selected) MaterialTheme.healthColors.onMealContainer
                 else MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
@@ -267,7 +280,7 @@ private fun FoodRow(food: Food, onClick: () -> Unit) {
                 Icons.Default.Add,
                 stringResource(R.string.food_select),
                 modifier = Modifier.padding(start = Dimens.spaceSmall),
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.healthColors.meal
             )
         }
     }
@@ -294,7 +307,10 @@ private fun MealDetailsForm(state: AddMealUiState, onAction: (AddMealAction) -> 
         state.selectedFood?.let { food ->
             HealthCard(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.healthColors.mealContainer,
+                    contentColor = MaterialTheme.healthColors.onMealContainer
+                )
             ) {
                 Row(
                     modifier = Modifier
@@ -314,7 +330,7 @@ private fun MealDetailsForm(state: AddMealUiState, onAction: (AddMealAction) -> 
                     TextButton(
                         onClick = { onAction(AddMealAction.ChooseAgain) },
                         colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            contentColor = MaterialTheme.healthColors.onMealContainer
                         )
                     ) {
                         Text(
@@ -335,27 +351,46 @@ private fun MealDetailsForm(state: AddMealUiState, onAction: (AddMealAction) -> 
                 singleLine = true,
                 isError = state.validationError == AddMealValidationError.EMPTY_NAME
             )
-            OutlinedTextField(
+            HealthNumericSlider(
+                label = stringResource(R.string.food_kcal_per_100g),
                 value = state.caloriesPer100Grams,
                 onValueChange = { onAction(AddMealAction.UpdateCaloriesPer100Grams(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.food_kcal_per_100g)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true,
-                isError = state.validationError == AddMealValidationError.INVALID_CALORIES_PER_100_GRAMS
+                valueRange = 1f..2_000f,
+                unit = stringResource(R.string.unit_kcal),
+                step = 5f,
+                errorText = if (
+                    state.validationError == AddMealValidationError.INVALID_CALORIES_PER_100_GRAMS
+                ) validationMessage(state.validationError) else null,
+                accentColor = MaterialTheme.healthColors.meal,
+                accentContainerColor = MaterialTheme.healthColors.mealContainer,
+                onAccentContainerColor = MaterialTheme.healthColors.onMealContainer
             )
         }
-        OutlinedTextField(
+        Text(
+            text = stringResource(R.string.add_meal_amount_section),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        HealthNumericSlider(
+            label = stringResource(R.string.food_consumed_grams),
             value = state.consumedGrams,
             onValueChange = { onAction(AddMealAction.UpdateConsumedGrams(it)) },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.food_consumed_grams)) },
-            suffix = { Text(stringResource(R.string.unit_grams)) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            singleLine = true,
-            isError = state.validationError == AddMealValidationError.INVALID_GRAMS
+            valueRange = 5f..1_000f,
+            unit = stringResource(R.string.unit_grams),
+            step = 5f,
+            errorText = if (state.validationError == AddMealValidationError.INVALID_GRAMS) {
+                validationMessage(state.validationError)
+            } else {
+                null
+            },
+            accentColor = MaterialTheme.healthColors.meal,
+            accentContainerColor = MaterialTheme.healthColors.mealContainer,
+            onAccentContainerColor = MaterialTheme.healthColors.onMealContainer
         )
-        state.validationError?.let { error ->
+        state.validationError?.takeIf {
+            it != AddMealValidationError.INVALID_GRAMS &&
+                it != AddMealValidationError.INVALID_CALORIES_PER_100_GRAMS
+        }?.let { error ->
             Text(
                 text = validationMessage(error),
                 color = MaterialTheme.colorScheme.error,
@@ -364,7 +399,10 @@ private fun MealDetailsForm(state: AddMealUiState, onAction: (AddMealAction) -> 
         }
         HealthCard(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.healthColors.mealContainer,
+                contentColor = MaterialTheme.healthColors.onMealContainer
+            )
         ) {
             Column(modifier = Modifier.padding(Dimens.spaceLarge)) {
                 Text(stringResource(R.string.food_estimated_energy))
@@ -372,7 +410,7 @@ private fun MealDetailsForm(state: AddMealUiState, onAction: (AddMealAction) -> 
                     stringResource(R.string.food_estimated_kcal, state.estimatedCalories ?: 0),
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = MaterialTheme.healthColors.onMealContainer
                 )
             }
         }
@@ -383,13 +421,18 @@ private fun MealDetailsForm(state: AddMealUiState, onAction: (AddMealAction) -> 
 private fun MealTypeSelector(selected: MealType, onAction: (AddMealAction) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
         Text(stringResource(R.string.add_meal_choose_type), fontWeight = FontWeight.Bold)
-        Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-            MealType.entries.forEach { type ->
-                ModeCard(
-                    label = mealTypeLabel(type),
-                    selected = selected == type,
-                    modifier = Modifier.weight(1f)
-                ) { onAction(AddMealAction.SelectMealType(type)) }
+        MealType.entries.chunked(MEAL_TYPE_COLUMNS).forEach { types ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+            ) {
+                types.forEach { type ->
+                    ModeCard(
+                        label = mealTypeLabel(type),
+                        selected = selected == type,
+                        modifier = Modifier.weight(1f)
+                    ) { onAction(AddMealAction.SelectMealType(type)) }
+                }
             }
         }
     }
@@ -418,6 +461,8 @@ private fun validationMessage(error: AddMealValidationError): String = stringRes
 
 private fun formatDecimal(value: Double): String =
     NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }.format(value)
+
+private const val MEAL_TYPE_COLUMNS = 2
 
 @Preview
 @Composable

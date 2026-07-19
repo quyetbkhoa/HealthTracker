@@ -8,7 +8,7 @@ internal object StatisticsDimens {
     val itemSpacing = 12.dp
     val compactSpacing = 6.dp
     val cardPadding = 12.dp
-    val metricCardHeight = 136.dp
+    val metricCardHeight = 152.dp
     val rangeHeight = 58.dp
     val rangeOuterRadius = 30.dp
     val rangeInnerRadius = 25.dp
@@ -25,7 +25,7 @@ internal object StatisticsDimens {
     val legendDotSize = 10.dp
 
     val metricTitleSize = 13.sp
-    val metricValueSize = 28.sp
+    val metricValueSize = 26.sp
     val chartLabelSize = 9.sp
     val chartsButtonArrowSize = 28.sp
 }
