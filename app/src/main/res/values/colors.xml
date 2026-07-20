@@ -7,4 +7,12 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="widget_background">#FFFFFFFF</color>
+    <color name="widget_meal">#FF2E7D32</color>
+    <color name="widget_activity">#FFF57C00</color>
+    <color name="widget_remaining_ok">#FF2E7D32</color>
+    <color name="widget_remaining_exceeded">#FFB3261E</color>
+    <color name="widget_on_button">#FFFFFFFF</color>
+    <color name="widget_on_remaining_ok">#FFFFFFFF</color>
+    <color name="widget_on_remaining_exceeded">#FFFFFFFF</color>
 </resources>
