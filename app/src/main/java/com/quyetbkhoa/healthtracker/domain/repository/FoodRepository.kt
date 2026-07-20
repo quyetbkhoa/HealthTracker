@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface FoodRepository {
     fun observeFoods(query: String, languageTag: String): Flow<List<Food>>
     suspend fun getFoodById(id: Long, languageTag: String): Food?
+    suspend fun setFavorite(id: Long, isFavorite: Boolean)
 }

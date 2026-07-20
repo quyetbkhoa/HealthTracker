@@ -8,5 +8,6 @@ data class FoodEntity(
     @PrimaryKey val id: Long,
     val caloriesPer100Grams: Double,
     val defaultServingGrams: Double,
+    val isFavorite: Boolean = false,
     val displayOrder: Int
 )

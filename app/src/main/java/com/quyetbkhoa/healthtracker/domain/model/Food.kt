@@ -5,5 +5,6 @@ data class Food(
     val name: String,
     val caloriesPer100Grams: Double,
     val defaultServingGrams: Double,
-    val displayOrder: Int
+    val displayOrder: Int,
+    val isFavorite: Boolean = false
 )

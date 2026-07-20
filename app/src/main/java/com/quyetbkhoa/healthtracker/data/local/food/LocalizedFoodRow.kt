@@ -5,5 +5,6 @@ data class LocalizedFoodRow(
     val name: String,
     val caloriesPer100Grams: Double,
     val defaultServingGrams: Double,
+    val isFavorite: Boolean,
     val displayOrder: Int
 )

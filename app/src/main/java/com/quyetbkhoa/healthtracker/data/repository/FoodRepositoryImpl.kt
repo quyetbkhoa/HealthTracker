@@ -26,6 +26,10 @@ class FoodRepositoryImpl @Inject constructor(
         return row?.toDomain()
     }
 
+    override suspend fun setFavorite(id: Long, isFavorite: Boolean) {
+        if (id > 0L) foodDao.updateFavorite(id, isFavorite)
+    }
+
     private fun String.safeLanguageTag(): String =
         if (startsWith(ENGLISH_LANGUAGE_TAG)) ENGLISH_LANGUAGE_TAG else DEFAULT_LANGUAGE_TAG
 
@@ -40,5 +44,6 @@ private fun LocalizedFoodRow.toDomain() = Food(
     name = name,
     caloriesPer100Grams = caloriesPer100Grams,
     defaultServingGrams = defaultServingGrams,
-    displayOrder = displayOrder
+    displayOrder = displayOrder,
+    isFavorite = isFavorite
 )

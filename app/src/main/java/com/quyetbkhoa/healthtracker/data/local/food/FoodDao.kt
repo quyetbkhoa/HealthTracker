@@ -23,6 +23,7 @@ interface FoodDao {
             food_translations.name AS name,
             foods.caloriesPer100Grams AS caloriesPer100Grams,
             foods.defaultServingGrams AS defaultServingGrams,
+            foods.isFavorite AS isFavorite,
             foods.displayOrder AS displayOrder
         FROM foods
         INNER JOIN food_translations
@@ -33,7 +34,7 @@ interface FoodDao {
               OR food_translations.normalizedName
                   LIKE '%' || :normalizedQuery || '%'
           )
-        ORDER BY foods.displayOrder ASC, food_translations.name ASC
+        ORDER BY foods.isFavorite DESC, foods.displayOrder ASC, food_translations.name ASC
         """
     )
     fun observeLocalizedFoods(
@@ -48,6 +49,7 @@ interface FoodDao {
             food_translations.name AS name,
             foods.caloriesPer100Grams AS caloriesPer100Grams,
             foods.defaultServingGrams AS defaultServingGrams,
+            foods.isFavorite AS isFavorite,
             foods.displayOrder AS displayOrder
         FROM foods
         INNER JOIN food_translations
@@ -61,4 +63,7 @@ interface FoodDao {
         foodId: Long,
         languageTag: String
     ): LocalizedFoodRow?
+
+    @Query("UPDATE foods SET isFavorite = :isFavorite WHERE id = :foodId")
+    suspend fun updateFavorite(foodId: Long, isFavorite: Boolean)
 }

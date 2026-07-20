@@ -20,6 +20,7 @@ import com.quyetbkhoa.healthtracker.data.datastore.DailyCalorieDataStore
 import com.quyetbkhoa.healthtracker.data.repository.DailyCalorieRepositoryImpl
 import com.quyetbkhoa.healthtracker.domain.repository.DailyCalorieRepository
 import com.quyetbkhoa.healthtracker.data.local.HealthTrackerDatabase
+import com.quyetbkhoa.healthtracker.data.local.MIGRATION_3_4
 import com.quyetbkhoa.healthtracker.data.local.activity.ActivityDao
 import com.quyetbkhoa.healthtracker.data.local.activity.DefaultActivities
 import com.quyetbkhoa.healthtracker.data.local.food.DefaultFoods
@@ -59,6 +60,7 @@ object AppModule {
             HealthTrackerDatabase::class.java,
             "health_tracker.db"
         )
+            .addMigrations(MIGRATION_3_4)
             .addCallback(DEFAULT_DATA_SEED_CALLBACK)
             .build()
 

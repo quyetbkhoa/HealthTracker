@@ -19,7 +19,7 @@ import com.quyetbkhoa.healthtracker.data.local.meal.MealEntity
         FoodEntity::class,
         FoodTranslationEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class HealthTrackerDatabase : RoomDatabase() {
