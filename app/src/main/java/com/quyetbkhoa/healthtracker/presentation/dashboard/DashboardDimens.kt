@@ -8,5 +8,6 @@ object DashboardDimens {
     val overviewHeight: Dp = 200.dp
     val goalRingSize: Dp = 168.dp
     val mealCardHeight: Dp = 168.dp
+    val mealDialogMaxHeight: Dp = 360.dp
     val progressStroke: Dp = 20.dp
 }
