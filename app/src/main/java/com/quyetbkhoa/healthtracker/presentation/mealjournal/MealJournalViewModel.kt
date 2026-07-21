@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.quyetbkhoa.healthtracker.domain.model.MealEntry
 import com.quyetbkhoa.healthtracker.domain.model.MealType
 import com.quyetbkhoa.healthtracker.domain.usecase.DeleteMealUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.DailyCalorieEvaluation
+import com.quyetbkhoa.healthtracker.domain.usecase.DailyCalorieStatus
 import com.quyetbkhoa.healthtracker.domain.usecase.ObserveMealJournalUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
@@ -28,6 +30,12 @@ data class MealJournalUiState(
     val selectedEpochDay: Long = LocalDate.now().toEpochDay(),
     val targetCalories: Int = 0,
     val meals: List<MealEntry> = emptyList(),
+    val calorieEvaluation: DailyCalorieEvaluation = DailyCalorieEvaluation(
+        status = DailyCalorieStatus.NEEDS_MORE,
+        lowerBound = 0,
+        upperBound = 0,
+        caloriesToBoundary = 0
+    ),
     val pendingDeleteId: Long? = null
 ) {
     val totalCalories: Int get() = meals.sumOf(MealEntry::calories)
@@ -69,6 +77,7 @@ class MealJournalViewModel @Inject constructor(
             selectedEpochDay = day,
             targetCalories = data.targetCalories,
             meals = data.meals,
+            calorieEvaluation = data.calorieEvaluation,
             pendingDeleteId = deleteId
         )
     }.stateIn(
