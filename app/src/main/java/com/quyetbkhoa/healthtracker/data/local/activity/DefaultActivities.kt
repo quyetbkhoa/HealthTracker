@@ -1,5 +1,7 @@
 package com.quyetbkhoa.healthtracker.data.local.activity
 
+import com.quyetbkhoa.healthtracker.domain.model.OTHER_ACTIVITY_TYPE_ID
+
 object DefaultActivities {
     val values = listOf(
         ActivityTypeEntity(1, "Đi bộ nhẹ", 2.8, "🚶", displayOrder = 1),
@@ -19,6 +21,7 @@ object DefaultActivities {
         ActivityTypeEntity(15, "Bóng rổ", 6.5, "🏀", displayOrder = 15),
         ActivityTypeEntity(16, "Khiêu vũ", 4.5, "💃", displayOrder = 16),
         ActivityTypeEntity(17, "Đi bộ đường dài", 6.0, "🥾", displayOrder = 17),
-        ActivityTypeEntity(18, "Dọn dẹp nhà cửa", 3.3, "🧹", displayOrder = 18)
+        ActivityTypeEntity(18, "Dọn dẹp nhà cửa", 3.3, "🧹", displayOrder = 18),
+        ActivityTypeEntity(OTHER_ACTIVITY_TYPE_ID, "Khác", 4.0, "✨", displayOrder = 19)
     )
 }

@@ -12,6 +12,7 @@
     <string name="widget_calorie_value">%1$d kcal</string>
     <string name="widget_calorie_unavailable">—</string>
     <string name="common_not_available">—</string>
+    <string name="common_other">Khác</string>
     <string name="welcome_title">Chào mừng bạn đến với HealthTracker</string>
     <string name="welcome_start">Bắt đầu</string>
     <string name="login">Đăng nhập</string>
@@ -65,6 +66,12 @@
     <string name="dashboard_advice_short_good_outcome">Bạn đã đi đúng mục tiêu hôm nay</string>
     <string name="dashboard_advice_short_exceeded_detail">Cao hơn mục tiêu %1$s kcal</string>
     <string name="dashboard_advice_short_exceeded_outcome">Chưa đạt mục tiêu</string>
+    <string name="dashboard_mood_happy">😊</string>
+    <string name="dashboard_mood_sad">☹️</string>
+    <string name="dashboard_target_range_info">Xem cách xác định vùng mục tiêu</string>
+    <string name="dashboard_target_range_info_title">Vùng calorie mục tiêu</string>
+    <string name="dashboard_target_range_info_message">Vùng mục tiêu hôm nay của bạn là từ %1$s đến %2$s kcal. Khi tổng calorie đã nạp cao hơn %3$s kcal, bạn được tính là đã vượt quá vùng mục tiêu.</string>
+    <string name="dashboard_target_range_info_confirm">Đã hiểu</string>
     <string name="dashboard_advice_lose_need_more">Bạn cần thêm %1$s kcal để tránh thâm hụt quá mức trong ngày hôm nay.</string>
     <string name="dashboard_advice_lose_good">Rất tốt! Lượng calo hôm nay phù hợp với mục tiêu giảm cân.</string>
     <string name="dashboard_advice_lose_exceeded">Bạn đã vượt vùng giảm cân %1$s kcal. Một ngày vượt nhẹ không làm mất tiến độ.</string>
@@ -274,6 +281,9 @@
     <string name="add_meal_save">Lưu bữa ăn</string>
     <string name="add_meal_saved">Đã thêm bữa ăn</string>
     <string name="add_meal_save_failed">Không thể lưu bữa ăn. Vui lòng thử lại.</string>
+    <string name="add_meal_favorite">Món ăn yêu thích</string>
+    <string name="add_meal_not_favorite">Chưa yêu thích; nhấn giữ để thêm</string>
+    <string name="add_meal_favorite_failed">Không thể cập nhật món yêu thích. Vui lòng thử lại.</string>
     <string name="add_meal_error_empty_name">Vui lòng nhập tên món ăn</string>
     <string name="add_meal_error_invalid_calories">Calories phải lớn hơn 0</string>
     <string name="add_meal_error_calories_too_high">Calories không được vượt quá 10.000 kcal</string>
@@ -286,7 +296,7 @@
     <string name="add_activity_reselect">Chọn lại</string>
     <string name="add_activity_info">Xem hướng dẫn chọn hoạt động</string>
     <string name="add_activity_info_title">Hoạt động yêu thích</string>
-    <string name="add_activity_info_message">Hãy nhấn giữ để yêu thích hoạt động.</string>
+    <string name="add_activity_info_message">Nhấn giữ để yêu thích hoạt động. Mục Khác dùng mức vận động trung bình MET 4,0 để ước tính.</string>
     <string name="add_activity_info_confirm">Đã hiểu</string>
     <string name="add_activity_duration">Thời gian thực hiện</string>
     <string name="add_activity_minutes">%1$d phút</string>
@@ -305,11 +315,30 @@
     <string name="add_activity_error_duration">Thời gian phải từ 1 đến 600 phút</string>
     <string name="add_activity_error_activity">Vui lòng chọn hoạt động hợp lệ</string>
     <string name="add_activity_error_save">Không thể lưu hoạt động. Vui lòng thử lại.</string>
+    <string name="activity_history_title">Lịch sử hoạt động</string>
+    <string name="activity_history_add">Thêm hoạt động</string>
+    <string name="activity_history_total_burned">Tổng calorie đã đốt</string>
+    <string name="activity_history_kcal">%1$s kcal</string>
+    <string name="activity_history_summary">%1$d hoạt động • %2$d phút</string>
+    <string name="activity_history_today_records">Hoạt động trong ngày</string>
+    <string name="activity_history_record_detail">%1$d phút • %2$s</string>
+    <string name="activity_history_empty">Chưa có hoạt động nào trong ngày này</string>
+    <string name="activity_history_delete">Xóa hoạt động</string>
+    <string name="activity_history_delete_title">Xóa hoạt động?</string>
+    <string name="activity_history_delete_message">Hoạt động này sẽ bị xóa khỏi lịch sử của ngày đã chọn.</string>
+    <string name="activity_history_delete_confirm">Xóa</string>
     <string name="add_meal_catalog_subtitle">Chọn món có sẵn hoặc tự nhập theo gram</string>
+    <string name="add_meal_info">Xem thông tin về giá trị dinh dưỡng</string>
+    <string name="add_meal_info_title">Giá trị dinh dưỡng tham khảo</string>
+    <string name="add_meal_info_message">Giá trị dinh dưỡng chỉ là ước tính tham khảo. Nhấn giữ một món để thêm hoặc bỏ khỏi danh sách yêu thích; món yêu thích sẽ được đưa lên đầu.</string>
+    <string name="add_meal_info_confirm">Đã hiểu</string>
+    <string name="add_meal_food_icon">🍽️</string>
+    <string name="add_meal_other_icon">✨</string>
     <string name="food_catalog_tab">Danh sách có sẵn</string>
     <string name="food_custom_tab">Tự nhập</string>
     <string name="food_search_hint">Tìm món ăn theo tên</string>
     <string name="food_default_grams">Khẩu phần gợi ý: %1$s g</string>
+    <string name="food_default_grams_short">Gợi ý %1$s g</string>
     <string name="food_kcal_per_100g_value">%1$s kcal/100 g</string>
     <string name="food_kcal_per_100g">Năng lượng trên 100 g</string>
     <string name="food_consumed_grams">Khối lượng đã ăn</string>
@@ -318,6 +347,7 @@
     <string name="food_select">Chọn món ăn</string>
     <string name="food_empty_search">Không tìm thấy món phù hợp</string>
     <string name="food_enter_custom">Tự nhập món ăn</string>
+    <string name="food_other_description">Tự nhập món ăn và năng lượng</string>
     <string name="food_choose_again">Chọn lại</string>
     <string name="food_estimated_energy">Năng lượng ước tính</string>
     <string name="food_estimated_kcal">%1$d kcal</string>
@@ -325,9 +355,15 @@
     <string name="add_meal_error_invalid_grams">Khối lượng phải là số dương</string>
     <string name="add_meal_error_invalid_per_100g">Năng lượng trên 100 g phải là số dương</string>
     <string name="meal_journal_title">Nhật ký bữa ăn</string>
+    <string name="meal_journal_open_calendar">Mở lịch chọn ngày</string>
+    <string name="meal_journal_today_date">Hôm nay, %1$s</string>
+    <string name="meal_journal_short_date_pattern">dd/MM</string>
     <string name="meal_journal_total_today">Tổng trong ngày</string>
     <string name="meal_journal_total_value">%1$s / %2$s kcal</string>
     <string name="meal_journal_remaining">Còn lại %1$s kcal</string>
+    <string name="meal_journal_exceeded">Vượt mục tiêu %1$s kcal</string>
+    <string name="meal_journal_used_percent">Đã dùng %1$d phần trăm mục tiêu calorie</string>
+    <string name="meal_journal_used">đã dùng</string>
     <string name="meal_journal_group_kcal">%1$d kcal</string>
     <string name="meal_journal_add_item">Thêm món</string>
     <string name="meal_journal_add_food">Thêm món ăn</string>
@@ -345,6 +381,10 @@
     <string name="next_day">Ngày sau</string>
     <string name="dashboard_meal_records">%1$d món</string>
     <string name="dashboard_meal_kcal">%1$d kcal</string>
+    <string name="dashboard_meal_dialog_title">Bữa %1$s hôm nay</string>
+    <string name="dashboard_meal_dialog_empty">Chưa có món nào trong bữa này</string>
+    <string name="dashboard_meal_dialog_total">Tổng cộng</string>
+    <string name="dashboard_meal_dialog_close">Đóng</string>
 
     <!-- Statistics -->
     <string name="statistics_today">Hôm nay</string>

@@ -76,3 +76,11 @@ class SetActivityFavoriteUseCase @Inject constructor(
         if (activityId > 0L) activityRepository.setFavorite(activityId, isFavorite)
     }
 }
+
+class DeleteActivityRecordUseCase @Inject constructor(
+    private val activityRepository: ActivityRepository
+) {
+    suspend operator fun invoke(recordId: Long) {
+        if (recordId > 0L) activityRepository.deleteActivityRecord(recordId)
+    }
+}

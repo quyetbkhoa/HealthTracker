@@ -66,6 +66,7 @@ import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthNumericSli
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
+import com.quyetbkhoa.healthtracker.domain.model.OTHER_ACTIVITY_TYPE_ID
 
 @Composable
 fun AddActivityScreen(
@@ -315,7 +316,7 @@ private fun ActivityCard(
                 }
             }
             Text(
-                activity.name,
+                activityDisplayName(activity),
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
                 color = if (isSelected) MaterialTheme.healthColors.onActivityContainer
@@ -359,7 +360,7 @@ private fun SelectedActivityCard(
                 HealthIconText(text = activity.iconName, style = MaterialTheme.typography.headlineMedium)
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = activity.name,
+                        text = activityDisplayName(activity),
                         fontWeight = FontWeight.Bold,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
@@ -442,6 +443,14 @@ private fun addActivityErrorText(error: AddActivityError): String = stringResour
         AddActivityError.SAVE_FAILED -> R.string.add_activity_error_save
     }
 )
+
+@Composable
+private fun activityDisplayName(activity: ActivityItemUiModel): String =
+    if (activity.id == OTHER_ACTIVITY_TYPE_ID) {
+        stringResource(R.string.common_other)
+    } else {
+        activity.name
+    }
 
 @Preview
 @Composable

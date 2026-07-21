@@ -1,5 +1,7 @@
 package com.quyetbkhoa.healthtracker.domain.model
 
+const val OTHER_ACTIVITY_TYPE_ID = 19L
+
 data class PhysicalActivityType(
     val id: Long,
     val name: String,
