@@ -43,15 +43,24 @@ data class AddMealUiState(
     val consumedGrams: String = "",
     val caloriesPer100Grams: String = "",
     val estimatedCalories: Int? = null,
+    val isFoodPickerExpanded: Boolean = true,
+    val isLoading: Boolean = true,
     val validationError: AddMealValidationError? = null,
     val isSaving: Boolean = false
-)
+) {
+    val canSave: Boolean
+        get() = !isFoodPickerExpanded &&
+            estimatedCalories != null &&
+            (selectedFood != null || (isCustom && customName.isNotBlank())) &&
+            !isSaving
+}
 
 sealed interface AddMealAction {
     data class UpdateQuery(val value: String) : AddMealAction
     data class SelectFood(val food: Food) : AddMealAction
-    data object ChooseAgain : AddMealAction
-    data class SetCustomMode(val enabled: Boolean) : AddMealAction
+    data class ToggleFavorite(val foodId: Long) : AddMealAction
+    data object SelectOther : AddMealAction
+    data object ReselectFood : AddMealAction
     data class UpdateCustomName(val value: String) : AddMealAction
     data class UpdateConsumedGrams(val value: String) : AddMealAction
     data class UpdateCaloriesPer100Grams(val value: String) : AddMealAction
@@ -62,6 +71,7 @@ sealed interface AddMealAction {
 sealed interface AddMealUiEvent {
     data object Saved : AddMealUiEvent
     data object SaveFailed : AddMealUiEvent
+    data object FavoriteFailed : AddMealUiEvent
 }
 
 @HiltViewModel
@@ -88,11 +98,15 @@ class AddMealViewModel @Inject constructor(
 
     private val _uiEvent = Channel<AddMealUiEvent>(Channel.BUFFERED)
     val uiEvent = _uiEvent.receiveAsFlow()
+    private var isSaveInProgress = false
+    private var hasSaved = false
 
     init {
         viewModelScope.launch {
             query.flatMapLatest { foodRepository.observeFoods(it, languageTag) }
-                .collect { foods -> _uiState.update { it.copy(foods = foods) } }
+                .collect { foods ->
+                    _uiState.update { it.copy(foods = foods, isLoading = false) }
+                }
         }
     }
 
@@ -103,25 +117,31 @@ class AddMealViewModel @Inject constructor(
                 _uiState.update { it.copy(query = action.value) }
             }
             is AddMealAction.SelectFood -> selectFood(action.food)
-            AddMealAction.ChooseAgain -> _uiState.update {
-                it.copy(selectedFood = null, consumedGrams = "", estimatedCalories = null)
-            }
-            is AddMealAction.SetCustomMode -> _uiState.update {
-                val defaultGrams = if (action.enabled) DEFAULT_CUSTOM_GRAMS else ""
-                val defaultCalories = if (action.enabled) DEFAULT_CUSTOM_CALORIES else ""
+            is AddMealAction.ToggleFavorite -> toggleFavorite(action.foodId)
+            AddMealAction.SelectOther -> _uiState.update {
                 it.copy(
-                    isCustom = action.enabled,
+                    isCustom = true,
                     selectedFood = null,
-                    consumedGrams = defaultGrams,
-                    caloriesPer100Grams = defaultCalories,
-                    estimatedCalories = if (action.enabled) {
-                        calculateMealCalories(
-                            defaultCalories.toDouble(),
-                            defaultGrams.toDouble()
-                        )
-                    } else {
-                        null
-                    },
+                    customName = "",
+                    consumedGrams = DEFAULT_CUSTOM_GRAMS,
+                    caloriesPer100Grams = DEFAULT_CUSTOM_CALORIES,
+                    estimatedCalories = calculateMealCalories(
+                        DEFAULT_CUSTOM_CALORIES.toDouble(),
+                        DEFAULT_CUSTOM_GRAMS.toDouble()
+                    ),
+                    isFoodPickerExpanded = false,
+                    validationError = null
+                )
+            }
+            AddMealAction.ReselectFood -> _uiState.update {
+                it.copy(
+                    selectedFood = null,
+                    isCustom = false,
+                    customName = "",
+                    consumedGrams = "",
+                    caloriesPer100Grams = "",
+                    estimatedCalories = null,
+                    isFoodPickerExpanded = true,
                     validationError = null
                 )
             }
@@ -147,8 +167,17 @@ class AddMealViewModel @Inject constructor(
                     food.caloriesPer100Grams,
                     food.defaultServingGrams
                 ),
+                isFoodPickerExpanded = false,
                 validationError = null
             )
+        }
+    }
+
+    private fun toggleFavorite(foodId: Long) {
+        val food = _uiState.value.foods.firstOrNull { it.id == foodId } ?: return
+        viewModelScope.launch {
+            runCatching { foodRepository.setFavorite(foodId, !food.isFavorite) }
+                .onFailure { _uiEvent.send(AddMealUiEvent.FavoriteFailed) }
         }
     }
 
@@ -173,7 +202,7 @@ class AddMealViewModel @Inject constructor(
 
     private fun saveMeal() {
         val state = _uiState.value
-        if (state.isSaving) return
+        if (isSaveInProgress || hasSaved) return
         val food = state.selectedFood
         val name = food?.name ?: state.customName
         val grams = state.consumedGrams.toDoubleOrNull() ?: Double.NaN
@@ -186,8 +215,9 @@ class AddMealViewModel @Inject constructor(
             .toInstant()
             .toEpochMilli()
 
+        isSaveInProgress = true
+        _uiState.update { it.copy(isSaving = true, validationError = null) }
         viewModelScope.launch {
-            _uiState.update { it.copy(isSaving = true, validationError = null) }
             try {
                 val result = addMealUseCase(
                     MealEntry(
@@ -202,7 +232,10 @@ class AddMealViewModel @Inject constructor(
                     )
                 )
                 when (result) {
-                    AddMealResult.Success -> _uiEvent.send(AddMealUiEvent.Saved)
+                    AddMealResult.Success -> {
+                        hasSaved = true
+                        _uiEvent.send(AddMealUiEvent.Saved)
+                    }
                     is AddMealResult.Invalid -> _uiState.update {
                         it.copy(validationError = result.error)
                     }
@@ -210,6 +243,7 @@ class AddMealViewModel @Inject constructor(
             } catch (_: Exception) {
                 _uiEvent.send(AddMealUiEvent.SaveFailed)
             } finally {
+                isSaveInProgress = false
                 _uiState.update { it.copy(isSaving = false) }
             }
         }
