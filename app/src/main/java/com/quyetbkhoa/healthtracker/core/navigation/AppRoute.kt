@@ -42,6 +42,9 @@ sealed interface AppRoute {
     data object AddActivity : AppRoute
 
     @Serializable
+    data object ActivityHistory : AppRoute
+
+    @Serializable
     data object Settings : AppRoute
 
     @Serializable

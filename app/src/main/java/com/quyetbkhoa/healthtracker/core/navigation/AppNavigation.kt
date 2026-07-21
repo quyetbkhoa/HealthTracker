@@ -24,6 +24,7 @@ import com.quyetbkhoa.healthtracker.presentation.settings.SettingsScreen
 import com.quyetbkhoa.healthtracker.presentation.profile.ProfileSettingsScreen
 import com.quyetbkhoa.healthtracker.presentation.meal.AddMealScreen
 import com.quyetbkhoa.healthtracker.presentation.activity.AddActivityScreen
+import com.quyetbkhoa.healthtracker.presentation.activityhistory.ActivityHistoryScreen
 import com.quyetbkhoa.healthtracker.presentation.mealjournal.MealJournalScreen
 import com.quyetbkhoa.healthtracker.presentation.statistics.StatisticsChartsScreen
 import com.quyetbkhoa.healthtracker.presentation.statistics.StatisticsOverviewScreen
@@ -135,6 +136,9 @@ fun AppNavigation(
                     )
                 },
                 onNavigateToAddActivity = { navController.navigate(AppRoute.AddActivity) },
+                onNavigateToActivityHistory = {
+                    navController.navigate(AppRoute.ActivityHistory)
+                },
                 onNavigateToMealJournal = { navController.navigate(AppRoute.MealJournal) },
                 onNavigateToStatistics = { navController.navigate(AppRoute.Statistics) }
             )
@@ -186,6 +190,13 @@ fun AppNavigation(
                     ).show()
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable<AppRoute.ActivityHistory> {
+            ActivityHistoryScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onAddActivity = { navController.navigate(AppRoute.AddActivity) }
             )
         }
 
