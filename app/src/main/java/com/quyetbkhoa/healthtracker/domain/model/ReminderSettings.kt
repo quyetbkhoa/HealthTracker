@@ -23,11 +23,4 @@ data class ReminderSettings(
         ReminderType.DINNER -> dinner
         ReminderType.ACTIVITY -> activity
     }
-
-    fun withTime(type: ReminderType, time: ReminderTime): ReminderSettings = when (type) {
-        ReminderType.BREAKFAST -> copy(breakfast = time)
-        ReminderType.LUNCH -> copy(lunch = time)
-        ReminderType.DINNER -> copy(dinner = time)
-        ReminderType.ACTIVITY -> copy(activity = time)
-    }
 }

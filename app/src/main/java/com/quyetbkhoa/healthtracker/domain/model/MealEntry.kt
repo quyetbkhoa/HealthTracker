@@ -1,7 +1,9 @@
 package com.quyetbkhoa.healthtracker.domain.model
 
+import androidx.annotation.Keep
 import kotlinx.serialization.Serializable
 
+@Keep
 @Serializable
 enum class MealType {
     BREAKFAST,
