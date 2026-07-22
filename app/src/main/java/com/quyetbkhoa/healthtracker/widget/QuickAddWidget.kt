@@ -187,6 +187,11 @@ private fun RemainingCaloriesCard(
         modifier = modifier
             .background(backgroundColorRes)
             .cornerRadius(ITEM_CORNER_RADIUS)
+            .clickable(
+                actionStartActivity<MainActivity>(
+                    actionParametersOf(DestinationKey to AppDestination.DASHBOARD.name)
+                )
+            )
             .padding(REMAINING_CARD_PADDING),
         contentAlignment = Alignment.Center
     ) {

@@ -60,7 +60,13 @@ fun AppNavigation(
     LaunchedEffect(destinationToOpen, hasProfile) {
         val destination = destinationToOpen ?: return@LaunchedEffect
         if (hasProfile) {
-            navController.navigate(destination.toRoute(LocalDate.now().toEpochDay()))
+            val route = destination.toRoute(LocalDate.now().toEpochDay())
+            navController.navigate(route) {
+                launchSingleTop = true
+                if (route == AppRoute.Home) {
+                    popUpTo<AppRoute.Home> { inclusive = false }
+                }
+            }
             onDestinationConsumed()
         }
     }
@@ -242,6 +248,7 @@ fun AppNavigation(
 }
 
 private fun AppDestination.toRoute(epochDay: Long): AppRoute = when (this) {
+    AppDestination.DASHBOARD -> AppRoute.Home
     AppDestination.ADD_MEAL -> AppRoute.AddMeal(epochDay, MealType.BREAKFAST)
     AppDestination.ADD_LUNCH -> AppRoute.AddMeal(epochDay, MealType.LUNCH)
     AppDestination.ADD_DINNER -> AppRoute.AddMeal(epochDay, MealType.DINNER)

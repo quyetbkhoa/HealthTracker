@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -397,32 +398,6 @@ private fun OverviewMetric(
         Spacer(modifier = Modifier.width(Dimens.spaceSmall))
             HealthIconText(text = stringResource(iconRes), style = MaterialTheme.typography.displaySmall, color = contentColor)
 
-    }
-}
-
-@Composable
-private fun ProgressLine(progress: Float, progressPercent: Int) {
-    Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(Dimens.progressBarHeight)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(progress.coerceIn(0f, 1f))
-                    .height(Dimens.progressBarHeight)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-            )
-        }
-        Text(
-            text = stringResource(R.string.dashboard_percent_goal, progressPercent),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
     }
 }
 
@@ -838,8 +813,11 @@ private fun DashboardBottomBar(
 @Composable
 private fun RowScope.NavigationItem(iconRes: Int, labelRes: Int, selected: Boolean, onClick: () -> Unit) {
     val contentColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-    val screenWidthDp = LocalConfiguration.current.screenWidthDp
-    val fontScale = LocalDensity.current.fontScale
+    val density = LocalDensity.current
+    val screenWidthDp = with(density) {
+        LocalWindowInfo.current.containerSize.width.toDp().value
+    }
+    val fontScale = density.fontScale
     val labelStyle = if (screenWidthDp < COMPACT_NAVIGATION_WIDTH_DP || fontScale > LARGE_FONT_SCALE) {
         MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 12.sp)
     } else {

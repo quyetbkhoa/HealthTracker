@@ -1,6 +1,7 @@
 package com.quyetbkhoa.healthtracker.core.navigation
 
 enum class AppDestination {
+    DASHBOARD,
     ADD_MEAL,
     ADD_LUNCH,
     ADD_DINNER,

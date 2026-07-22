@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.AlarmManager
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -28,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.os.LocaleListCompat
+import androidx.core.net.toUri
 import androidx.core.content.ContextCompat
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.navigation.AppNavigation
@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.markExactAlarmAccessRequested()
         startActivity(
             Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                data = Uri.parse("package:$packageName")
+                data = "package:$packageName".toUri()
             }
         )
     }
