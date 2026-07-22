@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/widget_preview_background" />
+    <item
+        android:bottom="94dp"
+        android:drawable="@drawable/widget_preview_meal"
+        android:left="12dp"
+        android:right="190dp"
+        android:top="12dp" />
+    <item
+        android:bottom="12dp"
+        android:drawable="@drawable/widget_preview_activity"
+        android:left="12dp"
+        android:right="190dp"
+        android:top="94dp" />
+    <item
+        android:bottom="12dp"
+        android:drawable="@drawable/widget_preview_remaining"
+        android:left="190dp"
+        android:right="12dp"
+        android:top="12dp" />
+</layer-list>
