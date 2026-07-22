@@ -1,34 +1,18 @@
-# =========================================================================
-# Android & Kotlin Standard .gitignore Template
-# =========================================================================
-
-# Gradle files and directories
+# Gradle
 .gradle/
-/build/
-/*/build/
-*~
-*.lck
-
-# Kotlin
 .kotlin/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+build/
+*/build/
 
-# Android Studio & IntelliJ IDEA
+# Android Studio
 .idea/
 *.iml
-*.ipr
-*.iws
 out/
 
-# Local configuration files (contains local SDK paths, user-specific config)
+# Local configuration
 local.properties
-.navigation/
 
-# Secrets & Signing files (CRITICAL: Do not commit keys to GitHub!)
+# Signing and secrets
 *.jks
 *.keystore
 *.pepk
@@ -37,40 +21,15 @@ local.properties
 secrets.properties
 signing.properties
 
-# Output artifacts
+# Build artifacts
 *.apk
-*.ap_
 *.aab
-*.dex
 
-# Log files & Captures
+# Logs and captures
 *.log
-/captures/
+captures/
 
-# NDK & C++ build outputs
-.externalNativeBuild/
-.cxx/
-cmake-build-*/
-/obj/
-/lib/
-
-# OS/System generated files
+# OS files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 Desktop.ini
-
-# Project structure script outputs
-project_structure.txt
-codebase_summary.txt
-android_mvvm_guidelines.txt
-generate_tree.bat
-generate_tree.ps1
-
-# Agent customizations
-.agents/
-/.agents/TODO_MEAL_JOURNAL.md
