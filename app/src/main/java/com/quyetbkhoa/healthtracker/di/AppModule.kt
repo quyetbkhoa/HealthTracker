@@ -16,9 +16,6 @@ import com.quyetbkhoa.healthtracker.domain.repository.ReminderScheduler
 import com.quyetbkhoa.healthtracker.data.datastore.ProfileDataStore
 import com.quyetbkhoa.healthtracker.data.repository.ProfileRepositoryImpl
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
-import com.quyetbkhoa.healthtracker.data.datastore.DailyCalorieDataStore
-import com.quyetbkhoa.healthtracker.data.repository.DailyCalorieRepositoryImpl
-import com.quyetbkhoa.healthtracker.domain.repository.DailyCalorieRepository
 import com.quyetbkhoa.healthtracker.data.local.HealthTrackerDatabase
 import com.quyetbkhoa.healthtracker.data.local.MIGRATION_3_4
 import com.quyetbkhoa.healthtracker.data.local.activity.ActivityDao
@@ -130,16 +127,6 @@ object AppModule {
         return ProfileRepositoryImpl(profileDataStore)
     }
 
-    @Provides
-    @Singleton
-    fun provideDailyCalorieDataStore(dataStore: DataStore<Preferences>): DailyCalorieDataStore =
-        DailyCalorieDataStore(dataStore)
-
-    @Provides
-    @Singleton
-    fun provideDailyCalorieRepository(dataStore: DailyCalorieDataStore): DailyCalorieRepository =
-        DailyCalorieRepositoryImpl(dataStore)
-
     private val DEFAULT_DATA_SEED_CALLBACK = object : RoomDatabase.Callback() {
         override fun onOpen(db: SupportSQLiteDatabase) {
             db.beginTransaction()
@@ -151,7 +138,7 @@ object AppModule {
                         (id, name, met, iconName, isFavorite, displayOrder)
                         VALUES (?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
-                        arrayOf(
+                        arrayOf<Any>(
                             activity.id,
                             activity.name,
                             activity.met,
@@ -168,7 +155,7 @@ object AppModule {
                         (id, caloriesPer100Grams, defaultServingGrams, displayOrder)
                         VALUES (?, ?, ?, ?)
                         """.trimIndent(),
-                        arrayOf(
+                        arrayOf<Any>(
                             food.id,
                             food.caloriesPer100Grams,
                             food.defaultServingGrams,
@@ -183,7 +170,7 @@ object AppModule {
                         (foodId, languageTag, name, normalizedName)
                         VALUES (?, ?, ?, ?)
                         """.trimIndent(),
-                        arrayOf(
+                        arrayOf<Any>(
                             translation.foodId,
                             translation.languageTag,
                             translation.name,

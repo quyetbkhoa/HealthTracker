@@ -1,21 +1,11 @@
 package com.quyetbkhoa.healthtracker.data.local.food
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FoodDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertFoods(foods: List<FoodEntity>): List<Long>
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertTranslations(
-        translations: List<FoodTranslationEntity>
-    ): List<Long>
-
     @Query(
         """
         SELECT

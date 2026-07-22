@@ -1,7 +1,6 @@
 package com.quyetbkhoa.healthtracker.data.local.meal
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -17,9 +16,6 @@ interface MealDao {
 
     @Update
     suspend fun update(meal: MealEntity)
-
-    @Delete
-    suspend fun delete(meal: MealEntity)
 
     @Query("DELETE FROM meals WHERE id = :id")
     suspend fun deleteById(id: Long)
