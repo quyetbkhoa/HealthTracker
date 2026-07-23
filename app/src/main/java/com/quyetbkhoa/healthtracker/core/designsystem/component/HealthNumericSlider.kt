@@ -2,6 +2,7 @@ package com.quyetbkhoa.healthtracker.core.designsystem.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,7 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Text
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -86,20 +87,23 @@ fun HealthNumericSlider(
                         contentColor = onAccentContainerColor
                     )
                 ) {
-                    Text(
-                        text = stringResource(
-                            R.string.numeric_value_with_unit,
-                            value.ifBlank { stringResource(R.string.common_not_available) },
-                            unit
-                        ).trim(),
-                        modifier = Modifier.padding(
-                            horizontal = Dimens.spaceMedium,
-                            vertical = Dimens.spaceSmall
-                        ),
-                        fontWeight = FontWeight.Bold,
-                        color = onAccentContainerColor,
-                        maxLines = 1
-                    )
+                    Box(
+                        modifier = Modifier
+                            .heightIn(min = Dimens.buttonHeightMedium)
+                            .padding(horizontal = Dimens.spaceMedium),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(
+                                R.string.numeric_value_with_unit,
+                                value.ifBlank { stringResource(R.string.common_not_available) },
+                                unit
+                            ).trim(),
+                            fontWeight = FontWeight.Bold,
+                            color = onAccentContainerColor,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
             Slider(

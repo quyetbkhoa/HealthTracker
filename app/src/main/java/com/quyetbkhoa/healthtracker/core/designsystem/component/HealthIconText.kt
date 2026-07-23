@@ -1,7 +1,7 @@
 package com.quyetbkhoa.healthtracker.core.designsystem.component
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
