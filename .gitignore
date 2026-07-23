@@ -25,6 +25,10 @@ signing.properties
 *.apk
 *.aab
 
+# Tests
+app/src/test/
+app/src/androidTest/
+
 # Logs and captures
 *.log
 captures/

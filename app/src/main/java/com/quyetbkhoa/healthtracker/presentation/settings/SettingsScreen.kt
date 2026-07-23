@@ -47,8 +47,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
-import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
-import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
@@ -58,18 +56,20 @@ import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthOutlinedCard
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
+import com.quyetbkhoa.healthtracker.domain.model.FontScale
 import com.quyetbkhoa.healthtracker.domain.model.ReminderSettings
 import com.quyetbkhoa.healthtracker.domain.model.ReminderTime
 import com.quyetbkhoa.healthtracker.domain.model.ReminderType
+import com.quyetbkhoa.healthtracker.domain.model.ThemeMode
 
 @Composable
 fun SettingsScreen(
-    themeType: AppThemeType,
-    fontSize: AppFontSize,
+    themeMode: ThemeMode,
+    fontScale: FontScale,
     reminderSettings: ReminderSettings,
     hasExactAlarmAccess: Boolean,
-    onThemeChanged: (AppThemeType) -> Unit,
-    onFontSizeChanged: (AppFontSize) -> Unit,
+    onThemeChanged: (ThemeMode) -> Unit,
+    onFontScaleChanged: (FontScale) -> Unit,
     selectedLanguage: AppLanguage,
     onLanguageChanged: (AppLanguage) -> Unit,
     onRemindersChanged: (Boolean) -> Unit,
@@ -128,15 +128,15 @@ fun SettingsScreen(
     }
 
     SettingsContent(
-        themeType = themeType,
-        fontSize = fontSize,
+        themeMode = themeMode,
+        fontScale = fontScale,
         reminderSettings = reminderSettings,
         hasExactAlarmAccess = hasExactAlarmAccess,
         selectedLanguage = selectedLanguage,
         isResetting = uiState.isResetting,
         isLoadingDemoData = uiState.isLoadingDemoData,
         onThemeChanged = onThemeChanged,
-        onFontSizeChanged = onFontSizeChanged,
+        onFontScaleChanged = onFontScaleChanged,
         onLanguageChanged = { viewModel.onAction(SettingsAction.SelectLanguage(it)) },
         onRemindersChanged = onRemindersChanged,
         onReminderTimeChanged = onReminderTimeChanged,
@@ -151,15 +151,15 @@ fun SettingsScreen(
 
 @Composable
 private fun SettingsContent(
-    themeType: AppThemeType,
-    fontSize: AppFontSize,
+    themeMode: ThemeMode,
+    fontScale: FontScale,
     reminderSettings: ReminderSettings,
     hasExactAlarmAccess: Boolean,
     selectedLanguage: AppLanguage,
     isResetting: Boolean,
     isLoadingDemoData: Boolean,
-    onThemeChanged: (AppThemeType) -> Unit,
-    onFontSizeChanged: (AppFontSize) -> Unit,
+    onThemeChanged: (ThemeMode) -> Unit,
+    onFontScaleChanged: (FontScale) -> Unit,
     onLanguageChanged: (AppLanguage) -> Unit,
     onRemindersChanged: (Boolean) -> Unit,
     onReminderTimeChanged: (ReminderType, ReminderTime) -> Unit,
@@ -204,28 +204,28 @@ private fun SettingsContent(
                     Column(verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
                             ThemeChoice(
-                                type = AppThemeType.LIGHT,
-                                selected = themeType == AppThemeType.LIGHT,
+                                type = ThemeMode.LIGHT,
+                                selected = themeMode == ThemeMode.LIGHT,
                                 modifier = Modifier.weight(1f),
                                 onClick = onThemeChanged
                             )
                             ThemeChoice(
-                                type = AppThemeType.DARK,
-                                selected = themeType == AppThemeType.DARK,
+                                type = ThemeMode.DARK,
+                                selected = themeMode == ThemeMode.DARK,
                                 modifier = Modifier.weight(1f),
                                 onClick = onThemeChanged
                             )
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
                             ThemeChoice(
-                                type = AppThemeType.PINK,
-                                selected = themeType == AppThemeType.PINK,
+                                type = ThemeMode.PINK,
+                                selected = themeMode == ThemeMode.PINK,
                                 modifier = Modifier.weight(1f),
                                 onClick = onThemeChanged
                             )
                             ThemeChoice(
-                                type = AppThemeType.SYSTEM,
-                                selected = themeType == AppThemeType.SYSTEM,
+                                type = ThemeMode.SYSTEM,
+                                selected = themeMode == ThemeMode.SYSTEM,
                                 modifier = Modifier.weight(1f),
                                 onClick = onThemeChanged
                             )
@@ -239,12 +239,12 @@ private fun SettingsContent(
                             textAlign = TextAlign.Center
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)) {
-                            AppFontSize.entries.forEach { size ->
+                            FontScale.entries.forEach { scale ->
                                 FontSizeChoice(
-                                    size = size,
-                                    selected = fontSize == size,
+                                    scale = scale,
+                                    selected = fontScale == scale,
                                     modifier = Modifier.weight(1f),
-                                    onClick = onFontSizeChanged
+                                    onClick = onFontScaleChanged
                                 )
                             }
                         }
@@ -578,25 +578,25 @@ private fun SettingsNavigationCard(
 
 @Composable
 private fun ThemeChoice(
-    type: AppThemeType,
+    type: ThemeMode,
     selected: Boolean,
     modifier: Modifier,
-    onClick: (AppThemeType) -> Unit
+    onClick: (ThemeMode) -> Unit
 ) {
     val label = stringResource(
         when (type) {
-            AppThemeType.LIGHT -> R.string.theme_light
-            AppThemeType.DARK -> R.string.theme_dark
-            AppThemeType.PINK -> R.string.theme_pink
-            AppThemeType.SYSTEM -> R.string.theme_system
+            ThemeMode.LIGHT -> R.string.theme_light
+            ThemeMode.DARK -> R.string.theme_dark
+            ThemeMode.PINK -> R.string.theme_pink
+            ThemeMode.SYSTEM -> R.string.theme_system
         }
     )
     val icon = stringResource(
         when (type) {
-            AppThemeType.LIGHT -> R.string.settings_icon_light
-            AppThemeType.DARK -> R.string.settings_icon_dark
-            AppThemeType.PINK -> R.string.settings_icon_pink
-            AppThemeType.SYSTEM -> R.string.settings_icon_system
+            ThemeMode.LIGHT -> R.string.settings_icon_light
+            ThemeMode.DARK -> R.string.settings_icon_dark
+            ThemeMode.PINK -> R.string.settings_icon_pink
+            ThemeMode.SYSTEM -> R.string.settings_icon_system
         }
     )
     HealthCard(
@@ -638,27 +638,27 @@ private fun ThemeChoice(
 
 @Composable
 private fun FontSizeChoice(
-    size: AppFontSize,
+    scale: FontScale,
     selected: Boolean,
     modifier: Modifier = Modifier,
-    onClick: (AppFontSize) -> Unit
+    onClick: (FontScale) -> Unit
 ) {
     val label = stringResource(
-        when (size) {
-            AppFontSize.SMALL -> R.string.settings_font_size_small
-            AppFontSize.MEDIUM -> R.string.settings_font_size_medium
-            AppFontSize.LARGE -> R.string.settings_font_size_large
+        when (scale) {
+            FontScale.SMALL -> R.string.settings_font_size_small
+            FontScale.MEDIUM -> R.string.settings_font_size_medium
+            FontScale.LARGE -> R.string.settings_font_size_large
         }
     )
-    val sampleStyle = when (size) {
-        AppFontSize.SMALL -> MaterialTheme.typography.bodyMedium
-        AppFontSize.MEDIUM -> MaterialTheme.typography.titleMedium
-        AppFontSize.LARGE -> MaterialTheme.typography.headlineSmall
+    val sampleStyle = when (scale) {
+        FontScale.SMALL -> MaterialTheme.typography.bodyMedium
+        FontScale.MEDIUM -> MaterialTheme.typography.titleMedium
+        FontScale.LARGE -> MaterialTheme.typography.headlineSmall
     }
     HealthCard(
         modifier = modifier
             .height(Dimens.buttonHeightLarge)
-            .clickable { onClick(size) },
+            .clickable { onClick(scale) },
         shape = Shape.medium,
         colors = CardDefaults.cardColors(
             containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer
@@ -974,15 +974,15 @@ private fun ResetConfirmationDialog(
 private fun PreviewSettingsScreen() {
     HealthTrackerTheme {
         SettingsContent(
-            themeType = AppThemeType.LIGHT,
-            fontSize = AppFontSize.MEDIUM,
+            themeMode = ThemeMode.LIGHT,
+            fontScale = FontScale.MEDIUM,
             reminderSettings = ReminderSettings(),
             hasExactAlarmAccess = true,
             selectedLanguage = AppLanguage.VIETNAMESE,
             isResetting = false,
             isLoadingDemoData = false,
             onThemeChanged = {},
-            onFontSizeChanged = {},
+            onFontScaleChanged = {},
             onLanguageChanged = {},
             onRemindersChanged = {},
             onReminderTimeChanged = { _, _ -> },

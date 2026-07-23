@@ -1,20 +1,20 @@
 package com.quyetbkhoa.healthtracker.domain.repository
 
-import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
-import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
+import com.quyetbkhoa.healthtracker.domain.model.FontScale
 import com.quyetbkhoa.healthtracker.domain.model.ReminderSettings
 import com.quyetbkhoa.healthtracker.domain.model.ReminderTime
 import com.quyetbkhoa.healthtracker.domain.model.ReminderType
+import com.quyetbkhoa.healthtracker.domain.model.ThemeMode
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
-    val themeType: Flow<AppThemeType>
-    val fontSize: Flow<AppFontSize>
+    val themeMode: Flow<ThemeMode>
+    val fontScale: Flow<FontScale>
     val reminderSettings: Flow<ReminderSettings>
     val exactAlarmAccessRequested: Flow<Boolean>
 
-    suspend fun setThemeType(themeType: AppThemeType)
-    suspend fun setFontSize(fontSize: AppFontSize)
+    suspend fun setThemeMode(themeMode: ThemeMode)
+    suspend fun setFontScale(fontScale: FontScale)
     suspend fun setRemindersEnabled(isEnabled: Boolean)
     suspend fun setReminderTime(type: ReminderType, time: ReminderTime)
     suspend fun markExactAlarmAccessRequested()

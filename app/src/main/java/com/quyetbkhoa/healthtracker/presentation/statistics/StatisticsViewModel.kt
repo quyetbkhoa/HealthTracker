@@ -1,13 +1,15 @@
 package com.quyetbkhoa.healthtracker.presentation.statistics
 
-import com.quyetbkhoa.healthtracker.domain.model.StatisticsRange
-
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.quyetbkhoa.healthtracker.core.navigation.AppRoute
 import com.quyetbkhoa.healthtracker.domain.model.Goal
+import com.quyetbkhoa.healthtracker.domain.model.StatisticsRange
+import com.quyetbkhoa.healthtracker.domain.statistics.CalculateStatisticsUseCase
+import com.quyetbkhoa.healthtracker.domain.statistics.ResolveStatisticsPeriodUseCase
+import com.quyetbkhoa.healthtracker.domain.statistics.StatisticsCalculationInput
 import com.quyetbkhoa.healthtracker.domain.usecase.ObserveStatisticsDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,9 +20,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import java.time.Clock
-import java.time.LocalDate
-import java.time.ZoneId
 import java.util.Locale
 import javax.inject.Inject
 
@@ -29,11 +28,9 @@ import javax.inject.Inject
 class StatisticsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val observeStatisticsData: ObserveStatisticsDataUseCase,
-    private val calculator: StatisticsCalculator,
-    clock: Clock
+    private val calculateStatistics: CalculateStatisticsUseCase,
+    private val resolveStatisticsPeriod: ResolveStatisticsPeriodUseCase
 ) : ViewModel() {
-    private val zone: ZoneId = clock.zone
-    private val today: LocalDate = LocalDate.now(clock)
     private val languageTag = Locale.getDefault().language.takeIf { it == ENGLISH } ?: VIETNAMESE
     private val initialRange = savedStateHandle.toRoute<AppRoute.StatisticsCharts>().range
     private val selectedRange = MutableStateFlow(initialRange)
@@ -53,14 +50,14 @@ class StatisticsViewModel @Inject constructor(
     }
 
     private fun observeStatistics(range: StatisticsRange): Flow<StatisticsUiState> {
-        val period = range.toQueryPeriod(today, zone)
+        val period = resolveStatisticsPeriod(range)
         return observeStatisticsData(
             period.startMillis,
             period.endMillis,
             languageTag
         ).map { data ->
-            calculator.calculate(
-                StatisticsInput(
+            calculateStatistics(
+                StatisticsCalculationInput(
                     range = range,
                     requestedStartDate = period.startDate,
                     dailyTarget = data.profile?.dailyCalorieTarget ?: 0,
@@ -69,7 +66,7 @@ class StatisticsViewModel @Inject constructor(
                     meals = data.meals,
                     activities = data.activities
                 )
-            )
+            ).toUiState()
         }
     }
 
@@ -78,24 +75,4 @@ class StatisticsViewModel @Inject constructor(
         const val ENGLISH = "en"
         const val VIETNAMESE = "vi"
     }
-}
-
-private data class StatisticsQueryPeriod(
-    val startDate: LocalDate,
-    val startMillis: Long,
-    val endMillis: Long
-)
-
-private fun StatisticsRange.toQueryPeriod(today: LocalDate, zone: ZoneId): StatisticsQueryPeriod {
-    val startDate = when (this) {
-        StatisticsRange.TODAY -> today
-        StatisticsRange.LAST_7_DAYS -> today.minusDays(6)
-        StatisticsRange.LAST_30_DAYS -> today.minusDays(29)
-        StatisticsRange.ALL -> LocalDate.ofEpochDay(0)
-    }
-    return StatisticsQueryPeriod(
-        startDate = startDate,
-        startMillis = startDate.atStartOfDay(zone).toInstant().toEpochMilli(),
-        endMillis = today.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
-    )
 }

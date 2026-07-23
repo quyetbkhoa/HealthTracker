@@ -16,9 +16,8 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.quyetbkhoa.healthtracker.R
-import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
-import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
+import com.quyetbkhoa.healthtracker.domain.model.FontScale
 import com.quyetbkhoa.healthtracker.presentation.onboarding.*
 import com.quyetbkhoa.healthtracker.presentation.dashboard.DashboardScreen
 import com.quyetbkhoa.healthtracker.presentation.settings.SettingsScreen
@@ -33,18 +32,19 @@ import com.quyetbkhoa.healthtracker.domain.model.MealType
 import com.quyetbkhoa.healthtracker.domain.model.ReminderType
 import com.quyetbkhoa.healthtracker.domain.model.ReminderSettings
 import com.quyetbkhoa.healthtracker.domain.model.ReminderTime
+import com.quyetbkhoa.healthtracker.domain.model.ThemeMode
 import java.time.LocalDate
 
 @Composable
 fun AppNavigation(
-    themeType: AppThemeType,
-    fontSize: AppFontSize,
+    themeMode: ThemeMode,
+    fontScale: FontScale,
     hasProfile: Boolean,
     reminderSettings: ReminderSettings,
     hasExactAlarmAccess: Boolean,
     destinationToOpen: AppDestination?,
-    onThemeChanged: (AppThemeType) -> Unit,
-    onFontSizeChanged: (AppFontSize) -> Unit,
+    onThemeChanged: (ThemeMode) -> Unit,
+    onFontScaleChanged: (FontScale) -> Unit,
     onLanguageChanged: (AppLanguage) -> Unit,
     onRemindersChanged: (Boolean) -> Unit,
     onReminderTimeChanged: (ReminderType, ReminderTime) -> Unit,
@@ -215,12 +215,12 @@ fun AppNavigation(
 
         composable<AppRoute.Settings> {
             SettingsScreen(
-                themeType = themeType,
-                fontSize = fontSize,
+                themeMode = themeMode,
+                fontScale = fontScale,
                 reminderSettings = reminderSettings,
                 hasExactAlarmAccess = hasExactAlarmAccess,
                 onThemeChanged = onThemeChanged,
-                onFontSizeChanged = onFontSizeChanged,
+                onFontScaleChanged = onFontScaleChanged,
                 selectedLanguage = AppLanguage.fromLanguageTag(
                     AppCompatDelegate.getApplicationLocales().toLanguageTags()
                 ),

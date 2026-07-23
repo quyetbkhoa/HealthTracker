@@ -3,8 +3,8 @@ package com.quyetbkhoa.healthtracker.presentation.settings
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.quyetbkhoa.healthtracker.data.seed.DemoDataInitializer
 import com.quyetbkhoa.healthtracker.domain.usecase.ResetUserDataUseCase
+import com.quyetbkhoa.healthtracker.domain.usecase.ReplaceWithDemoDataUseCase
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -45,7 +45,7 @@ sealed interface SettingsUiEvent {
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val resetUserDataUseCase: ResetUserDataUseCase,
-    private val demoDataInitializer: DemoDataInitializer
+    private val replaceWithDemoData: ReplaceWithDemoDataUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -102,7 +102,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingDemoData = true) }
             try {
-                demoDataInitializer.replaceWithTwoMonthDemo()
+                replaceWithDemoData()
                 _uiState.update { it.copy(showDemoDataConfirmation = false) }
                 _uiEvent.send(SettingsUiEvent.DemoDataLoaded)
             } catch (_: Exception) {

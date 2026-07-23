@@ -64,8 +64,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
-import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
-import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
+import com.quyetbkhoa.healthtracker.domain.model.FontScale
+import com.quyetbkhoa.healthtracker.domain.model.ThemeMode
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.MealTypeColorPalette
@@ -670,7 +670,7 @@ private val previewMeals = listOf(
 @Preview
 @Composable
 private fun PreviewMealJournalLight() {
-    HealthTrackerTheme(themeType = AppThemeType.LIGHT, fontSize = AppFontSize.MEDIUM) {
+    HealthTrackerTheme(themeMode = ThemeMode.LIGHT, fontScale = FontScale.MEDIUM) {
         MealJournalContent(
             state = MealJournalUiState(
                 isLoading = false,
@@ -687,7 +687,7 @@ private fun PreviewMealJournalLight() {
 @Preview
 @Composable
 private fun PreviewMealJournalDark() {
-    HealthTrackerTheme(themeType = AppThemeType.DARK, fontSize = AppFontSize.MEDIUM) {
+    HealthTrackerTheme(themeMode = ThemeMode.DARK, fontScale = FontScale.MEDIUM) {
         MealJournalContent(
             state = MealJournalUiState(
                 isLoading = false,

@@ -1,7 +1,5 @@
 package com.quyetbkhoa.healthtracker.data.seed
 
-import androidx.room.withTransaction
-import com.quyetbkhoa.healthtracker.data.local.HealthTrackerDatabase
 import com.quyetbkhoa.healthtracker.data.local.activity.ActivityRecordEntity
 import com.quyetbkhoa.healthtracker.data.local.activity.DefaultActivities
 import com.quyetbkhoa.healthtracker.data.local.food.DefaultFood
@@ -9,65 +7,9 @@ import com.quyetbkhoa.healthtracker.data.local.food.DefaultFoods
 import com.quyetbkhoa.healthtracker.data.local.meal.MealEntity
 import com.quyetbkhoa.healthtracker.domain.model.MealType
 import com.quyetbkhoa.healthtracker.domain.model.UserProfile
-import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
-import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.roundToInt
-import kotlinx.coroutines.flow.first
-
-/**
- * Replaces journal records with a deterministic, varied two-month data set.
- *
- * Profile information is preserved. Only the internal activity tracking start date is moved
- * backwards so activity-level suggestions can evaluate the generated history correctly.
- */
-@Singleton
-class DemoDataInitializer @Inject constructor(
-    private val profileRepository: ProfileRepository,
-    private val database: HealthTrackerDatabase,
-    private val clock: Clock
-) {
-    suspend fun replaceWithTwoMonthDemo(): DemoDataSummary {
-        val profile = checkNotNull(profileRepository.userProfile.first()) {
-            "A user profile is required before demo data can be generated."
-        }
-        val batch = DemoDataGenerator.generate(
-            profile = profile,
-            today = LocalDate.now(clock),
-            zoneId = clock.zone
-        )
-
-        database.withTransaction {
-            database.mealDao().deleteAll()
-            database.activityDao().deleteAllActivityRecords()
-            database.mealDao().insertAll(batch.meals)
-            database.activityDao().insertActivityRecords(batch.activities)
-        }
-        profileRepository.saveProfile(
-            profile.copy(
-                activityTrackingStartedAt = batch.startDate
-                    .atStartOfDay(clock.zone)
-                    .toInstant()
-                    .toEpochMilli()
-            )
-        )
-
-        return DemoDataSummary(
-            dayCount = DemoDataGenerator.HISTORY_DAYS,
-            mealCount = batch.meals.size,
-            activityCount = batch.activities.size
-        )
-    }
-}
-
-data class DemoDataSummary(
-    val dayCount: Int,
-    val mealCount: Int,
-    val activityCount: Int
-)
 
 internal data class DemoDataBatch(
     val startDate: LocalDate,

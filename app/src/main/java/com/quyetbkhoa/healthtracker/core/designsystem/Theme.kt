@@ -9,19 +9,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
-
-enum class AppThemeType {
-    LIGHT,
-    DARK,
-    PINK,
-    SYSTEM
-}
-
-enum class AppFontSize(val scale: Float) {
-    SMALL(0.9f),
-    MEDIUM(1f),
-    LARGE(1.1f)
-}
+import com.quyetbkhoa.healthtracker.domain.model.FontScale
+import com.quyetbkhoa.healthtracker.domain.model.ThemeMode
 
 internal val LocalAppFontScale = staticCompositionLocalOf { 1f }
 
@@ -141,21 +130,22 @@ private val PinkColorScheme = lightColorScheme(
 
 @Composable
 fun HealthTrackerTheme(
-    themeType: AppThemeType = AppThemeType.SYSTEM,
-    fontSize: AppFontSize = AppFontSize.MEDIUM,
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
+    fontScale: FontScale = FontScale.MEDIUM,
     content: @Composable () -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
     val systemDensity = LocalDensity.current
+    val scale = fontScale.value
     val appDensity = Density(
         density = systemDensity.density,
-        fontScale = systemDensity.fontScale * fontSize.scale
+        fontScale = systemDensity.fontScale * scale
     )
-    val (colorScheme, healthColors) = when (themeType) {
-        AppThemeType.LIGHT -> LightColorScheme to LightHealthColors
-        AppThemeType.DARK -> DarkColorScheme to DarkHealthColors
-        AppThemeType.PINK -> PinkColorScheme to PinkHealthColors
-        AppThemeType.SYSTEM -> if (isDark) {
+    val (colorScheme, healthColors) = when (themeMode) {
+        ThemeMode.LIGHT -> LightColorScheme to LightHealthColors
+        ThemeMode.DARK -> DarkColorScheme to DarkHealthColors
+        ThemeMode.PINK -> PinkColorScheme to PinkHealthColors
+        ThemeMode.SYSTEM -> if (isDark) {
             DarkColorScheme to DarkHealthColors
         } else {
             LightColorScheme to LightHealthColors
@@ -163,7 +153,7 @@ fun HealthTrackerTheme(
     }
     CompositionLocalProvider(
         LocalHealthColors provides healthColors,
-        LocalAppFontScale provides fontSize.scale,
+        LocalAppFontScale provides scale,
         LocalDensity provides appDensity
     ) {
         MaterialTheme(
@@ -173,3 +163,10 @@ fun HealthTrackerTheme(
         )
     }
 }
+
+private val FontScale.value: Float
+    get() = when (this) {
+        FontScale.SMALL -> 0.9f
+        FontScale.MEDIUM -> 1f
+        FontScale.LARGE -> 1.1f
+    }

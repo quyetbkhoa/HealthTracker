@@ -6,11 +6,11 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
-import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
+import com.quyetbkhoa.healthtracker.domain.model.FontScale
 import com.quyetbkhoa.healthtracker.domain.model.ReminderSettings
 import com.quyetbkhoa.healthtracker.domain.model.ReminderTime
 import com.quyetbkhoa.healthtracker.domain.model.ReminderType
+import com.quyetbkhoa.healthtracker.domain.model.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -32,16 +32,16 @@ class SettingsDataStore @Inject constructor(
         const val MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR
     }
 
-    val themeTypeFlow: Flow<AppThemeType> = dataStore.data
+    val themeModeFlow: Flow<ThemeMode> = dataStore.data
         .map { preferences ->
-            val themeString = preferences[THEME_TYPE_KEY] ?: AppThemeType.SYSTEM.name
-            runCatching { AppThemeType.valueOf(themeString) }.getOrDefault(AppThemeType.SYSTEM)
+            val themeString = preferences[THEME_TYPE_KEY] ?: ThemeMode.SYSTEM.name
+            runCatching { ThemeMode.valueOf(themeString) }.getOrDefault(ThemeMode.SYSTEM)
         }
 
-    val fontSizeFlow: Flow<AppFontSize> = dataStore.data
+    val fontScaleFlow: Flow<FontScale> = dataStore.data
         .map { preferences ->
-            val fontSize = preferences[FONT_SIZE_KEY] ?: AppFontSize.MEDIUM.name
-            runCatching { AppFontSize.valueOf(fontSize) }.getOrDefault(AppFontSize.MEDIUM)
+            val fontScale = preferences[FONT_SIZE_KEY] ?: FontScale.MEDIUM.name
+            runCatching { FontScale.valueOf(fontScale) }.getOrDefault(FontScale.MEDIUM)
         }
 
     val reminderSettingsFlow: Flow<ReminderSettings> = dataStore.data
@@ -58,15 +58,15 @@ class SettingsDataStore @Inject constructor(
     val exactAlarmAccessRequestedFlow: Flow<Boolean> = dataStore.data
         .map { preferences -> preferences[EXACT_ALARM_ACCESS_REQUESTED_KEY] ?: false }
 
-    suspend fun saveThemeType(themeType: AppThemeType) {
+    suspend fun saveThemeMode(themeMode: ThemeMode) {
         dataStore.edit { preferences ->
-            preferences[THEME_TYPE_KEY] = themeType.name
+            preferences[THEME_TYPE_KEY] = themeMode.name
         }
     }
 
-    suspend fun saveFontSize(fontSize: AppFontSize) {
+    suspend fun saveFontScale(fontScale: FontScale) {
         dataStore.edit { preferences ->
-            preferences[FONT_SIZE_KEY] = fontSize.name
+            preferences[FONT_SIZE_KEY] = fontScale.name
         }
     }
 

@@ -2,14 +2,14 @@ package com.quyetbkhoa.healthtracker
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
-import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
+import com.quyetbkhoa.healthtracker.domain.model.FontScale
 import com.quyetbkhoa.healthtracker.domain.repository.SettingsRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ProfileRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ReminderScheduler
 import com.quyetbkhoa.healthtracker.domain.model.ReminderSettings
 import com.quyetbkhoa.healthtracker.domain.model.ReminderTime
 import com.quyetbkhoa.healthtracker.domain.model.ReminderType
+import com.quyetbkhoa.healthtracker.domain.model.ThemeMode
 import com.quyetbkhoa.healthtracker.domain.usecase.SetRemindersEnabledUseCase
 import com.quyetbkhoa.healthtracker.domain.usecase.SetReminderTimeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,15 +30,15 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     val uiState: StateFlow<MainActivityUiState> = combine(
-        settingsRepository.themeType,
-        settingsRepository.fontSize,
+        settingsRepository.themeMode,
+        settingsRepository.fontScale,
         profileRepository.userProfile,
         settingsRepository.reminderSettings,
         settingsRepository.exactAlarmAccessRequested
-    ) { themeType, fontSize, profile, reminderSettings, exactAlarmAccessRequested ->
+    ) { themeMode, fontScale, profile, reminderSettings, exactAlarmAccessRequested ->
         MainActivityUiState.Success(
-            themeType = themeType,
-            fontSize = fontSize,
+            themeMode = themeMode,
+            fontScale = fontScale,
             hasProfile = profile != null,
             reminderSettings = reminderSettings,
             exactAlarmAccessRequested = exactAlarmAccessRequested
@@ -49,15 +49,15 @@ class MainViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000)
     )
 
-    fun setTheme(themeType: AppThemeType) {
+    fun setTheme(themeMode: ThemeMode) {
         viewModelScope.launch {
-            settingsRepository.setThemeType(themeType)
+            settingsRepository.setThemeMode(themeMode)
         }
     }
 
-    fun setFontSize(fontSize: AppFontSize) {
+    fun setFontScale(fontScale: FontScale) {
         viewModelScope.launch {
-            settingsRepository.setFontSize(fontSize)
+            settingsRepository.setFontScale(fontScale)
         }
     }
 
@@ -102,8 +102,8 @@ class MainViewModel @Inject constructor(
 sealed interface MainActivityUiState {
     data object Loading : MainActivityUiState
     data class Success(
-        val themeType: AppThemeType,
-        val fontSize: AppFontSize,
+        val themeMode: ThemeMode,
+        val fontScale: FontScale,
         val hasProfile: Boolean,
         val reminderSettings: ReminderSettings,
         val exactAlarmAccessRequested: Boolean
