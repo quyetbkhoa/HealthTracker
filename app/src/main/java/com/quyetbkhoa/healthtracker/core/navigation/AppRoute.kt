@@ -39,7 +39,9 @@ sealed interface AppRoute {
     data object MealJournal : AppRoute
 
     @Serializable
-    data object AddActivity : AppRoute
+    data class AddActivity(
+        val epochDay: Long
+    ) : AppRoute
 
     @Serializable
     data object ActivityHistory : AppRoute

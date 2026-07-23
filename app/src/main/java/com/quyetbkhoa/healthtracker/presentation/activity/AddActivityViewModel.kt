@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -36,6 +37,7 @@ data class ActivityItemUiModel(
 
 @Immutable
 data class AddActivityUiState(
+    val epochDay: Long = LocalDate.now().toEpochDay(),
     val activities: List<ActivityItemUiModel> = emptyList(),
     val selectedActivityId: Long? = null,
     val durationMinutes: Int = AddActivityViewModel.DEFAULT_DURATION_MINUTES,
@@ -66,6 +68,7 @@ enum class AddActivityError {
 }
 
 sealed interface AddActivityAction {
+    data class SetDate(val epochDay: Long) : AddActivityAction
     data class SelectActivity(val activityId: Long) : AddActivityAction
     data class ToggleFavorite(val activityId: Long) : AddActivityAction
     data class ChangeDuration(val minutes: Int) : AddActivityAction
@@ -101,6 +104,7 @@ class AddActivityViewModel @Inject constructor(
         val selected = items.firstOrNull { it.id == editor.selectedActivityId }
         val weight = profile?.weightKg?.toDouble()?.takeIf { it in 1.0..300.0 }
         AddActivityUiState(
+            epochDay = editor.epochDay,
             activities = items,
             selectedActivityId = selected?.id,
             durationMinutes = editor.durationMinutes,
@@ -134,6 +138,9 @@ class AddActivityViewModel @Inject constructor(
 
     fun onAction(action: AddActivityAction) {
         when (action) {
+            is AddActivityAction.SetDate -> editorState.update {
+                it.copy(epochDay = action.epochDay)
+            }
             is AddActivityAction.SelectActivity -> editorState.update {
                 it.copy(
                     selectedActivityId = action.activityId,
@@ -194,7 +201,8 @@ class AddActivityViewModel @Inject constructor(
                     activityTypeId = checkNotNull(activity).id,
                     met = activity.met,
                     weightKg = checkNotNull(weight),
-                    durationMinutes = state.durationMinutes
+                    durationMinutes = state.durationMinutes,
+                    epochDay = state.epochDay
                 )
             }.onSuccess { result ->
                 when (result) {
@@ -215,6 +223,7 @@ class AddActivityViewModel @Inject constructor(
     }
 
     private data class EditorState(
+        val epochDay: Long = LocalDate.now().toEpochDay(),
         val selectedActivityId: Long? = null,
         val durationMinutes: Int = DEFAULT_DURATION_MINUTES,
         val isPickerExpanded: Boolean = true,

@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.AppThemeType
 import com.quyetbkhoa.healthtracker.core.designsystem.AppFontSize
@@ -141,7 +142,9 @@ fun AppNavigation(
                         AppRoute.AddMeal(LocalDate.now().toEpochDay(), MealType.BREAKFAST)
                     )
                 },
-                onNavigateToAddActivity = { navController.navigate(AppRoute.AddActivity) },
+                onNavigateToAddActivity = {
+                    navController.navigate(AppRoute.AddActivity(LocalDate.now().toEpochDay()))
+                },
                 onNavigateToActivityHistory = {
                     navController.navigate(AppRoute.ActivityHistory)
                 },
@@ -185,8 +188,10 @@ fun AppNavigation(
             )
         }
 
-        composable<AppRoute.AddActivity> {
+        composable<AppRoute.AddActivity> { backStackEntry ->
+            val route = backStackEntry.toRoute<AppRoute.AddActivity>()
             AddActivityScreen(
+                epochDay = route.epochDay,
                 onNavigateBack = { navController.popBackStack() },
                 onSaved = {
                     Toast.makeText(
@@ -202,7 +207,9 @@ fun AppNavigation(
         composable<AppRoute.ActivityHistory> {
             ActivityHistoryScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onAddActivity = { navController.navigate(AppRoute.AddActivity) }
+                onAddActivity = { epochDay ->
+                    navController.navigate(AppRoute.AddActivity(epochDay))
+                }
             )
         }
 
@@ -252,5 +259,5 @@ private fun AppDestination.toRoute(epochDay: Long): AppRoute = when (this) {
     AppDestination.ADD_MEAL -> AppRoute.AddMeal(epochDay, MealType.BREAKFAST)
     AppDestination.ADD_LUNCH -> AppRoute.AddMeal(epochDay, MealType.LUNCH)
     AppDestination.ADD_DINNER -> AppRoute.AddMeal(epochDay, MealType.DINNER)
-    AppDestination.ADD_ACTIVITY -> AppRoute.AddActivity
+    AppDestination.ADD_ACTIVITY -> AppRoute.AddActivity(epochDay)
 }

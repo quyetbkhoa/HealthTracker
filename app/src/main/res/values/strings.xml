@@ -12,14 +12,15 @@
     <string name="common_not_available">—</string>
     <string name="common_other">Khác</string>
     <string name="welcome_title">Chào mừng bạn đến với HealthTracker</string>
+    <string name="welcome_subtitle">Theo dõi dinh dưỡng và vận động mỗi ngày theo cách đơn giản hơn</string>
     <string name="welcome_start">Bắt đầu</string>
 
     <!-- Test / Temp Screens -->
     <string name="dashboard_settings">Cài đặt</string>
     <string name="dashboard_goal">MỤC TIÊU</string>
-    <string name="dashboard_consumed">NẠP</string>
-    <string name="dashboard_burned">ĐỐT</string>
-    <string name="dashboard_remaining">CÒN</string>
+    <string name="dashboard_consumed">NẠP VÀO</string>
+    <string name="dashboard_burned">TIÊU THỤ</string>
+    <string name="dashboard_remaining">CÒN LẠI</string>
     <string name="dashboard_kcal_value">%1$s kcal</string>
     <string name="dashboard_add_meal">Thêm bữa ăn</string>
     <string name="dashboard_add_activity">Thêm vận động</string>
@@ -82,6 +83,12 @@
     <string name="settings_reset_confirm">Xóa dữ liệu</string>
     <string name="settings_reset_cancel">Hủy</string>
     <string name="settings_reset_failed">Không thể đặt lại dữ liệu. Vui lòng thử lại.</string>
+    <string name="settings_demo_data_title">Nạp dữ liệu kiểm thử 2 tháng</string>
+    <string name="settings_demo_data_confirm_title">Nạp dữ liệu giả lập?</string>
+    <string name="settings_demo_data_confirm_message">Nhật ký ăn uống và vận động hiện tại sẽ được thay thế bằng dữ liệu giả lập trong 60 ngày gần nhất. Thông tin hồ sơ của bạn vẫn được giữ nguyên.</string>
+    <string name="settings_demo_data_confirm">Nạp dữ liệu</string>
+    <string name="settings_demo_data_loaded">Đã nạp dữ liệu giả lập cho 60 ngày gần nhất.</string>
+    <string name="settings_demo_data_failed">Không thể nạp dữ liệu giả lập. Vui lòng thử lại.</string>
     <string name="theme_light">Sáng</string>
     <string name="theme_dark">Tối</string>
     <string name="theme_pink">Hồng</string>
@@ -103,12 +110,13 @@
     <string name="settings_icon_appearance">🎨</string>
     <string name="settings_icon_language">🌐</string>
     <string name="settings_icon_data">🗂</string>
+    <string name="settings_icon_demo_data">🧪</string>
     <string name="settings_icon_reset">↻</string>
     <string name="settings_icon_chevron">›</string>
-    <string name="settings_icon_light">☀</string>
-    <string name="settings_icon_dark">☾</string>
-    <string name="settings_icon_pink">✿</string>
-    <string name="settings_icon_system">◐</string>
+    <string name="settings_icon_light">🌞</string>
+    <string name="settings_icon_dark">🌙</string>
+    <string name="settings_icon_pink">🌸</string>
+    <string name="settings_icon_system">🌓</string>
     <string name="settings_icon_check">✓</string>
     <string name="settings_icon_vietnamese">🇻🇳</string>
     <string name="settings_icon_english">🇬🇧</string>
@@ -215,6 +223,7 @@
     <!-- Add physical activity -->
     <string name="add_activity_title">Thêm hoạt động</string>
     <string name="add_activity_subtitle">Ghi lại vận động trong ngày</string>
+    <string name="add_activity_subtitle_date">Ghi lại vận động ngày %1$s</string>
     <string name="add_activity_choose">Chọn hoạt động</string>
     <string name="add_activity_reselect">Chọn lại</string>
     <string name="add_activity_info">Xem hướng dẫn chọn hoạt động</string>
@@ -316,15 +325,15 @@
     <string name="statistics_unit_days">ngày</string>
     <string name="statistics_goal_rate_detail">trong khoảng đã chọn</string>
     <string name="statistics_close">Đã hiểu</string>
-    <string name="statistics_info_total_burned">Tổng năng lượng đã tiêu hao từ các hoạt động bạn ghi lại trong khoảng thời gian đã chọn.</string>
-    <string name="statistics_info_average_burned">Tổng calo đã đốt chia cho toàn bộ số ngày trong khoảng được chọn, kể cả ngày chưa ghi hoạt động.</string>
+    <string name="statistics_info_total_burned">Tổng năng lượng cơ thể tự tiêu hao theo BMR và năng lượng từ các hoạt động bạn ghi lại trong khoảng thời gian đã chọn.</string>
+    <string name="statistics_info_average_burned">Tổng năng lượng tiêu hao theo BMR và hoạt động chia cho toàn bộ số ngày trong khoảng được chọn.</string>
     <string name="statistics_info_total_consumed">Tổng năng lượng từ tất cả món ăn bạn đã ghi lại trong khoảng thời gian được chọn.</string>
     <string name="statistics_info_average_consumed">Tổng calo đã ăn chia cho toàn bộ số ngày trong khoảng được chọn.</string>
     <string name="statistics_info_goal_days">Số ngày có ghi bữa ăn và lượng calo nằm trong vùng phù hợp với mục tiêu hồ sơ của bạn.</string>
     <string name="statistics_info_target_difference">Tổng calo đã ăn trừ tổng mục tiêu calo của các ngày trong khoảng. Số âm là thấp hơn mục tiêu, số dương là cao hơn mục tiêu.</string>
     <string name="statistics_info_goal_streak">Chuỗi ngày đạt mục tiêu dài nhất trong khoảng thời gian đang xem.</string>
     <string name="statistics_info_highest_consumed">Lượng calo nạp vào cao nhất trong một ngày thuộc khoảng thời gian đang xem.</string>
-    <string name="statistics_info_highest_burned">Lượng calo đốt từ hoạt động cao nhất trong một ngày thuộc khoảng thời gian đang xem.</string>
+    <string name="statistics_info_highest_burned">Tổng năng lượng tiêu hao theo BMR và hoạt động cao nhất trong một ngày thuộc khoảng thời gian đang xem.</string>
     <string name="statistics_info_goal_rate">Tỷ lệ số ngày đạt mục tiêu trên tổng số ngày của khoảng thời gian đang xem.</string>
     <string name="statistics_charts">Biểu đồ</string>
     <string name="statistics_charts_subtitle">Xem chi tiết xu hướng calorie</string>

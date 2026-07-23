@@ -11,6 +11,7 @@ import com.quyetbkhoa.healthtracker.domain.usecase.EnsureDefaultActivitiesUseCas
 import com.quyetbkhoa.healthtracker.domain.usecase.SetActivityFavoriteUseCase
 import java.time.Clock
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneOffset
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -93,12 +94,18 @@ class AddActivityViewModelTest {
         assertTrue(repository.records.isEmpty())
         assertEquals(AddActivityError.INVALID_ACTIVITY, viewModel.uiState.value.error)
 
+        val selectedDay = LocalDate.of(2025, 12, 25).toEpochDay()
+        viewModel.onAction(AddActivityAction.SetDate(selectedDay))
         viewModel.onAction(AddActivityAction.SelectActivity(1))
         viewModel.onAction(AddActivityAction.SaveActivity)
         viewModel.onAction(AddActivityAction.SaveActivity)
         advanceUntilIdle()
         assertEquals(1, repository.records.size)
         assertEquals(84.0, repository.records.single().caloriesBurned, 0.0001)
+        assertEquals(
+            Instant.parse("2025-12-25T00:00:00Z").toEpochMilli(),
+            repository.records.single().performedAt
+        )
         assertFalse(viewModel.uiState.value.isSaving)
         collection.cancel()
     }

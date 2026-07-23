@@ -34,7 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -71,7 +71,7 @@ import java.util.Locale
 @Composable
 fun ActivityHistoryScreen(
     onNavigateBack: () -> Unit,
-    onAddActivity: () -> Unit,
+    onAddActivity: (Long) -> Unit,
     viewModel: ActivityHistoryViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -79,7 +79,7 @@ fun ActivityHistoryScreen(
         state = state,
         onAction = viewModel::onAction,
         onNavigateBack = onNavigateBack,
-        onAddActivity = onAddActivity
+        onAddActivity = { onAddActivity(state.selectedEpochDay) }
     )
 }
 
@@ -148,7 +148,7 @@ private fun ActivityHistoryContent(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
-            if (!state.isLoading && state.canAddActivity) {
+            if (!state.isLoading) {
                 ExtendedFloatingActionButton(
                     onClick = onAddActivity,
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },

@@ -35,8 +35,7 @@ data class ActivityHistoryUiState(
     val isLoading: Boolean = true,
     val selectedEpochDay: Long = LocalDate.now().toEpochDay(),
     val activities: List<ActivityHistoryItem> = emptyList(),
-    val pendingDeleteId: Long? = null,
-    val canAddActivity: Boolean = true
+    val pendingDeleteId: Long? = null
 ) {
     val totalCalories: Int get() = activities.sumOf(ActivityHistoryItem::caloriesBurned)
     val totalDurationMinutes: Int get() = activities.sumOf(ActivityHistoryItem::durationMinutes)
@@ -84,8 +83,7 @@ class ActivityHistoryViewModel @Inject constructor(
                     performedAt = record.performedAt
                 )
             },
-            pendingDeleteId = deleteId,
-            canAddActivity = day == todayEpochDay
+            pendingDeleteId = deleteId
         )
     }.stateIn(
         scope = viewModelScope,

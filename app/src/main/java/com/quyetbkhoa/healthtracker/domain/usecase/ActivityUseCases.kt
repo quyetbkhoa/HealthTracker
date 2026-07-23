@@ -3,6 +3,8 @@ package com.quyetbkhoa.healthtracker.domain.usecase
 import com.quyetbkhoa.healthtracker.domain.model.PhysicalActivityRecord
 import com.quyetbkhoa.healthtracker.domain.repository.ActivityRepository
 import java.time.Clock
+import java.time.Instant
+import java.time.LocalDate
 import javax.inject.Inject
 
 enum class AddActivityRecordError {
@@ -25,7 +27,8 @@ class AddActivityRecordUseCase @Inject constructor(
         activityTypeId: Long,
         met: Double,
         weightKg: Double,
-        durationMinutes: Int
+        durationMinutes: Int,
+        epochDay: Long = LocalDate.now(clock).toEpochDay()
     ): AddActivityRecordResult {
         if (activityTypeId <= 0L || !met.isFinite() || met <= 0.0) {
             return AddActivityRecordResult.Invalid(AddActivityRecordError.INVALID_ACTIVITY)
@@ -41,6 +44,12 @@ class AddActivityRecordUseCase @Inject constructor(
             return AddActivityRecordResult.Invalid(AddActivityRecordError.INVALID_ACTIVITY)
         }
         val now = clock.millis()
+        val localTime = Instant.ofEpochMilli(now).atZone(clock.zone).toLocalTime()
+        val performedAt = LocalDate.ofEpochDay(epochDay)
+            .atTime(localTime)
+            .atZone(clock.zone)
+            .toInstant()
+            .toEpochMilli()
         activityRepository.addActivityRecord(
             PhysicalActivityRecord(
                 activityTypeId = activityTypeId,
@@ -48,7 +57,7 @@ class AddActivityRecordUseCase @Inject constructor(
                 metAtCreation = met,
                 weightKgAtCreation = weightKg,
                 caloriesBurned = calories,
-                performedAt = now,
+                performedAt = performedAt,
                 createdAt = now
             )
         )

@@ -37,7 +37,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,9 +67,13 @@ import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPri
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.domain.model.OTHER_ACTIVITY_TYPE_ID
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @Composable
 fun AddActivityScreen(
+    epochDay: Long,
     onNavigateBack: () -> Unit,
     onSaved: () -> Unit,
     viewModel: AddActivityViewModel = hiltViewModel()
@@ -78,6 +82,9 @@ fun AddActivityScreen(
     val snackbar = remember { SnackbarHostState() }
     val errorMessage = state.error?.let { addActivityErrorText(it) }
 
+    LaunchedEffect(epochDay) {
+        viewModel.onAction(AddActivityAction.SetDate(epochDay))
+    }
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { onSaved() }
     }
@@ -106,7 +113,7 @@ private fun AddActivityContent(
                 .padding(horizontal = Dimens.spaceMedium),
             verticalArrangement = Arrangement.spacedBy(Dimens.spaceMedium)
         ) {
-            AddActivityHeader(onNavigateBack)
+            AddActivityHeader(state.epochDay, onNavigateBack)
             when {
                 state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -197,7 +204,9 @@ private fun ActivityPickerHeader() {
 }
 
 @Composable
-private fun AddActivityHeader(onNavigateBack: () -> Unit) {
+private fun AddActivityHeader(epochDay: Long, onNavigateBack: () -> Unit) {
+    val dateLabel = LocalDate.ofEpochDay(epochDay)
+        .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -215,7 +224,7 @@ private fun AddActivityHeader(onNavigateBack: () -> Unit) {
                 fontWeight = FontWeight.Bold
             )
             Text(
-                stringResource(R.string.add_activity_subtitle),
+                stringResource(R.string.add_activity_subtitle_date, dateLabel),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -275,10 +284,13 @@ private fun ActivityCard(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(Dimens.spaceMedium),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
+            verticalArrangement = Arrangement.spacedBy(
+                Dimens.spaceSmall,
+                Alignment.CenterVertically
+            )
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
