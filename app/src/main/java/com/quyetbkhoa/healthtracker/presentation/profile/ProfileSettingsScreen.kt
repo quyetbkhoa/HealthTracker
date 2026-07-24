@@ -27,7 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.Text
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,12 +53,12 @@ import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthNumericSlider
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthSteppedSlider
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
 import com.quyetbkhoa.healthtracker.domain.model.Gender
 import com.quyetbkhoa.healthtracker.domain.model.Goal
 import com.quyetbkhoa.healthtracker.domain.usecase.BmiCategory
-import com.quyetbkhoa.healthtracker.presentation.onboarding.SelectableCard
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -164,30 +165,56 @@ fun ProfileSettingsContent(
                 unit = stringResource(R.string.onboarding_height_unit),
                 errorText = state.heightError?.let { stringResource(it) }
             )
-            FieldTitle(R.string.onboarding_activity_level)
-            ActivityLevel.entries.forEach { level ->
-                val label = when (level) {
+            val activityLevels = ActivityLevel.entries
+            val activityLabels = activityLevels.map { level ->
+                stringResource(
+                    when (level) {
                     ActivityLevel.SEDENTARY -> R.string.onboarding_activity_sedentary
                     ActivityLevel.LIGHT -> R.string.onboarding_activity_light
                     ActivityLevel.MODERATE -> R.string.onboarding_activity_moderate
                     ActivityLevel.VERY_ACTIVE -> R.string.onboarding_activity_active
                     ActivityLevel.EXTRA_ACTIVE -> R.string.onboarding_activity_extra_active
-                }
-                SelectableCard(stringResource(label), state.activityLevel == level) {
-                    onAction(ProfileSettingsAction.UpdateActivityLevel(level))
-                }
+                    }
+                )
             }
-            FieldTitle(R.string.onboarding_goal)
-            Goal.entries.forEach { goal ->
-                val label = when (goal) {
-                    Goal.LOSE_WEIGHT -> R.string.onboarding_goal_lose
-                    Goal.MAINTAIN -> R.string.onboarding_goal_maintain
-                    Goal.GAIN_WEIGHT -> R.string.onboarding_goal_gain
-                }
-                SelectableCard(stringResource(label), state.goal == goal) {
-                    onAction(ProfileSettingsAction.UpdateGoal(goal))
-                }
+            val activitySelectedLabels = activityLevels.map { level ->
+                stringResource(
+                    when (level) {
+                        ActivityLevel.SEDENTARY -> R.string.onboarding_activity_short_sedentary
+                        ActivityLevel.LIGHT -> R.string.onboarding_activity_short_light
+                        ActivityLevel.MODERATE -> R.string.onboarding_activity_short_moderate
+                        ActivityLevel.VERY_ACTIVE -> R.string.onboarding_activity_short_active
+                        ActivityLevel.EXTRA_ACTIVE -> R.string.onboarding_activity_short_extra_active
+                    }
+                )
             }
+            HealthSteppedSlider(
+                label = stringResource(R.string.onboarding_activity_level),
+                options = activityLabels,
+                selectedOptionLabels = activitySelectedLabels,
+                selectedIndex = activityLevels.indexOf(state.activityLevel),
+                onSelectedIndexChange = { index ->
+                    onAction(ProfileSettingsAction.UpdateActivityLevel(activityLevels[index]))
+                }
+            )
+            val goals = Goal.entries
+            val goalLabels = goals.map { goal ->
+                stringResource(
+                    when (goal) {
+                        Goal.LOSE_WEIGHT -> R.string.onboarding_goal_lose
+                        Goal.MAINTAIN -> R.string.onboarding_goal_maintain
+                        Goal.GAIN_WEIGHT -> R.string.onboarding_goal_gain
+                    }
+                )
+            }
+            HealthSteppedSlider(
+                label = stringResource(R.string.onboarding_goal),
+                options = goalLabels,
+                selectedIndex = goals.indexOf(state.goal),
+                onSelectedIndexChange = { index ->
+                    onAction(ProfileSettingsAction.UpdateGoal(goals[index]))
+                }
+            )
             HealthPrimaryButton(
                 onClick = { onAction(ProfileSettingsAction.Save) },
                 enabled = !state.isLoading,
@@ -292,14 +319,20 @@ private fun SelectableCardCompact(text: String, selected: Boolean, onClick: () -
         ),
         shape = Shape.pill
     ) {
-        Box(modifier = Modifier.fillMaxWidth().padding(Dimens.spaceMedium), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = Dimens.spaceMedium),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
                 text = text,
                 color = if (selected) MaterialTheme.colorScheme.onPrimary
                 else MaterialTheme.colorScheme.onSurface,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
             )
         }
     }

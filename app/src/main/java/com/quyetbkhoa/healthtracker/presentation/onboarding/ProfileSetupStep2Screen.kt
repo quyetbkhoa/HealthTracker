@@ -25,7 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,6 +48,7 @@ import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthIconText
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthSteppedSlider
 import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
@@ -72,42 +73,58 @@ fun ProfileSetupStep2Screen(
             verticalArrangement = Arrangement.spacedBy(Dimens.spaceLarge)
         ) {
             OnboardingSectionCard {
-                Text(text = stringResource(R.string.onboarding_activity_section), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(modifier = Modifier.height(Dimens.spaceMedium))
-                ActivityLevel.entries.chunked(SELECTION_COLUMNS).forEach { levels ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
-                    ) {
-                        levels.forEach { level ->
-                            ActivityOption(
-                                level,
-                                uiState.activityLevel == level,
-                                Modifier.weight(1f)
-                            ) { onAction(ProfileSetupAction.UpdateActivityLevel(level)) }
+                val activityLevels = ActivityLevel.entries
+                val activityLabels = activityLevels.map { level ->
+                    stringResource(
+                        when (level) {
+                            ActivityLevel.SEDENTARY -> R.string.onboarding_activity_sedentary
+                            ActivityLevel.LIGHT -> R.string.onboarding_activity_light
+                            ActivityLevel.MODERATE -> R.string.onboarding_activity_moderate
+                            ActivityLevel.VERY_ACTIVE -> R.string.onboarding_activity_active
+                            ActivityLevel.EXTRA_ACTIVE -> R.string.onboarding_activity_extra_active
                         }
-                        if (levels.size < SELECTION_COLUMNS) Spacer(Modifier.weight(1f))
-                    }
+                    )
                 }
+                val activitySelectedLabels = activityLevels.map { level ->
+                    stringResource(
+                        when (level) {
+                            ActivityLevel.SEDENTARY -> R.string.onboarding_activity_short_sedentary
+                            ActivityLevel.LIGHT -> R.string.onboarding_activity_short_light
+                            ActivityLevel.MODERATE -> R.string.onboarding_activity_short_moderate
+                            ActivityLevel.VERY_ACTIVE -> R.string.onboarding_activity_short_active
+                            ActivityLevel.EXTRA_ACTIVE -> R.string.onboarding_activity_short_extra_active
+                        }
+                    )
+                }
+                HealthSteppedSlider(
+                    label = stringResource(R.string.onboarding_activity_section),
+                    options = activityLabels,
+                    selectedOptionLabels = activitySelectedLabels,
+                    selectedIndex = activityLevels.indexOf(uiState.activityLevel),
+                    onSelectedIndexChange = { index ->
+                        onAction(ProfileSetupAction.UpdateActivityLevel(activityLevels[index]))
+                    }
+                )
             }
             OnboardingSectionCard {
-                Text(text = stringResource(R.string.onboarding_goal_section), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(modifier = Modifier.height(Dimens.spaceMedium))
-                Goal.entries.chunked(SELECTION_COLUMNS).forEach { goals ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(Dimens.spaceSmall)
-                    ) {
-                        goals.forEach { goal ->
-                            GoalOption(
-                                goal,
-                                uiState.goal == goal,
-                                Modifier.weight(1f)
-                            ) { onAction(ProfileSetupAction.UpdateGoal(goal)) }
+                val goals = Goal.entries
+                val goalLabels = goals.map { goal ->
+                    stringResource(
+                        when (goal) {
+                            Goal.LOSE_WEIGHT -> R.string.onboarding_goal_lose
+                            Goal.MAINTAIN -> R.string.onboarding_goal_maintain
+                            Goal.GAIN_WEIGHT -> R.string.onboarding_goal_gain
                         }
-                        if (goals.size < SELECTION_COLUMNS) Spacer(Modifier.weight(1f))
-                    }
+                    )
                 }
+                HealthSteppedSlider(
+                    label = stringResource(R.string.onboarding_goal_section),
+                    options = goalLabels,
+                    selectedIndex = goals.indexOf(uiState.goal),
+                    onSelectedIndexChange = { index ->
+                        onAction(ProfileSetupAction.UpdateGoal(goals[index]))
+                    }
+                )
             }
             OnboardingSectionCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -148,7 +165,10 @@ fun ProfileSetupStep2Screen(
             }
             HealthPrimaryButton(
                 onClick = { onAction(ProfileSetupAction.SubmitProfile) },
-                modifier = Modifier.fillMaxWidth().height(Dimens.buttonHeightLarge).padding(bottom = Dimens.spaceLarge),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = Dimens.spaceLarge)
+                    .height(Dimens.buttonHeightLarge),
                 enabled = !uiState.isSubmitting
             ) {
                 Text(text = stringResource(R.string.onboarding_complete), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -253,8 +273,6 @@ private fun EstimateMetric(iconRes: Int, labelRes: Int, value: Int, modifier: Mo
 }
 
 private fun formatNumber(value: Int): String = NumberFormat.getIntegerInstance(Locale.getDefault()).format(value)
-
-private const val SELECTION_COLUMNS = 2
 
 @Composable
 fun SelectableCard(text: String, isSelected: Boolean, onClick: () -> Unit) {

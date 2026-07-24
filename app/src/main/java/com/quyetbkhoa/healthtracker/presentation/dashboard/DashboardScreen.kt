@@ -28,7 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -216,7 +216,8 @@ private fun DashboardHeader(userName: String) {
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            marquee = true
         )
         DashboardBrandMark()
         Spacer(modifier = Modifier.width(Dimens.spaceSmall))
@@ -227,7 +228,8 @@ private fun DashboardHeader(userName: String) {
             color = MaterialTheme.healthColors.meal,
             textAlign = TextAlign.End,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            marquee = true
         )
     }
 }
@@ -550,7 +552,9 @@ private fun QuickActionCard(
         colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(Dimens.spaceMedium),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(Dimens.spaceMedium),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surface, modifier = Modifier.size(Dimens.buttonHeightMedium), shadowElevation = Dimens.spaceExtraSmall) {
