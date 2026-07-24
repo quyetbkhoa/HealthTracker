@@ -32,7 +32,7 @@ import androidx.core.content.ContextCompat
 import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.navigation.AppNavigation
 import com.quyetbkhoa.healthtracker.core.navigation.AppDestination
-import com.quyetbkhoa.healthtracker.data.notification.ReminderNotificationManager
+import com.quyetbkhoa.healthtracker.platform.notification.ReminderNotificationManager
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
 import com.quyetbkhoa.healthtracker.domain.model.ReminderType
 import dagger.hilt.android.AndroidEntryPoint
