@@ -6,6 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -24,8 +26,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -42,15 +45,22 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quyetbkhoa.healthtracker.R
 import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.core.designsystem.Shape
 import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
 import java.text.NumberFormat
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.math.absoluteValue
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
 
 @Composable
 fun StatisticsChartsScreen(
@@ -58,6 +68,11 @@ fun StatisticsChartsScreen(
     viewModel: StatisticsViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(state.selectedRange) {
+        if (state.selectedRange == StatisticsRange.ALL) {
+            viewModel.onAction(StatisticsAction.SelectRange(StatisticsRange.LAST_30_DAYS))
+        }
+    }
     StatisticsChartsContent(
         state = state,
         onNavigateBack = onNavigateBack,
@@ -72,7 +87,7 @@ private fun StatisticsChartsContent(
     onRangeSelected: (StatisticsRange) -> Unit
 ) {
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        if (state.isLoading) {
+        if (state.isLoading || state.selectedRange == StatisticsRange.ALL) {
             CircularProgressIndicator(Modifier.align(Alignment.Center))
             return@Box
         }
@@ -82,7 +97,13 @@ private fun StatisticsChartsContent(
             verticalArrangement = Arrangement.spacedBy(StatisticsDimens.screenPadding)
         ) {
             item { ChartsHeader(onNavigateBack) }
-            item { StatisticsRangeSelector(state.selectedRange, onRangeSelected) }
+            item {
+                StatisticsRangeSelector(
+                    selectedRange = state.selectedRange,
+                    onRangeSelected = onRangeSelected,
+                    showAllOption = false
+                )
+            }
             item { CaloriesBarChart(state) }
             item { TargetDifferenceChart(state) }
             item { PeriodSummary(state) }
@@ -101,23 +122,20 @@ private fun ChartsHeader(onNavigateBack: () -> Unit) {
 }
 
 private data class ChartPoint(val label: String, val consumed: Int, val burned: Int)
+private data class ChartAxisLabel(val pointIndex: Int, val text: String)
 
 @Composable
 private fun rememberChartPoints(state: StatisticsUiState): List<ChartPoint> {
     val locale = LocalConfiguration.current.locales[0]
     val datePattern = stringResource(R.string.statistics_chart_date_pattern)
-    val rangePattern = stringResource(R.string.statistics_chart_range)
     val formatter = remember(locale, datePattern) { DateTimeFormatter.ofPattern(datePattern, locale) }
-    val chunkSize = state.selectedRange.chartChunkSize(state.dailyStatistics.size)
 
-    return remember(state.dailyStatistics, chunkSize, formatter, rangePattern) {
-        state.dailyStatistics.chunked(chunkSize).map { days ->
-            val start = days.first().date.format(formatter)
-            val end = days.last().date.format(formatter)
+    return remember(state.dailyStatistics, formatter) {
+        state.dailyStatistics.map { day ->
             ChartPoint(
-                label = if (days.size == 1) start else rangePattern.format(start, end),
-                consumed = days.sumOf(DailyStatistic::consumedCalories) / days.size,
-                burned = days.sumOf(DailyStatistic::burnedCalories) / days.size
+                label = day.date.format(formatter),
+                consumed = day.consumedCalories,
+                burned = day.burnedCalories
             )
         }
     }
@@ -132,7 +150,10 @@ private fun CaloriesBarChart(state: StatisticsUiState) {
             EmptyChart()
         } else {
             BarChart(points, palette)
-            ChartLabels(points.map(ChartPoint::label))
+            ChartLabels(
+                pointCount = points.size,
+                labels = points.axisLabels(state.selectedRange)
+            )
             ChartLegend(palette)
         }
     }
@@ -141,20 +162,67 @@ private fun CaloriesBarChart(state: StatisticsUiState) {
 @Composable
 private fun BarChart(points: List<ChartPoint>, palette: StatisticsPalette) {
     val gridColor = MaterialTheme.colorScheme.outlineVariant
-    val maximum = points.maxOf { maxOf(it.consumed, it.burned) }.coerceAtLeast(1)
-    Canvas(Modifier.fillMaxWidth().height(StatisticsDimens.chartHeight)) {
-        val baseline = size.height - StatisticsDimens.chartBaselineInset.toPx()
-        val slotWidth = size.width / points.size
-        val barWidth = (slotWidth * BAR_WIDTH_RATIO).coerceAtMost(StatisticsDimens.chartBarMaxWidth.toPx())
+    val axisColor = MaterialTheme.colorScheme.outline
+    val maximum = niceAxisMaximum(
+        value = points.maxOf { maxOf(it.consumed, it.burned) },
+        segments = CHART_GRID_LINES - 1
+    )
+    val axisValues = List(CHART_GRID_LINES) { index ->
+        maximum - maximum * index / (CHART_GRID_LINES - 1)
+    }
 
-        repeat(CHART_GRID_LINES) { index ->
-            val y = baseline * index / (CHART_GRID_LINES - 1)
-            drawLine(gridColor, Offset(0f, y), Offset(size.width, y), StatisticsDimens.chartGridWidth.toPx())
-        }
-        points.forEachIndexed { index, point ->
-            val center = slotWidth * (index + HALF_SLOT)
-            drawCalorieBar(center - barWidth - Dimens.spaceExtraSmall.toPx(), point.consumed, maximum, baseline, barWidth, palette.consumed)
-            drawCalorieBar(center + Dimens.spaceExtraSmall.toPx(), point.burned, maximum, baseline, barWidth, palette.burned)
+    Row(Modifier.fillMaxWidth()) {
+        YAxisLabels(axisValues)
+        Canvas(
+            Modifier
+                .weight(1f)
+                .height(StatisticsDimens.chartHeight)
+        ) {
+            val chartInset = StatisticsDimens.chartVerticalInset.toPx()
+            val baseline = size.height - chartInset
+            val chartHeight = baseline - chartInset
+            val slotWidth = size.width / points.size
+            val barWidth = (slotWidth * BAR_WIDTH_RATIO)
+                .coerceAtMost(StatisticsDimens.chartBarMaxWidth.toPx())
+            val barGap = (slotWidth * BAR_GAP_RATIO)
+                .coerceAtMost(Dimens.spaceExtraSmall.toPx())
+
+            repeat(CHART_GRID_LINES) { index ->
+                val y = chartInset + chartHeight * index / (CHART_GRID_LINES - 1)
+                drawLine(
+                    gridColor,
+                    Offset(0f, y),
+                    Offset(size.width, y),
+                    StatisticsDimens.chartGridWidth.toPx()
+                )
+            }
+            drawLine(
+                axisColor,
+                Offset(0f, chartInset),
+                Offset(0f, baseline),
+                StatisticsDimens.chartAxisWidthStroke.toPx()
+            )
+            points.forEachIndexed { index, point ->
+                val center = slotWidth * (index + HALF_SLOT)
+                drawCalorieBar(
+                    x = center - barWidth - barGap / 2,
+                    value = point.consumed,
+                    maximum = maximum,
+                    baseline = baseline,
+                    chartHeight = chartHeight,
+                    width = barWidth,
+                    color = palette.consumed
+                )
+                drawCalorieBar(
+                    x = center + barGap / 2,
+                    value = point.burned,
+                    maximum = maximum,
+                    baseline = baseline,
+                    chartHeight = chartHeight,
+                    width = barWidth,
+                    color = palette.burned
+                )
+            }
         }
     }
 }
@@ -164,10 +232,11 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCalorieBar(
     value: Int,
     maximum: Int,
     baseline: Float,
+    chartHeight: Float,
     width: Float,
     color: Color
 ) {
-    val height = baseline * value / maximum
+    val height = chartHeight * value / maximum
     drawRoundRect(color, Offset(x, baseline - height), Size(width, height), CornerRadius(width / 2))
 }
 
@@ -180,7 +249,10 @@ private fun TargetDifferenceChart(state: StatisticsUiState) {
             EmptyChart()
         } else {
             LineChart(points.map { it.consumed - state.dailyTarget }, palette.balance)
-            ChartLabels(points.map(ChartPoint::label))
+            ChartLabels(
+                pointCount = points.size,
+                labels = points.axisLabels(state.selectedRange)
+            )
         }
     }
 }
@@ -188,20 +260,95 @@ private fun TargetDifferenceChart(state: StatisticsUiState) {
 @Composable
 private fun LineChart(values: List<Int>, lineColor: Color) {
     val gridColor = MaterialTheme.colorScheme.outlineVariant
+    val axisColor = MaterialTheme.colorScheme.outline
     val pointCenterColor = MaterialTheme.colorScheme.background
-    val maximum = values.maxOf { it.absoluteValue }.coerceAtLeast(1)
-    Canvas(Modifier.fillMaxWidth().height(StatisticsDimens.chartHeight)) {
-        val centerY = size.height / 2
-        drawLine(gridColor, Offset(0f, centerY), Offset(size.width, centerY), StatisticsDimens.chartGridWidth.toPx())
-        val path = Path()
-        values.forEachIndexed { index, value ->
-            val x = if (values.size == 1) size.width / 2 else size.width * index / (values.size - 1)
-            val y = centerY - value.toFloat() / maximum * (centerY - StatisticsDimens.chartLineInset.toPx())
-            if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
-            drawCircle(lineColor, StatisticsDimens.chartPointRadius.toPx(), Offset(x, y))
-            drawCircle(pointCenterColor, StatisticsDimens.chartPointInnerRadius.toPx(), Offset(x, y))
+    val maximum = niceAxisMaximum(
+        value = values.maxOf { it.absoluteValue },
+        segments = CHART_LINE_GRID_LINES / 2
+    )
+    val axisValues = List(CHART_LINE_GRID_LINES) { index ->
+        maximum - maximum * index / (CHART_LINE_GRID_LINES / 2)
+    }
+
+    Row(Modifier.fillMaxWidth()) {
+        YAxisLabels(axisValues)
+        Canvas(
+            Modifier
+                .weight(1f)
+                .height(StatisticsDimens.chartHeight)
+        ) {
+            val centerY = size.height / 2
+            val chartAmplitude = centerY - StatisticsDimens.chartVerticalInset.toPx()
+            repeat(CHART_LINE_GRID_LINES) { index ->
+                val y = StatisticsDimens.chartVerticalInset.toPx() +
+                    chartAmplitude * 2 * index / (CHART_LINE_GRID_LINES - 1)
+                drawLine(
+                    gridColor,
+                    Offset(0f, y),
+                    Offset(size.width, y),
+                    StatisticsDimens.chartGridWidth.toPx()
+                )
+            }
+            drawLine(
+                axisColor,
+                Offset(0f, StatisticsDimens.chartVerticalInset.toPx()),
+                Offset(0f, size.height - StatisticsDimens.chartVerticalInset.toPx()),
+                StatisticsDimens.chartAxisWidthStroke.toPx()
+            )
+            val slotWidth = size.width / values.size
+            val pointRadius = minOf(
+                StatisticsDimens.chartPointRadius.toPx(),
+                slotWidth * CHART_POINT_RADIUS_SLOT_RATIO
+            )
+            val path = Path()
+            values.forEachIndexed { index, value ->
+                val x = slotWidth * (index + HALF_SLOT)
+                val y = centerY - value.toFloat() / maximum * chartAmplitude
+                if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
+            }
+            drawPath(
+                path,
+                lineColor,
+                style = Stroke(StatisticsDimens.chartLineWidth.toPx(), cap = StrokeCap.Round)
+            )
+            values.forEachIndexed { index, value ->
+                val x = slotWidth * (index + HALF_SLOT)
+                val y = centerY - value.toFloat() / maximum * chartAmplitude
+                drawCircle(lineColor, pointRadius, Offset(x, y))
+                drawCircle(
+                    pointCenterColor,
+                    pointRadius * CHART_POINT_INNER_RATIO,
+                    Offset(x, y)
+                )
+            }
         }
-        drawPath(path, lineColor, style = Stroke(StatisticsDimens.chartLineWidth.toPx(), cap = StrokeCap.Round))
+    }
+}
+
+@Composable
+private fun YAxisLabels(values: List<Int>) {
+    val locale = LocalConfiguration.current.locales[0]
+    val formatter = remember(locale) { NumberFormat.getIntegerInstance(locale) }
+    Column(
+        modifier = Modifier
+            .width(StatisticsDimens.chartAxisWidth)
+            .height(StatisticsDimens.chartHeight)
+            .padding(
+                end = StatisticsDimens.compactSpacing,
+                top = StatisticsDimens.chartVerticalInset,
+                bottom = StatisticsDimens.chartVerticalInset
+            ),
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        values.forEach { value ->
+            Text(
+                text = formatter.format(value),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = StatisticsDimens.chartLabelSize,
+                maxLines = 1
+            )
+        }
     }
 }
 
@@ -226,10 +373,28 @@ private fun EmptyChart() {
 }
 
 @Composable
-private fun ChartLabels(labels: List<String>) {
-    Row(Modifier.fillMaxWidth()) {
+private fun ChartLabels(pointCount: Int, labels: List<ChartAxisLabel>) {
+    BoxWithConstraints(
+        Modifier
+            .fillMaxWidth()
+            .padding(start = StatisticsDimens.chartAxisWidth)
+            .height(StatisticsDimens.chartLabelHeight)
+    ) {
+        if (pointCount == 0) return@BoxWithConstraints
+        val labelWidth = StatisticsDimens.chartDateLabelWidth.coerceAtMost(maxWidth)
+        val maximumOffset = (maxWidth - labelWidth).coerceAtLeast(0.dp)
         labels.forEach { label ->
-            Text(label, Modifier.weight(1f), textAlign = TextAlign.Center, fontSize = StatisticsDimens.chartLabelSize, maxLines = 2)
+            val center = maxWidth * ((label.pointIndex + HALF_SLOT) / pointCount)
+            val x = (center - labelWidth / 2).coerceIn(0.dp, maximumOffset)
+            Text(
+                text = label.text,
+                modifier = Modifier
+                    .offset(x = x)
+                    .width(labelWidth),
+                textAlign = TextAlign.Center,
+                fontSize = StatisticsDimens.chartLabelSize,
+                maxLines = 1
+            )
         }
     }
 }
@@ -281,14 +446,68 @@ private fun SummaryRow(label: String, value: Int, color: Color, isSigned: Boolea
 
 private fun List<ChartPoint>.hasNoCalories(): Boolean = isEmpty() || all { it.consumed == 0 && it.burned == 0 }
 
-private fun StatisticsRange.chartChunkSize(dayCount: Int): Int = when (this) {
-    StatisticsRange.TODAY, StatisticsRange.LAST_7_DAYS -> 1
-    StatisticsRange.LAST_30_DAYS -> DAYS_PER_CHART_GROUP
-    StatisticsRange.ALL -> maxOf(1, (dayCount + MAX_CHART_POINTS - 1) / MAX_CHART_POINTS)
+private fun List<ChartPoint>.axisLabels(range: StatisticsRange): List<ChartAxisLabel> =
+    mapIndexedNotNull { index, point ->
+        val shouldShow = when (range) {
+            StatisticsRange.TODAY, StatisticsRange.LAST_7_DAYS -> true
+            StatisticsRange.LAST_30_DAYS -> index % DAYS_PER_AXIS_LABEL == 0
+            StatisticsRange.ALL -> false
+        }
+        point.takeIf { shouldShow }?.let { ChartAxisLabel(index, it.label) }
+    }
+
+private fun niceAxisMaximum(value: Int, segments: Int): Int {
+    if (value <= 0 || segments <= 0) return segments.coerceAtLeast(1)
+    val roughStep = value.toDouble() / segments
+    val magnitude = 10.0.pow(floor(log10(roughStep)))
+    val normalizedStep = roughStep / magnitude
+    val niceStep = when {
+        normalizedStep <= 1.0 -> 1.0
+        normalizedStep <= 2.0 -> 2.0
+        normalizedStep <= 2.5 -> 2.5
+        normalizedStep <= 5.0 -> 5.0
+        else -> 10.0
+    } * magnitude
+    return (niceStep.toInt().coerceAtLeast(1) * segments)
 }
 
-private const val DAYS_PER_CHART_GROUP = 5
-private const val MAX_CHART_POINTS = 8
+private const val DAYS_PER_AXIS_LABEL = 7
 private const val CHART_GRID_LINES = 4
+private const val CHART_LINE_GRID_LINES = 5
 private const val BAR_WIDTH_RATIO = 0.22f
+private const val BAR_GAP_RATIO = 0.08f
 private const val HALF_SLOT = 0.5f
+private const val CHART_POINT_RADIUS_SLOT_RATIO = 0.28f
+private const val CHART_POINT_INNER_RATIO = 0.5f
+
+@Preview
+@Composable
+private fun PreviewStatisticsChartsScreen() {
+    val today = LocalDate.of(2026, 7, 24)
+    HealthTrackerTheme {
+        StatisticsChartsContent(
+            state = StatisticsUiState(
+                isLoading = false,
+                selectedRange = StatisticsRange.LAST_7_DAYS,
+                dailyTarget = 2_250,
+                consumed = CalorieStatistics(total = 14_680, dailyAverage = 2_097),
+                burned = CalorieStatistics(total = 2_730, dailyAverage = 390),
+                goal = GoalStatistics(
+                    achievedDays = 5,
+                    totalDays = 7,
+                    targetDifference = -153,
+                    achievementRate = 71
+                ),
+                dailyStatistics = List(7) { index ->
+                    DailyStatistic(
+                        date = today.minusDays((6 - index).toLong()),
+                        consumedCalories = 1_880 + index * 95,
+                        burnedCalories = 260 + index * 40
+                    )
+                }
+            ),
+            onNavigateBack = {},
+            onRangeSelected = {}
+        )
+    }
+}

@@ -22,7 +22,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -149,7 +149,6 @@ private fun buildMetricRows(state: StatisticsUiState): List<List<MetricCardModel
     val burnedColors = palette.burnedContainer to palette.onBurnedContainer
     val consumedColors = palette.consumedContainer to palette.onConsumedContainer
     val goalColors = palette.goalContainer to palette.onGoalContainer
-    val balanceColors = palette.balanceContainer to palette.onBalanceContainer
 
     return listOf(
         listOf(
@@ -162,15 +161,15 @@ private fun buildMetricRows(state: StatisticsUiState): List<List<MetricCardModel
         ),
         listOf(
             metric(R.string.statistics_goal_days, stringResource(R.string.statistics_fraction, formatter.number(state.goal.achievedDays), formatter.number(state.goal.totalDays)), R.string.statistics_unit_days, R.string.statistics_info_goal_days, goalColors, goalHistory),
-            metric(R.string.statistics_target_difference, formatter.signed(state.goal.targetDifference), R.string.unit_kcal, R.string.statistics_info_target_difference, balanceColors)
+            metric(R.string.statistics_target_difference, formatter.signed(state.goal.targetDifference), R.string.unit_kcal, R.string.statistics_info_target_difference, goalColors)
         ),
         listOf(
-            metric(R.string.statistics_goal_streak, formatter.number(state.goal.longestStreak.length), R.string.statistics_unit_days, R.string.statistics_info_goal_streak, goalColors, streakHistory),
+            metric(R.string.statistics_goal_streak, formatter.number(state.goal.longestStreak.length), R.string.statistics_unit_days, R.string.statistics_info_goal_streak, consumedColors, streakHistory),
             metric(R.string.statistics_highest_consumed, formatter.number(state.consumed.highest.value), R.string.unit_kcal, R.string.statistics_info_highest_consumed, consumedColors, peakHistory(state.consumed.highest, formatter.date, R.string.statistics_no_consumed_history))
         ),
         listOf(
             metric(R.string.statistics_highest_burned, formatter.number(state.burned.highest.value), R.string.unit_kcal, R.string.statistics_info_highest_burned, burnedColors, peakHistory(state.burned.highest, formatter.date, R.string.statistics_no_burned_history)),
-            metric(R.string.statistics_goal_rate, stringResource(R.string.statistics_percent, state.goal.achievementRate), R.string.statistics_goal_rate_detail, R.string.statistics_info_goal_rate, goalColors, goalHistory)
+            metric(R.string.statistics_goal_rate, stringResource(R.string.statistics_percent, state.goal.achievementRate), R.string.statistics_goal_rate_detail, R.string.statistics_info_goal_rate, burnedColors, goalHistory)
         )
     )
 }
@@ -201,13 +200,21 @@ private fun MetricCard(model: MetricCardModel, modifier: Modifier = Modifier) {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = model.value,
+                    modifier = Modifier.fillMaxWidth(),
                     color = model.contentColor,
                     fontSize = StatisticsDimens.metricValueSize,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
                 )
-                Text(model.unit, color = model.contentColor.copy(alpha = 0.75f), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+                Text(
+                    text = model.unit,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = model.contentColor.copy(alpha = 0.75f),
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }

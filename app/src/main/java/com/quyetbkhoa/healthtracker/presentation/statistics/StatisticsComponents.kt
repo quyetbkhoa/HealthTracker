@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,11 +63,15 @@ internal fun statisticsPalette(): StatisticsPalette {
 internal fun StatisticsRangeSelector(
     selectedRange: StatisticsRange,
     onRangeSelected: (StatisticsRange) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showAllOption: Boolean = true
 ) {
     val isLargeFont = LocalDensity.current.fontScale > STATISTICS_LARGE_FONT_SCALE
-    val optionRows = if (isLargeFont) RANGE_OPTIONS.chunked(RANGE_COLUMNS_LARGE_FONT) else {
-        listOf(RANGE_OPTIONS)
+    val rangeOptions = if (showAllOption) RANGE_OPTIONS else {
+        RANGE_OPTIONS.filterNot { it.range == StatisticsRange.ALL }
+    }
+    val optionRows = if (isLargeFont) rangeOptions.chunked(RANGE_COLUMNS_LARGE_FONT) else {
+        listOf(rangeOptions)
     }
     Surface(
         modifier = modifier

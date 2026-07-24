@@ -18,6 +18,7 @@ internal data class StatisticsInput(
     val range: StatisticsRange,
     val requestedStartDate: LocalDate,
     val dailyTarget: Int,
+    val dailyBasalCalories: Int,
     val goal: Goal,
     val meals: List<MealEntry>,
     val activities: List<PhysicalActivityRecord>
@@ -55,7 +56,8 @@ class StatisticsCalculator @Inject constructor(
             DailyStatistic(
                 date = date,
                 consumedCalories = mealsByDate[date].orEmpty().sumOf(MealEntry::calories),
-                burnedCalories = activitiesByDate[date].orEmpty().sumOf { it.caloriesBurned }.roundToInt()
+                burnedCalories = input.dailyBasalCalories.coerceAtLeast(0) +
+                    activitiesByDate[date].orEmpty().sumOf { it.caloriesBurned }.roundToInt()
             )
         }
     }

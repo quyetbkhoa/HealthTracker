@@ -64,6 +64,7 @@ class StatisticsViewModel @Inject constructor(
                     range = range,
                     requestedStartDate = period.startDate,
                     dailyTarget = data.profile?.dailyCalorieTarget ?: 0,
+                    dailyBasalCalories = data.profile?.bmrCalories ?: 0,
                     goal = data.profile?.goal ?: Goal.MAINTAIN,
                     meals = data.meals,
                     activities = data.activities

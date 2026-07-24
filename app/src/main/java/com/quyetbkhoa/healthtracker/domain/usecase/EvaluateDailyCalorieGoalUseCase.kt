@@ -24,12 +24,12 @@ class EvaluateDailyCalorieGoalUseCase @Inject constructor() {
         }
 
         val (lowerBound, upperBound) = when (goal) {
-            Goal.LOSE_WEIGHT -> (targetCalories * 0.75).roundToInt() to targetCalories
+            Goal.LOSE_WEIGHT -> (targetCalories * 0.95).roundToInt() to targetCalories
             Goal.MAINTAIN -> {
-                val tolerance = (targetCalories * 0.10).roundToInt().coerceAtMost(200)
+                val tolerance = (targetCalories * 0.05).roundToInt()
                 targetCalories - tolerance to targetCalories + tolerance
             }
-            Goal.GAIN_WEIGHT -> targetCalories to (targetCalories * 1.10).roundToInt()
+            Goal.GAIN_WEIGHT -> targetCalories to (targetCalories * 1.05).roundToInt()
         }
 
         return when {

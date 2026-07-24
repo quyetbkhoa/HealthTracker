@@ -8,7 +8,7 @@ internal object StatisticsDimens {
     val itemSpacing = 12.dp
     val compactSpacing = 6.dp
     val cardPadding = 12.dp
-    val metricCardHeight = 152.dp
+    val metricCardHeight = 128.dp
     val rangeHeight = 58.dp
     val rangeOuterRadius = 30.dp
     val rangeInnerRadius = 25.dp
@@ -16,13 +16,16 @@ internal object StatisticsDimens {
     val chartHeight = 220.dp
     val emptyChartHeight = 180.dp
     val chartBarMaxWidth = 18.dp
-    val chartBaselineInset = 10.dp
-    val chartLineInset = 20.dp
+    val chartVerticalInset = 10.dp
     val chartPointRadius = 5.dp
     val chartPointInnerRadius = 2.5.dp
     val chartLineWidth = 3.dp
     val chartGridWidth = 1.dp
+    val chartAxisWidthStroke = 1.dp
     val legendDotSize = 10.dp
+    val chartAxisWidth = 46.dp
+    val chartLabelHeight = 20.dp
+    val chartDateLabelWidth = 40.dp
 
     val metricTitleSize = 13.sp
     val metricValueSize = 26.sp
