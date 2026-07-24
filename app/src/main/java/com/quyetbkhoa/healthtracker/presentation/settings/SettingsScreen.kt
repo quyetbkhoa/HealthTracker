@@ -30,7 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
+import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -84,6 +84,8 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = androidx.compose.ui.platform.LocalContext.current
     val resetFailedMessage = stringResource(R.string.settings_reset_failed)
+    val demoDataLoadedMessage = stringResource(R.string.settings_demo_data_loaded)
+    val demoDataFailedMessage = stringResource(R.string.settings_demo_data_failed)
 
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { event ->
@@ -93,6 +95,16 @@ fun SettingsScreen(
                 SettingsUiEvent.ResetFailed -> Toast.makeText(
                     context,
                     resetFailedMessage,
+                    Toast.LENGTH_SHORT
+                ).show()
+                SettingsUiEvent.DemoDataLoaded -> Toast.makeText(
+                    context,
+                    demoDataLoadedMessage,
+                    Toast.LENGTH_LONG
+                ).show()
+                SettingsUiEvent.DemoDataFailed -> Toast.makeText(
+                    context,
+                    demoDataFailedMessage,
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -107,6 +119,14 @@ fun SettingsScreen(
         )
     }
 
+    if (uiState.showDemoDataConfirmation) {
+        DemoDataConfirmationDialog(
+            isLoading = uiState.isLoadingDemoData,
+            onConfirm = { viewModel.onAction(SettingsAction.ConfirmDemoData) },
+            onDismiss = { viewModel.onAction(SettingsAction.CancelDemoData) }
+        )
+    }
+
     SettingsContent(
         themeType = themeType,
         fontSize = fontSize,
@@ -114,6 +134,7 @@ fun SettingsScreen(
         hasExactAlarmAccess = hasExactAlarmAccess,
         selectedLanguage = selectedLanguage,
         isResetting = uiState.isResetting,
+        isLoadingDemoData = uiState.isLoadingDemoData,
         onThemeChanged = onThemeChanged,
         onFontSizeChanged = onFontSizeChanged,
         onLanguageChanged = { viewModel.onAction(SettingsAction.SelectLanguage(it)) },
@@ -123,6 +144,7 @@ fun SettingsScreen(
         onRequestExactAlarmAccess = onRequestExactAlarmAccess,
         onNavigateToProfile = onNavigateToProfile,
         onNavigateBack = onNavigateBack,
+        onLoadDemoData = { viewModel.onAction(SettingsAction.RequestDemoData) },
         onReset = { viewModel.onAction(SettingsAction.RequestReset) }
     )
 }
@@ -135,6 +157,7 @@ private fun SettingsContent(
     hasExactAlarmAccess: Boolean,
     selectedLanguage: AppLanguage,
     isResetting: Boolean,
+    isLoadingDemoData: Boolean,
     onThemeChanged: (AppThemeType) -> Unit,
     onFontSizeChanged: (AppFontSize) -> Unit,
     onLanguageChanged: (AppLanguage) -> Unit,
@@ -144,6 +167,7 @@ private fun SettingsContent(
     onRequestExactAlarmAccess: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateBack: () -> Unit,
+    onLoadDemoData: () -> Unit,
     onReset: () -> Unit
 ) {
     Scaffold(containerColor = MaterialTheme.colorScheme.background,
@@ -265,6 +289,11 @@ private fun SettingsContent(
                     icon = stringResource(R.string.settings_icon_data),
                     title = stringResource(R.string.settings_data_section)
                 ) {
+                    DemoDataCard(
+                        isLoading = isLoadingDemoData,
+                        onClick = onLoadDemoData
+                    )
+                    Spacer(Modifier.height(Dimens.spaceSmall))
                     DangerZoneCard(
                         isResetting = isResetting,
                         onClick = onReset
@@ -589,7 +618,10 @@ private fun ThemeChoice(
             verticalArrangement = Arrangement.Center
 
         ) {
-            HealthIconText(text = icon, style = MaterialTheme.typography.titleLarge)
+            HealthIconText(
+                text = icon,
+                style = MaterialTheme.typography.headlineSmall
+            )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
@@ -625,7 +657,7 @@ private fun FontSizeChoice(
     }
     HealthCard(
         modifier = modifier
-            .heightIn(min = Dimens.buttonHeightLarge)
+            .height(Dimens.buttonHeightLarge)
             .clickable { onClick(size) },
         shape = Shape.medium,
         colors = CardDefaults.cardColors(
@@ -635,26 +667,29 @@ private fun FontSizeChoice(
             else MaterialTheme.colorScheme.onSurface
         )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Dimens.spaceSmall),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = stringResource(R.string.settings_font_size_sample),
-                style = sampleStyle,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Column(
+                modifier = Modifier.padding(Dimens.spaceSmall),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_font_size_sample),
+                    style = sampleStyle,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
@@ -722,6 +757,55 @@ private fun LanguageChoice(
                         fontWeight = FontWeight.Bold
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DemoDataCard(isLoading: Boolean, onClick: () -> Unit) {
+    HealthCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = !isLoading, onClick = onClick),
+        shape = Shape.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(Dimens.spaceMedium),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SettingsIconBubble(
+                icon = stringResource(R.string.settings_icon_demo_data),
+                isPrimary = true
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = Dimens.spaceMedium)
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_demo_data_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(Dimens.iconSizeMedium),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            } else {
+                HealthIconText(
+                    text = stringResource(R.string.settings_icon_chevron),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             }
         }
     }
@@ -816,6 +900,41 @@ private fun SettingsIconBubble(
 }
 
 @Composable
+private fun DemoDataConfirmationDialog(
+    isLoading: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { if (!isLoading) onDismiss() },
+        title = { Text(stringResource(R.string.settings_demo_data_confirm_title)) },
+        text = { Text(stringResource(R.string.settings_demo_data_confirm_message)) },
+        confirmButton = {
+            HealthPrimaryButton(
+                onClick = onConfirm,
+                modifier = Modifier.width(Dimens.dialogActionWidth),
+                enabled = !isLoading
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(Dimens.iconSizeMedium),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = Dimens.borderWidthThick
+                    )
+                } else {
+                    Text(stringResource(R.string.settings_demo_data_confirm))
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !isLoading) {
+                Text(stringResource(R.string.settings_reset_cancel))
+            }
+        }
+    )
+}
+
+@Composable
 private fun ResetConfirmationDialog(
     isResetting: Boolean,
     onConfirm: () -> Unit,
@@ -861,6 +980,7 @@ private fun PreviewSettingsScreen() {
             hasExactAlarmAccess = true,
             selectedLanguage = AppLanguage.VIETNAMESE,
             isResetting = false,
+            isLoadingDemoData = false,
             onThemeChanged = {},
             onFontSizeChanged = {},
             onLanguageChanged = {},
@@ -870,6 +990,7 @@ private fun PreviewSettingsScreen() {
             onRequestExactAlarmAccess = {},
             onNavigateToProfile = {},
             onNavigateBack = {},
+            onLoadDemoData = {},
             onReset = {}
         )
     }

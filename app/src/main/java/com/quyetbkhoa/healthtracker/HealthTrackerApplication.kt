@@ -2,7 +2,6 @@ package com.quyetbkhoa.healthtracker
 
 import android.app.Application
 import android.util.Log
-import com.quyetbkhoa.healthtracker.data.seed.DemoDataInitializer
 import com.quyetbkhoa.healthtracker.data.notification.ReminderNotificationManager
 import com.quyetbkhoa.healthtracker.core.widget.HealthWidgetUpdater
 import com.quyetbkhoa.healthtracker.domain.usecase.ObserveRemainingCaloriesUseCase
@@ -19,7 +18,6 @@ import javax.inject.Inject
 
 @HiltAndroidApp
 class HealthTrackerApplication : Application() {
-    @Inject lateinit var demoDataInitializer: DemoDataInitializer
     @Inject lateinit var reminderNotificationManager: ReminderNotificationManager
     @Inject lateinit var observeRemainingCalories: ObserveRemainingCaloriesUseCase
     @Inject lateinit var healthWidgetUpdater: HealthWidgetUpdater
@@ -29,9 +27,6 @@ class HealthTrackerApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         reminderNotificationManager.createChannel()
-        applicationScope.launch {
-            demoDataInitializer.seedIfEmpty()
-        }
         applicationScope.launch {
             val languageTag = resources.configuration.locales[0].language
                 .takeIf { it == Locale.ENGLISH.language } ?: "vi"
