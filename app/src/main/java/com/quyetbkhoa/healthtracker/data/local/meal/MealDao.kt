@@ -14,6 +14,9 @@ interface MealDao {
     @Insert
     suspend fun insert(meal: MealEntity): Long
 
+    @Insert
+    suspend fun insertAll(meals: List<MealEntity>): List<Long>
+
     @Update
     suspend fun update(meal: MealEntity)
 

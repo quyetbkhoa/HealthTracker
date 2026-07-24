@@ -27,6 +27,9 @@ interface ActivityDao {
     @Insert
     suspend fun insertActivityRecord(record: ActivityRecordEntity): Long
 
+    @Insert
+    suspend fun insertActivityRecords(records: List<ActivityRecordEntity>): List<Long>
+
     @Query(
         """
         SELECT * FROM activity_records

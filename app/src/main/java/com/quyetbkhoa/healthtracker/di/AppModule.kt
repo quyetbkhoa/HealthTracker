@@ -152,13 +152,14 @@ object AppModule {
                     db.execSQL(
                         """
                         INSERT OR IGNORE INTO foods
-                        (id, caloriesPer100Grams, defaultServingGrams, displayOrder)
-                        VALUES (?, ?, ?, ?)
+                        (id, caloriesPer100Grams, defaultServingGrams, isFavorite, displayOrder)
+                        VALUES (?, ?, ?, ?, ?)
                         """.trimIndent(),
                         arrayOf<Any>(
                             food.id,
                             food.caloriesPer100Grams,
                             food.defaultServingGrams,
+                            if (food.isFavorite) 1 else 0,
                             food.displayOrder
                         )
                     )
