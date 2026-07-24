@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,9 +25,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.quyetbkhoa.healthtracker.R
-import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
-import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
-import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.presentation.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.presentation.designsystem.HealthTrackerTheme
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.button.HealthPrimaryButton
 
 @Composable
 fun WelcomeScreen(
@@ -59,7 +59,7 @@ fun WelcomeScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Surface(
-                    shape = com.quyetbkhoa.healthtracker.core.designsystem.Shape.extraLarge,
+                    shape = com.quyetbkhoa.healthtracker.presentation.designsystem.Shape.extraLarge,
                     color = MaterialTheme.colorScheme.surfaceContainerLowest,
                     shadowElevation = 10.dp
                 ) {

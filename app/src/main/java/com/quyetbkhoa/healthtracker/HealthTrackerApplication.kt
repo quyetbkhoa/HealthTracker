@@ -3,7 +3,7 @@ package com.quyetbkhoa.healthtracker
 import android.app.Application
 import android.util.Log
 import com.quyetbkhoa.healthtracker.platform.notification.ReminderNotificationManager
-import com.quyetbkhoa.healthtracker.core.widget.HealthWidgetUpdater
+import com.quyetbkhoa.healthtracker.widget.HealthWidgetUpdater
 import com.quyetbkhoa.healthtracker.domain.usecase.ObserveRemainingCaloriesUseCase
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope

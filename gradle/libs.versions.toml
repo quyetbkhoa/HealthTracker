@@ -12,7 +12,10 @@ appcompat = "1.7.1"
 glance = "1.1.1"
 
 [libraries]
+androidx-annotation = { group = "androidx.annotation", name = "annotation", version = "1.9.1" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.10.2" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.9.0" }
+javax-inject = { group = "javax.inject", name = "javax.inject", version = "1" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

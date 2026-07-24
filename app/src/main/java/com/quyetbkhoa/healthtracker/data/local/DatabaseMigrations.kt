@@ -10,3 +10,7 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
         )
     }
 }
+
+val ALL_MIGRATIONS = arrayOf(
+    MIGRATION_3_4
+)

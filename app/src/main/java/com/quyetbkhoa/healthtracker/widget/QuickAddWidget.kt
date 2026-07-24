@@ -40,7 +40,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.quyetbkhoa.healthtracker.MainActivity
 import com.quyetbkhoa.healthtracker.R
-import com.quyetbkhoa.healthtracker.core.navigation.AppDestination
+import com.quyetbkhoa.healthtracker.navigation.AppDestination
 import dagger.hilt.android.EntryPointAccessors
 import java.util.Locale
 import kotlinx.coroutines.flow.first

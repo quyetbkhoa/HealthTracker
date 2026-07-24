@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,8 +24,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.quyetbkhoa.healthtracker.R
-import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
-import com.quyetbkhoa.healthtracker.core.designsystem.healthColors
+import com.quyetbkhoa.healthtracker.presentation.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.presentation.designsystem.healthColors
 
 internal data class StatisticsPalette(
     val consumed: Color,

@@ -30,7 +30,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
-import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -51,13 +51,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.tooling.preview.Preview
 import com.quyetbkhoa.healthtracker.R
-import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
-import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
-import com.quyetbkhoa.healthtracker.core.designsystem.Shape
-import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
-import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthNumericSlider
-import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
-import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
+import com.quyetbkhoa.healthtracker.presentation.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.presentation.designsystem.HealthTrackerTheme
+import com.quyetbkhoa.healthtracker.presentation.designsystem.Shape
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.HealthNumericSlider
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.card.HealthCard
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.domain.model.Gender
 import java.time.Instant
 import java.time.ZoneId

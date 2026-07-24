@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.quyetbkhoa.healthtracker.core.navigation.AppRoute
+import com.quyetbkhoa.healthtracker.navigation.AppRoute
 import com.quyetbkhoa.healthtracker.domain.model.Goal
 import com.quyetbkhoa.healthtracker.domain.model.StatisticsRange
 import com.quyetbkhoa.healthtracker.domain.statistics.CalculateStatisticsUseCase

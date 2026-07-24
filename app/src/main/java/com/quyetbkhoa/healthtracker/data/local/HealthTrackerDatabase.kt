@@ -20,7 +20,7 @@ import com.quyetbkhoa.healthtracker.data.local.meal.MealEntity
         FoodTranslationEntity::class
     ],
     version = 4,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class HealthTrackerDatabase : RoomDatabase() {
     abstract fun mealDao(): MealDao

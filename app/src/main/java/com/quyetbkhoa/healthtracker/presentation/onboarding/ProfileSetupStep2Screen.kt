@@ -25,7 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthMarqueeText as Text
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.HealthMarqueeText as Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,14 +44,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import com.quyetbkhoa.healthtracker.R
-import com.quyetbkhoa.healthtracker.core.designsystem.Dimens
-import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
-import com.quyetbkhoa.healthtracker.core.designsystem.Shape
-import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthIconText
-import com.quyetbkhoa.healthtracker.core.designsystem.component.HealthSteppedSlider
-import com.quyetbkhoa.healthtracker.core.designsystem.component.button.HealthPrimaryButton
-import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthCard
-import com.quyetbkhoa.healthtracker.core.designsystem.component.card.HealthElevatedCard
+import com.quyetbkhoa.healthtracker.presentation.designsystem.Dimens
+import com.quyetbkhoa.healthtracker.presentation.designsystem.HealthTrackerTheme
+import com.quyetbkhoa.healthtracker.presentation.designsystem.Shape
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.HealthIconText
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.HealthSteppedSlider
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.button.HealthPrimaryButton
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.card.HealthCard
+import com.quyetbkhoa.healthtracker.presentation.designsystem.component.card.HealthElevatedCard
 import com.quyetbkhoa.healthtracker.domain.model.ActivityLevel
 import com.quyetbkhoa.healthtracker.domain.model.Goal
 import java.text.NumberFormat

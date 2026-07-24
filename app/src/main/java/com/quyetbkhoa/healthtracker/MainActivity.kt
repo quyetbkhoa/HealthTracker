@@ -29,12 +29,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.os.LocaleListCompat
 import androidx.core.net.toUri
 import androidx.core.content.ContextCompat
-import com.quyetbkhoa.healthtracker.core.designsystem.HealthTrackerTheme
-import com.quyetbkhoa.healthtracker.core.navigation.AppNavigation
-import com.quyetbkhoa.healthtracker.core.navigation.AppDestination
+import com.quyetbkhoa.healthtracker.presentation.designsystem.HealthTrackerTheme
 import com.quyetbkhoa.healthtracker.platform.notification.ReminderNotificationManager
 import com.quyetbkhoa.healthtracker.domain.model.AppLanguage
 import com.quyetbkhoa.healthtracker.domain.model.ReminderType
+import com.quyetbkhoa.healthtracker.navigation.AppDestination
+import com.quyetbkhoa.healthtracker.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 
