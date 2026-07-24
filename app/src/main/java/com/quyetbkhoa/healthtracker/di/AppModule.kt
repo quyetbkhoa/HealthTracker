@@ -9,7 +9,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.quyetbkhoa.healthtracker.data.datastore.SettingsDataStore
-import com.quyetbkhoa.healthtracker.data.notification.AlarmReminderScheduler
+import com.quyetbkhoa.healthtracker.platform.notification.AlarmReminderScheduler
 import com.quyetbkhoa.healthtracker.data.repository.SettingsRepositoryImpl
 import com.quyetbkhoa.healthtracker.domain.repository.SettingsRepository
 import com.quyetbkhoa.healthtracker.domain.repository.ReminderScheduler

@@ -25,10 +25,10 @@
                 android:value="true" />
         </service>
         <receiver
-            android:name=".data.notification.ReminderReceiver"
+            android:name=".platform.notification.ReminderReceiver"
             android:exported="false" />
         <receiver
-            android:name=".data.notification.ReminderRescheduleReceiver"
+            android:name=".platform.notification.ReminderRescheduleReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>

@@ -1,4 +1,4 @@
-package com.quyetbkhoa.healthtracker.data.notification
+package com.quyetbkhoa.healthtracker.platform.notification
 
 import android.Manifest
 import android.app.NotificationChannel

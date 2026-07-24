@@ -1,4 +1,4 @@
-package com.quyetbkhoa.healthtracker.data.notification
+package com.quyetbkhoa.healthtracker.platform.notification
 
 import android.app.AlarmManager
 import android.app.PendingIntent
